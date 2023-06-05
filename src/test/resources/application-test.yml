@@ -1,6 +1,45 @@
 server:
   shutdown: immediate
 
+#aws:
+#  provider: localstack
+
 management.endpoint:
   health.cache.time-to-live: 0
   info.cache.time-to-live: 0
+
+api:
+  base:
+    url:
+      oauth: http://localhost:8090/auth
+      prison: http://localhost:8093
+      offender-search: http://localhost:8094
+
+#spring:
+#  flyway:
+#    url: jdbc:postgresql://localhost:5432/incentives?sslmode=prefer
+#    user: incentives
+#    password: incentives
+
+#  r2dbc:
+#    url: r2dbc:postgresql://localhost:5432/incentives
+#    username: incentives
+#    password: incentives
+#    properties:
+#      sslMode: DISABLE
+#      sslRootCert:
+
+#hmpps.sqs:
+#  reactiveApi: true
+#  provider: localstack
+#  queues:
+#    audit:
+#      queueName: ${random.uuid}
+#    incentives:
+#      queueName: incentives-event-queue
+#      dlqName: incentives-event-dlq
+#      subscribeTopicId: domainevents
+#      subscribeFilter: '{"eventType":[ "prison-offender-events.prisoner.merged", "prisoner-offender-search.prisoner.received", "prisoner-offender-search.prisoner.alerts-updated" ] }'
+#  topics:
+#    domainevents:
+#      arn: arn:aws:sns:eu-west-2:000000000000:11111111-2222-3333-4444-555555555555
