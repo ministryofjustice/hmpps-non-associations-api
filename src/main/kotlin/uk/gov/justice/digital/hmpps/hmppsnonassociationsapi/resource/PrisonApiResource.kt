@@ -48,7 +48,7 @@ class PrisonApiResource(
       ),
     ],
   )
-  suspend fun getListByBookingId(
+  fun getListByBookingId(
     @Schema(description = "The offender booking id", example = "123456", required = true)
     @PathVariable
     bookingId: Long,
