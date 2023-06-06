@@ -15,6 +15,9 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+
   implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.1.0")
 
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")

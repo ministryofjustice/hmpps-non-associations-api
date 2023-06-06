@@ -11,18 +11,18 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsnonassociations.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationsDetails
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.NonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
 
 // TODO: Check endpoint format/document it
 
 @RestController
-@RequestMapping("/api", produces = [MediaType.APPLICATION_JSON_VALUE])
+@RequestMapping("/legacy/api", produces = [MediaType.APPLICATION_JSON_VALUE])
 @Tag(name = "TODO", description = "TODO")
 class PrisonApiResource(
   val nonAssociationsService: NonAssociationsService,
 ) {
-  @GetMapping("/bookings/{bookingId}/non-associations-details")
+  @GetMapping("/bookings/{bookingId}/non-association-details")
   @Operation(
     summary = "Get non-associations by bookingId",
     description = "TODO",
@@ -48,11 +48,11 @@ class PrisonApiResource(
       ),
     ],
   )
-  fun getListByBookingId(
+  suspend fun getDetailsByBookingId(
     @Schema(description = "The offender booking id", example = "123456", required = true)
     @PathVariable
     bookingId: Long,
-  ): NonAssociationsDetails {
+  ): NonAssociationDetails {
     return nonAssociationsService.getDetails(bookingId)
   }
 }

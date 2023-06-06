@@ -1,15 +1,14 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationsDetails
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.NonAssociationDetails
 
-// TODO: Check annotation, type in Incentives API was different
 @Service
-class NonAssociationsService {
+class NonAssociationsService(
+  private val prisonApiService: PrisonApiService,
+) {
 
-  fun getDetails(bookingId: Long): NonAssociationsDetails {
-    return NonAssociationsDetails(
-      offenderNo = "TODO: Implement me",
-    )
+  suspend fun getDetails(bookingId: Long): NonAssociationDetails {
+    return prisonApiService.getNonAssociationDetails(bookingId)
   }
 }
