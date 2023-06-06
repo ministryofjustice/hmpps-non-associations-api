@@ -17,12 +17,12 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociati
 // TODO: Check endpoint format/document it
 
 @RestController
-@RequestMapping("/api", produces = [MediaType.APPLICATION_JSON_VALUE])
+@RequestMapping("/legacy/api", produces = [MediaType.APPLICATION_JSON_VALUE])
 @Tag(name = "TODO", description = "TODO")
 class PrisonApiResource(
   val nonAssociationsService: NonAssociationsService,
 ) {
-  @GetMapping("/bookings/{bookingId}/non-associations-details")
+  @GetMapping("/bookings/{bookingId}/non-association-details")
   @Operation(
     summary = "Get non-associations by bookingId",
     description = "TODO",
