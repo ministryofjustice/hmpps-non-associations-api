@@ -48,7 +48,6 @@ class PrisonApiMockServer : WireMockServer(WIREMOCK_PORT) {
     )
   }
 
-
   fun stubHealthPing(status: Int) {
     stubFor(
       get("/health/ping").willReturn(
@@ -82,5 +81,4 @@ class PrisonApiMockServer : WireMockServer(WIREMOCK_PORT) {
       ),
     )
   }
-
 }
