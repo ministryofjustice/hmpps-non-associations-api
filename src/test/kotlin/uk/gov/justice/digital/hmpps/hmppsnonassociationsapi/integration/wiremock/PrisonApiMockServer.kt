@@ -1,30 +1,33 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.NonAssociation
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.NonAssociationDetails
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.OffenderNonAssociation
+import java.time.LocalDateTime
+
 
 class PrisonApiMockServer : WireMockServer(WIREMOCK_PORT) {
   companion object {
     private const val WIREMOCK_PORT = 8093
   }
 
+  private val mapper = ObjectMapper().findAndRegisterModules()
+
   fun getCountFor(url: String) = this.findAll(WireMock.getRequestedFor(WireMock.urlEqualTo(url))).count()
 
-  fun stubGetNonAssociationDetails(bookingId: Long) {
+  fun stubGetNonAssociationDetails(bookingId: Long, nonAssociationDetails: NonAssociationDetails) {
+
     stubFor(
       get("/api/bookings/$bookingId/non-association-details").willReturn(
         aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(
-            // language=json
-            """
-                {
-                  "offenderNo": "A1234AB",
-                  "nonAssociations": []
-                }
-            """,
+            mapper.writeValueAsBytes(nonAssociationDetails),
           ),
       ),
     )

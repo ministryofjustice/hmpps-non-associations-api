@@ -18,7 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociati
 
 @RestController
 @RequestMapping("/legacy/api", produces = [MediaType.APPLICATION_JSON_VALUE])
-@Tag(name = "TODO", description = "TODO")
+@Tag(name = "Non-Associations", description = "Retrieve non association details from prison-api")
 class PrisonApiResource(
   val nonAssociationsService: NonAssociationsService,
 ) {
@@ -32,13 +32,13 @@ class PrisonApiResource(
         description = "Returns list of non-associations",
       ),
       ApiResponse(
-        responseCode = "401",
-        description = "Unauthorized to access this endpoint",
+        responseCode = "400",
+        description = "Incorrect data specified to return list of non-associations",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
-        responseCode = "403",
-        description = "Incorrect permissions to use this endpoint",
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
