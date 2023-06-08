@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -10,11 +9,9 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.NonAss
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.OffenderNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.IntegrationTestBase
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class PrisonApiResourceTest : IntegrationTestBase() {
 
-  private val mapper = ObjectMapper().findAndRegisterModules()
   @Nested
   inner class `GET non association details by bookingId` {
     val bookingId: Long = 123456
@@ -31,8 +28,8 @@ class PrisonApiResourceTest : IntegrationTestBase() {
             reasonDescription = "Victim",
             typeCode = "WING",
             typeDescription = "Do Not Locate on Same Wing",
-            effectiveDate = LocalDateTime.parse("2021-07-05T10:35:17").format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-            expiryDate = LocalDateTime.parse("2021-07-05T10:35:17").format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+            effectiveDate = LocalDateTime.parse("2021-07-05T10:35:17"),
+            expiryDate = LocalDateTime.parse("2021-07-05T10:35:17"),
             authorisedBy = "string",
             comments = "string",
             offenderNonAssociation = OffenderNonAssociation(
@@ -83,16 +80,16 @@ class PrisonApiResourceTest : IntegrationTestBase() {
 
     @Test
     fun `with a valid token returns the non-association details`() {
+      val expectedResponse = objectMapper.writeValueAsString(nonAssociationDetails)
       webTestClient.get()
         .uri("/legacy/api/bookings/$bookingId/non-association-details")
         .headers(setAuthorisation())
         .exchange()
         .expectStatus().isOk
         .expectBody().json(
-          mapper.writeValueAsString(nonAssociationDetails),
+          expectedResponse,
           true,
         )
     }
-
   }
 }
