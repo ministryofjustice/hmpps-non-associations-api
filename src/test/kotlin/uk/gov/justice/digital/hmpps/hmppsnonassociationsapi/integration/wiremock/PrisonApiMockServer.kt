@@ -5,11 +5,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.NonAssociationDetails
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.OffenderNonAssociation
-import java.time.LocalDateTime
-
 
 class PrisonApiMockServer : WireMockServer(WIREMOCK_PORT) {
   companion object {
@@ -21,7 +17,6 @@ class PrisonApiMockServer : WireMockServer(WIREMOCK_PORT) {
   fun getCountFor(url: String) = this.findAll(WireMock.getRequestedFor(WireMock.urlEqualTo(url))).count()
 
   fun stubGetNonAssociationDetails(bookingId: Long, nonAssociationDetails: NonAssociationDetails) {
-
     stubFor(
       get("/api/bookings/$bookingId/non-association-details").willReturn(
         aResponse()
