@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi
 
+import java.time.LocalDateTime
+
 data class NonAssociationDetails(
   val offenderNo: String,
   val firstName: String,
@@ -15,8 +17,8 @@ data class NonAssociation(
   val reasonDescription: String,
   val typeCode: String,
   val typeDescription: String,
-  val effectiveDate: String,
-  val expiryDate: String,
+  val effectiveDate: LocalDateTime,
+  val expiryDate: LocalDateTime,
   val authorisedBy: String?,
   val comments: String?,
   val offenderNonAssociation: OffenderNonAssociation,
