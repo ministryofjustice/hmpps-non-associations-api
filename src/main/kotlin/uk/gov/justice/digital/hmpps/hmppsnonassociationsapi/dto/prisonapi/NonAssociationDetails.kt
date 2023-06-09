@@ -18,7 +18,7 @@ data class NonAssociation(
   val typeCode: String,
   val typeDescription: String,
   val effectiveDate: LocalDateTime,
-  val expiryDate: LocalDateTime,
+  val expiryDate: LocalDateTime?,
   val authorisedBy: String?,
   val comments: String?,
   val offenderNonAssociation: OffenderNonAssociation,
