@@ -14,8 +14,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociations.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.NonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
 
-// TODO: Check endpoint format/document it
-
 @RestController
 @RequestMapping("/legacy/api", produces = [MediaType.APPLICATION_JSON_VALUE])
 @Tag(name = "Non-Associations", description = "Retrieve non association details from prison-api")
@@ -24,8 +22,8 @@ class PrisonApiResource(
 ) {
   @GetMapping("/bookings/{bookingId}/non-association-details")
   @Operation(
-    summary = "Get non-associations by bookingId",
-    description = "TODO",
+    summary = "Get non-associations by booking ID",
+    description = "Booking ID is an internal ID for a prisoner in NOMIS",
     responses = [
       ApiResponse(
         responseCode = "200",
@@ -49,7 +47,7 @@ class PrisonApiResource(
     ],
   )
   suspend fun getDetailsByBookingId(
-    @Schema(description = "The offender booking id", example = "123456", required = true)
+    @Schema(description = "The offender booking ID", example = "123456", required = true)
     @PathVariable
     bookingId: Long,
   ): NonAssociationDetails {
