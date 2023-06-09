@@ -51,7 +51,7 @@ class PrisonApiResourceTest : IntegrationTestBase() {
 
     @BeforeEach
     fun stubPrisonApi() {
-      prisonApiMockServer.stubGetNonAssociationDetails(nonAssociationDetails)
+      prisonApiMockServer.stubGetNonAssociationDetailsByPrisonerNumber(nonAssociationDetails)
     }
 
     @Test
@@ -94,7 +94,7 @@ class PrisonApiResourceTest : IntegrationTestBase() {
 
     @BeforeEach
     fun stubPrisonApi() {
-      prisonApiMockServer.stubGetNonAssociationDetails(bookingId, nonAssociationDetails)
+      prisonApiMockServer.stubGetNonAssociationDetailsByBookingId(bookingId, nonAssociationDetails)
     }
 
     @Test

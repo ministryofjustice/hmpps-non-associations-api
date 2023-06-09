@@ -16,7 +16,7 @@ class PrisonApiMockServer : WireMockServer(WIREMOCK_PORT) {
 
   fun getCountFor(url: String) = this.findAll(WireMock.getRequestedFor(WireMock.urlEqualTo(url))).count()
 
-  fun stubGetNonAssociationDetails(bookingId: Long, nonAssociationDetails: NonAssociationDetails) {
+  fun stubGetNonAssociationDetailsByBookingId(bookingId: Long, nonAssociationDetails: NonAssociationDetails) {
     stubFor(
       get("/api/bookings/$bookingId/non-association-details").willReturn(
         aResponse()
@@ -28,7 +28,7 @@ class PrisonApiMockServer : WireMockServer(WIREMOCK_PORT) {
     )
   }
 
-  fun stubGetNonAssociationDetails(nonAssociationDetails: NonAssociationDetails) {
+  fun stubGetNonAssociationDetailsByPrisonerNumber(nonAssociationDetails: NonAssociationDetails) {
     stubFor(
       get("/api/offenders/${nonAssociationDetails.offenderNo}/non-association-details").willReturn(
         aResponse()
