@@ -47,6 +47,49 @@ class PrisonApiResourceTest : IntegrationTestBase() {
     )
 
   @Nested
+  inner class `GET non association details by Prisoner number` {
+
+    @BeforeEach
+    fun stubPrisonApi() {
+      prisonApiMockServer.stubGetNonAssociationDetails(nonAssociationDetails)
+    }
+
+    @Test
+    fun `without a prisoner number responds 400 not found`() {
+      val prisonerNumber = null
+      webTestClient.get()
+        .uri("/legacy/api/offenders/$prisonerNumber/non-association-details")
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+    }
+
+    @Test
+    fun `without a valid token responds 401 unauthorized`() {
+      webTestClient.get()
+        .uri("/legacy/api/offenders/$prisonerNumber/non-association-details")
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `with a valid token returns the non-association details`() {
+      val expectedResponse = jsonString(nonAssociationDetails)
+      webTestClient.get()
+        .uri("/legacy/api/offenders/$prisonerNumber/non-association-details")
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          expectedResponse,
+          true,
+        )
+    }
+  }
+
+  @Nested
   inner class `GET non association details by bookingId` {
 
     @BeforeEach
