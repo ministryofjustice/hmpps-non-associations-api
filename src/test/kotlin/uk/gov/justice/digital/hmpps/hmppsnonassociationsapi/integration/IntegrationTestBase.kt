@@ -69,4 +69,6 @@ abstract class IntegrationTestBase {
     roles: List<String> = listOf(),
     scopes: List<String> = listOf(),
   ): (HttpHeaders) -> Unit = jwtAuthHelper.setAuthorisation(user, roles, scopes)
+
+  protected fun jsonString(any: Any) = objectMapper.writeValueAsString(any) as String
 }

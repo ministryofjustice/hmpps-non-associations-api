@@ -76,7 +76,7 @@ class PrisonApiResourceTest : IntegrationTestBase() {
 
     @Test
     fun `with a valid token returns the non-association details`() {
-      val expectedResponse = objectMapper.writeValueAsString(nonAssociationDetails)
+      val expectedResponse = jsonString(nonAssociationDetails)
       webTestClient.get()
         .uri("/legacy/api/bookings/$bookingId/non-association-details")
         .headers(setAuthorisation())
