@@ -53,6 +53,7 @@ class PrisonApiResource(
   @Operation(
     summary = "Get non-associations by booking ID",
     description = "Booking ID is an internal ID for a prisoner in NOMIS",
+    deprecated = true,
     responses = [
       ApiResponse(
         responseCode = "200",
