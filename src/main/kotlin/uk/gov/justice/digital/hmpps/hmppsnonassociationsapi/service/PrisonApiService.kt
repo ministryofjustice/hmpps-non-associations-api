@@ -15,6 +15,14 @@ class PrisonApiService(
     return if (useClientCredentials) prisonWebClientClientCredentials else prisonWebClient
   }
 
+  suspend fun getNonAssociationDetails(prisonerNumber: String, useClientCredentials: Boolean = false): NonAssociationDetails {
+    return getClient(useClientCredentials)
+      .get()
+      .uri("/api/offenders/$prisonerNumber/non-association-details")
+      .retrieve()
+      .awaitBody()
+  }
+
   suspend fun getNonAssociationDetails(bookingId: Long, useClientCredentials: Boolean = false): NonAssociationDetails {
     return getClient(useClientCredentials)
       .get()

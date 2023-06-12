@@ -20,6 +20,35 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociati
 class PrisonApiResource(
   val nonAssociationsService: NonAssociationsService,
 ) {
+  @GetMapping("/offenders/{prisonerNumber}/non-association-details")
+  @Operation(
+    summary = "Get non-associations by Prisoner number",
+    description = "The offender prisoner number",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returns non-association details for this prisoner",
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Booking ID not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  suspend fun getDetailsByPrisonerNumber(
+    @Schema(description = "The offender prisoner number", example = "A1234BC", required = true)
+    @PathVariable
+    prisonerNumber: String,
+  ): NonAssociationDetails {
+    return nonAssociationsService.getDetails(prisonerNumber)
+  }
+
   @GetMapping("/bookings/{bookingId}/non-association-details")
   @Operation(
     summary = "Get non-associations by booking ID",
@@ -27,12 +56,7 @@ class PrisonApiResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Returns list of non-associations",
-      ),
-      ApiResponse(
-        responseCode = "400",
-        description = "Incorrect data specified to return list of non-associations",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+        description = "Returns non-association details for this prisoner",
       ),
       ApiResponse(
         responseCode = "401",

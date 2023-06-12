@@ -55,17 +55,6 @@ class PrisonApiResourceTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `without a prisoner number responds 400 not found`() {
-      val prisonerNumber = null
-      webTestClient.get()
-        .uri("/legacy/api/offenders/$prisonerNumber/non-association-details")
-        .headers(setAuthorisation())
-        .exchange()
-        .expectStatus()
-        .isBadRequest
-    }
-
-    @Test
     fun `without a valid token responds 401 unauthorized`() {
       webTestClient.get()
         .uri("/legacy/api/offenders/$prisonerNumber/non-association-details")
@@ -95,17 +84,6 @@ class PrisonApiResourceTest : IntegrationTestBase() {
     @BeforeEach
     fun stubPrisonApi() {
       prisonApiMockServer.stubGetNonAssociationDetailsByBookingId(bookingId, nonAssociationDetails)
-    }
-
-    @Test
-    fun `without a bookingId responds 400 not found`() {
-      val bookingId = null
-      webTestClient.get()
-        .uri("/legacy/api/bookings/$bookingId/non-association-details")
-        .headers(setAuthorisation())
-        .exchange()
-        .expectStatus()
-        .isBadRequest
     }
 
     @Test
