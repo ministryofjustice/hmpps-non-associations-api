@@ -18,8 +18,8 @@ spring:
         registration:
           NON_ASSOCIATIONS_API:
             provider: hmpps-auth
-            client-id: ${nonassociations.api.client.id}
-            client-secret: ${nonassociations.api.client.secret}
+            client-id: ${non_associations.api.client.id}
+            client-secret: ${non_associations.api.client.secret}
             authorization-grant-type: client_credentials
         provider:
           hmpps-auth:
