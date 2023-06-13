@@ -48,5 +48,4 @@ class PrisonApiResource(
   ): NonAssociationDetails {
     return nonAssociationsService.getDetails(prisonerNumber)
   }
-
 }

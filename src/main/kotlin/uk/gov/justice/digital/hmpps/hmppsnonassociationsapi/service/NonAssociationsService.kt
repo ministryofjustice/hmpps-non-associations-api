@@ -11,5 +11,4 @@ class NonAssociationsService(
   suspend fun getDetails(prisonerNumber: String): NonAssociationDetails {
     return prisonApiService.getNonAssociationDetails(prisonerNumber)
   }
-
 }

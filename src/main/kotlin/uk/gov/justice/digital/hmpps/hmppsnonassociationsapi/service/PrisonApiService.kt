@@ -22,5 +22,4 @@ class PrisonApiService(
       .retrieve()
       .awaitBody()
   }
-
 }
