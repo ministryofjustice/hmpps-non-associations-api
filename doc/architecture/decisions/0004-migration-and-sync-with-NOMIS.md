@@ -1,0 +1,197 @@
+# 1. Mastering and Synchronisation of Non Associations data with NOMIS
+
+[Next >>](9999-end.md)
+
+
+Date: 2023-06-13
+
+## Status
+
+Accepted
+
+## Context
+
+This document will cover the approach for the non-associations service to "own" non-associations data and synchronisation this information back into NOMIS
+
+### Migration plan for Non-Associations - Moving data off NOMIS approach
+A two-way sync and migration pattern is to be adopted.
+
+Therefore, the approach will be to :-
+- Keep NOMIS up to date with changes made in Non-Associations service
+- Provide a two-way sync and keep both systems in synchronisation so that turning off access to old NOMIS screens can be done prison by prison
+- Migrate all the data from NOMIS
+- Once all prisons had been switched over - turn off NOMIS -> DPS sync (now 1 way only)
+- All access to screen removed
+
+Steps taken:
+The Non-Associations Team.
+- Model the Non-Associations data in a new database 
+- Build API functionality for managing the data 
+- Provide Non-Associations endpoint in NS API that mirrors data in NOMIS
+- Build screens to make use of the new API
+- Raise events on creation or amendments of Non-Associationss
+- Build a "sync" and "migrate" endpoints to allow NOMIS to send Non-Associations data
+
+On NOMIS (syscon)
+- Call Non-Associations "sync" endpoint when any updates where made to Non-Associations data in NOMIS
+- Listen to events when Non-Associations where created in DPS and store them in NOMIS
+- Migrate all the data held on Non-Associations in NOMIS by calling Non-Associations "migrate" endpoint
+- Reconcile mismatches with weekly checks
+- Remove all Non-Associations endpoints in prison-api once all services are using new Non-Associations API
+
+Data is still held in NOMIS and will be maintained for reporting purposes.
+
+### NOMIS synchronisation sequence
+When a change is made to Non-Associations either a creation or update, events are be fired. The sequence of events for syncing back to NOMIS is shown below:
+
+```mermaid
+sequenceDiagram
+
+    actor Prison Staff
+    participant Non Associations UI
+    participant Manage Non Associations API
+    participant Non Associations Database
+    participant Domain Events
+    participant HMPPS Prisoner to NOMIS update
+    participant HMPPS NOMIS Prisoner API
+    participant NOMIS DB
+
+    Prison Staff ->> Non-Associations UI: Maintain Non-Associations
+    
+    Non-Associations UI ->> Manage Non-Associations API: Call API with changes
+    activate Manage Non-Associations API
+    Manage Non-Associations API->>Non-Associations Database: update DB
+    Manage Non-Associations API->>Domain Events: domain event raised
+    Note over Manage Non-Associations API,Domain Events: prisoner.non-association.[created/amended]
+    Manage Non-Associations API-->>Non-Associations UI: Saved Non-Associations returned
+    deactivate Manage Non-Associations API
+    
+    Domain Events-->>HMPPS Prisoner to NOMIS update: Receives prisoner.non-Association domain event
+    activate HMPPS Prisoner to NOMIS update
+    HMPPS Prisoner to NOMIS update->>HMPPS NOMIS Prisoner API: Update NOMIS with Non-Associations data
+    HMPPS NOMIS Prisoner API ->> NOMIS DB: Persist data into the Non-Associations tables
+    deactivate HMPPS Prisoner to NOMIS update
+
+```
+
+## Key components and their flow for Non-Associations sync
+```mermaid
+    
+graph TB
+    X((Prison Staff)) --> A
+    A[Non-Associations UI] -- Maintain Non-Associations --> B
+    B[Non-Associations API] -- Store Non-Associations --> D[[Non-Associations DB]]
+    B -- Non-Associations Updated Event --> C[[Domain Events]]
+    C -- Listen to events --> E[HMPPS Prisoner to NOMIS update]
+    E -- Update NOMIS via API --> F[HMPPS NOMIS Prisoner API]
+    F -- persist --> G[[NOMIS DB]]
+    R[HMPPS Prisoner from NOMIS Migration] -- perform migration --> B
+    R -- record history --> H[[History Record DB]]
+    K[HMPPS NOMIS Mapping Service] --> Q[[Mapping DB]]
+    R -- check for existing mapping --> K
+    R -- 1. find out how many to migrate, 2 Non-Associations details --> F
+```
+
+
+#### Domain Event Types:
+In all instances the domain event will contain the unique reference to the Non-Associations.
+- prisoner.non-associations.created 
+- prisoner.non-associations.amended
+
+**Example:**
+```json
+{
+  "eventType": "prisoner.non-associations.amended",
+  "occurredAt": "2023-03-14T10:00:00",
+  "version": "1.0",
+  "description": "Non-Associations added",
+  "additionalInformation": {
+    "prisonerNumber": "A1234AB"
+  }
+}
+```
+
+
+## API endpoints for sync
+
+### Sync endpoint 
+This endpoint will return all the Non-Associations information needed to populate NOMIS
+
+`GET /non-associations/{prisonerNumber}`
+```json
+{
+  "prisonerNumber": "A9109UD",
+  "nonAssociations": [
+    {
+      "reasonCode": "VIC",
+      "typeCode": "WING",
+      "effectiveDate": "2021-07-05T10:35:17",
+      "expiryDate": "2021-07-05T10:35:17",
+      "authorisedBy": "Staff Name",
+      "comments": "Do not location near",
+      "prisonerNonAssociation": {
+        "prisonerNumber": "A0135GA",
+        "reasonCode": "PER"
+      }
+    }
+  ]
+}
+```
+
+### Sync endpoint
+This endpoint will contain all the information need to populate the Non-Associations database with an Non-Associations related offender data changed in NOMIS
+
+`POST /sync`
+```json
+{
+  "prisonerNumber": "A9109UD",
+  "nonAssociations": [
+    {
+      "reasonCode": "VIC",
+      "typeCode": "WING",
+      "effectiveDate": "2021-07-05T10:35:17",
+      "expiryDate": "2021-07-05T10:35:17",
+      "authorisedBy": "Staff Name",
+      "comments": "Do not location near",
+      "prisonerNonAssociation": {
+        "prisonerNumber": "A0135GA",
+        "reasonCode": "PER"
+      }
+    }
+  ]
+}
+```
+
+### Migration endpoint
+This endpoint will contain all the information need to populate the Non-Associations database with an Non-Associations related offender data
+
+`POST /migrate`
+```json
+{
+  "prisonerNumber": "A9109UD",
+  "nonAssociations": [
+    {
+      "reasonCode": "VIC",
+      "typeCode": "WING",
+      "effectiveDate": "2021-07-05T10:35:17",
+      "expiryDate": "2021-07-05T10:35:17",
+      "authorisedBy": "Staff Name",
+      "comments": "Do not location near",
+      "prisonerNonAssociation": {
+        "prisonerNumber": "A0135GA",
+        "reasonCode": "PER"
+      }
+    }
+  ]
+}
+```
+
+
+
+## Decision
+- Migration process will be trialed in pre-prod and UAT testing will be needed to check mappings have accurately represented historical data
+- NOMIS screens can be turned off once all non-associations screens are complete and staff are informed to switch over.
+
+
+
+[Next >>](9999-end.md)
