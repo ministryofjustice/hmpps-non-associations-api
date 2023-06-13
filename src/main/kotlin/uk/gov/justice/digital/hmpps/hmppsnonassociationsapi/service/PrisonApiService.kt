@@ -23,11 +23,4 @@ class PrisonApiService(
       .awaitBody()
   }
 
-  suspend fun getNonAssociationDetails(bookingId: Long, useClientCredentials: Boolean = false): NonAssociationDetails {
-    return getClient(useClientCredentials)
-      .get()
-      .uri("/api/bookings/$bookingId/non-association-details")
-      .retrieve()
-      .awaitBody()
-  }
 }

@@ -11,7 +11,6 @@ import java.time.LocalDateTime
 
 class PrisonApiResourceTest : IntegrationTestBase() {
 
-  val bookingId: Long = 123456
   val prisonerNumber = "A1234BC"
 
   val nonAssociationDetails =
@@ -89,35 +88,4 @@ class PrisonApiResourceTest : IntegrationTestBase() {
     }
   }
 
-  @Nested
-  inner class `GET non association details by bookingId` {
-
-    @BeforeEach
-    fun stubPrisonApi() {
-      prisonApiMockServer.stubGetNonAssociationDetailsByBookingId(bookingId, nonAssociationDetails)
-    }
-
-    @Test
-    fun `without a valid token responds 401 unauthorized`() {
-      webTestClient.get()
-        .uri("/legacy/api/bookings/$bookingId/non-association-details")
-        .exchange()
-        .expectStatus()
-        .isUnauthorized
-    }
-
-    @Test
-    fun `with a valid token returns the non-association details`() {
-      val expectedResponse = jsonString(nonAssociationDetails)
-      webTestClient.get()
-        .uri("/legacy/api/bookings/$bookingId/non-association-details")
-        .headers(setAuthorisation())
-        .exchange()
-        .expectStatus().isOk
-        .expectBody().json(
-          expectedResponse,
-          true,
-        )
-    }
-  }
 }

@@ -12,7 +12,4 @@ class NonAssociationsService(
     return prisonApiService.getNonAssociationDetails(prisonerNumber)
   }
 
-  suspend fun getDetails(bookingId: Long): NonAssociationDetails {
-    return prisonApiService.getNonAssociationDetails(bookingId)
-  }
 }

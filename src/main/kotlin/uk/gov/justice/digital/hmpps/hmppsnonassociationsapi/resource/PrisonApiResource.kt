@@ -49,33 +49,4 @@ class PrisonApiResource(
     return nonAssociationsService.getDetails(prisonerNumber)
   }
 
-  @GetMapping("/bookings/{bookingId}/non-association-details")
-  @Operation(
-    summary = "Get non-associations by booking ID",
-    description = "Booking ID is an internal ID for a prisoner in NOMIS",
-    deprecated = true,
-    responses = [
-      ApiResponse(
-        responseCode = "200",
-        description = "Returns non-association details for this prisoner",
-      ),
-      ApiResponse(
-        responseCode = "401",
-        description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
-      ApiResponse(
-        responseCode = "404",
-        description = "Booking ID not found",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
-    ],
-  )
-  suspend fun getDetailsByBookingId(
-    @Schema(description = "The offender booking ID", example = "123456", required = true)
-    @PathVariable
-    bookingId: Long,
-  ): NonAssociationDetails {
-    return nonAssociationsService.getDetails(bookingId)
-  }
 }
