@@ -36,7 +36,7 @@ class PrisonApiResource(
       ),
       ApiResponse(
         responseCode = "404",
-        description = "Booking ID not found",
+        description = "Prisoner number not found",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],
