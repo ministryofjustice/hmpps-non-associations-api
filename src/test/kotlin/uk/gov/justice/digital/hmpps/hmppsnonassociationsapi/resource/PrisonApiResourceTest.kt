@@ -64,6 +64,17 @@ class PrisonApiResourceTest : IntegrationTestBase() {
     }
 
     @Test
+    fun `when the Prison API responds 404 Not Found, client gets the same status code`() {
+      var prisonerNumber = prisonerNumber + "not-a-prisoner"
+      webTestClient.get()
+        .uri("/legacy/api/offenders/$prisonerNumber/non-association-details")
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isNotFound
+    }
+
+    @Test
     fun `with a valid token returns the non-association details`() {
       val expectedResponse = jsonString(nonAssociationDetails)
       webTestClient.get()
