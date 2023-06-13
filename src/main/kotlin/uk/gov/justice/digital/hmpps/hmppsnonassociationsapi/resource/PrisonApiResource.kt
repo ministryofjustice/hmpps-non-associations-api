@@ -10,11 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.digital.hmpps.hmppsnonassociations.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.NonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
-
-// TODO: Check endpoint format/document it
 
 @RestController
 @RequestMapping("/legacy/api", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -22,19 +20,14 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociati
 class PrisonApiResource(
   val nonAssociationsService: NonAssociationsService,
 ) {
-  @GetMapping("/bookings/{bookingId}/non-association-details")
+  @GetMapping("/offenders/{prisonerNumber}/non-association-details")
   @Operation(
-    summary = "Get non-associations by bookingId",
-    description = "TODO",
+    summary = "Get non-associations by Prisoner number",
+    description = "The offender prisoner number",
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Returns list of non-associations",
-      ),
-      ApiResponse(
-        responseCode = "400",
-        description = "Incorrect data specified to return list of non-associations",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+        description = "Returns non-association details for this prisoner",
       ),
       ApiResponse(
         responseCode = "401",
@@ -43,16 +36,16 @@ class PrisonApiResource(
       ),
       ApiResponse(
         responseCode = "404",
-        description = "Booking ID not found",
+        description = "Prisoner number not found",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],
   )
-  suspend fun getDetailsByBookingId(
-    @Schema(description = "The offender booking id", example = "123456", required = true)
+  suspend fun getDetailsByPrisonerNumber(
+    @Schema(description = "The offender prisoner number", example = "A1234BC", required = true)
     @PathVariable
-    bookingId: Long,
+    prisonerNumber: String,
   ): NonAssociationDetails {
-    return nonAssociationsService.getDetails(bookingId)
+    return nonAssociationsService.getDetails(prisonerNumber)
   }
 }

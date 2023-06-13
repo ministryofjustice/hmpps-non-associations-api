@@ -16,31 +16,13 @@ class PrisonApiMockServer : WireMockServer(WIREMOCK_PORT) {
 
   fun getCountFor(url: String) = this.findAll(WireMock.getRequestedFor(WireMock.urlEqualTo(url))).count()
 
-  fun stubGetNonAssociationDetails(bookingId: Long, nonAssociationDetails: NonAssociationDetails) {
+  fun stubGetNonAssociationDetailsByPrisonerNumber(nonAssociationDetails: NonAssociationDetails) {
     stubFor(
-      get("/api/bookings/$bookingId/non-association-details").willReturn(
+      get("/api/offenders/${nonAssociationDetails.offenderNo}/non-association-details").willReturn(
         aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(
             mapper.writeValueAsBytes(nonAssociationDetails),
-          ),
-      ),
-    )
-  }
-
-  fun stubGetNonAssociationDetails(prisonerNumber: String) {
-    stubFor(
-      get("/api/offenders/$prisonerNumber/non-association-details").willReturn(
-        aResponse()
-          .withHeader("Content-Type", "application/json")
-          .withBody(
-            // language=json
-            """
-                {
-                  "offenderNo": "A1234AB",
-                  "nonAssociations": []
-                }
-            """,
           ),
       ),
     )

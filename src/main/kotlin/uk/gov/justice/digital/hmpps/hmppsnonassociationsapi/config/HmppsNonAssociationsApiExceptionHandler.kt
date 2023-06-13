@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppsnonassociations.config
+package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config
 
 import jakarta.validation.ValidationException
 import org.slf4j.LoggerFactory
@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.reactive.function.client.WebClientResponseException.NotFound
 
 @RestControllerAdvice
 class HmppsNonAssociationsApiExceptionHandler {
@@ -20,6 +21,20 @@ class HmppsNonAssociationsApiExceptionHandler {
         ErrorResponse(
           status = BAD_REQUEST,
           userMessage = "Validation failure: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
+  @ExceptionHandler(NotFound::class)
+  fun handleNotFound(e: NotFound): ResponseEntity<ErrorResponse?>? {
+    log.debug("Not found exception caught: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.NOT_FOUND)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.NOT_FOUND,
+          userMessage = "Not Found: ${e.message}",
           developerMessage = e.message,
         ),
       )
