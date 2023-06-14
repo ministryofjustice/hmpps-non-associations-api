@@ -15,10 +15,10 @@ data class NonAssociationDetails(
   val lastName: String,
   @Schema(description = "Description of the agency (e.g. prison) the offender is assigned to", required = true, example = "Moorland (HMP & YOI)")
   val agencyDescription: String,
-  @Schema(description = "Description of living unit (e.g. cell) the offender is assigned to.", required = true, example = "MDI-1-1-3")
-  val assignedLivingUnitDescription: String,
-  @Schema(description = "ID of living unit (e.g. cell) the offender is assigned to.", required = true, example = "113")
-  val assignedLivingUnitId: Long,
+  @Schema(description = "Description of living unit (e.g. cell) the offender is assigned to.", required = false, example = "MDI-1-1-3")
+  val assignedLivingUnitDescription: String?,
+  @Schema(description = "ID of living unit (e.g. cell) the offender is assigned to.", required = false, example = "113")
+  val assignedLivingUnitId: Long? = null,
   @Schema(description = "Non-associations with other prisoners", required = true)
   val nonAssociations: List<NonAssociation>,
 )
@@ -63,8 +63,8 @@ data class OffenderNonAssociation(
   val reasonDescription: String,
   @Schema(description = "Description of the agency (e.g. prison) the offender is assigned to", required = true, example = "Moorland (HMP & YOI)")
   val agencyDescription: String,
-  @Schema(description = "Description of living unit (e.g. cell) the offender is assigned to.", required = true, example = "MDI-2-3-4")
-  val assignedLivingUnitDescription: String,
-  @Schema(description = "ID of living unit (e.g. cell) the offender is assigned to.", required = true, example = "234")
-  val assignedLivingUnitId: Long,
+  @Schema(description = "Description of living unit (e.g. cell) the offender is assigned to.", required = false, example = "MDI-2-3-4")
+  val assignedLivingUnitDescription: String?,
+  @Schema(description = "ID of living unit (e.g. cell) the offender is assigned to.", required = false, example = "234")
+  val assignedLivingUnitId: Long? = null,
 )
