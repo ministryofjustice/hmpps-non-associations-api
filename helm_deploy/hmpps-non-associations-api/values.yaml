@@ -32,6 +32,13 @@ generic-service:
       APPINSIGHTS_INSTRUMENTATIONKEY: "APPINSIGHTS_INSTRUMENTATIONKEY"
       NON_ASSOCIATIONS_API_CLIENT_ID: "NON_ASSOCIATIONS_API_CLIENT_ID"
       NON_ASSOCIATIONS_API_CLIENT_SECRET: "NON_ASSOCIATIONS_API_CLIENT_SECRET"
+    dps-rds-instance-output:
+      SPRING_FLYWAY_USER: "database_username"
+      SPRING_FLYWAY_PASSWORD: "database_password"
+      DATABASE_NAME: "database_name"
+      DATABASE_ENDPOINT: "rds_instance_endpoint"
+      # SPRING_R2DBC_USERNAME: "database_username"
+      # SPRING_R2DBC_PASSWORD: "database_password"
 
   allowlist:
     office: "217.33.148.210/32"
