@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.JwtAuthHelper
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.HmppsAuthMockServer
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.PrisonApiMockServer
 import java.time.Clock
@@ -18,7 +19,7 @@ import java.time.ZoneId
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test")
-abstract class IntegrationTestBase {
+abstract class IntegrationTestBase : TestBase() {
 
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired

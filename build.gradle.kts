@@ -25,12 +25,15 @@ dependencies {
 
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
 
+  runtimeOnly("org.flywaydb:flyway-core")
+
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
   testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:2.35.0")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.11.5")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
   testImplementation("org.springframework.security:spring-security-test")
+  testImplementation("org.testcontainers:postgresql:1.18.3")
 }
 
 java {
