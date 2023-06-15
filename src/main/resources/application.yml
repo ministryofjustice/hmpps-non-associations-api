@@ -35,6 +35,10 @@ spring:
       test:
         - "stdout"
 
+  flyway:
+    enabled: true
+    url: jdbc:postgresql://${DATABASE_ENDPOINT}/${DATABASE_NAME}?sslmode=verify-full
+
 server:
   port: 8080
   servlet:
