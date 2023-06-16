@@ -34,10 +34,24 @@ spring:
     group:
       test:
         - "stdout"
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  datasource:
+    url: 'jdbc:postgresql://${DATABASE_ENDPOINT}/${DATABASE_NAME}?sslmode=verify-full'
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    hikari:
+      pool-name: NON-DB-CP
+      maximum-pool-size: 10
+      connection-timeout: 1000
+      validation-timeout: 500
 
   flyway:
     enabled: true
     url: jdbc:postgresql://${DATABASE_ENDPOINT}/${DATABASE_NAME}?sslmode=verify-full
+    user: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
 
 server:
   port: 8080

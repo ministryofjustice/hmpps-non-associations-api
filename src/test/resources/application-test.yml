@@ -15,11 +15,16 @@ api:
       prison: http://localhost:8093
       offender-search: http://localhost:8094
 
-#spring:
-#  flyway:
-#    url: jdbc:postgresql://localhost:5432/non-associations?sslmode=prefer
-#    user: non-associations
-#    password: non-associations
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/non_associations?sslmode=prefer
+    username: non_associations
+    password: non_associations
+
+  flyway:
+    url: jdbc:postgresql://localhost:5432/non_associations?sslmode=prefer
+    user: non_associations
+    password: non_associations
 
 #  r2dbc:
 #    url: r2dbc:postgresql://localhost:5432/non-associations

@@ -11,6 +11,7 @@ configurations {
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
+  implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
@@ -26,6 +27,7 @@ dependencies {
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
 
   runtimeOnly("org.flywaydb:flyway-core")
+  runtimeOnly("org.postgresql:postgresql:42.6.0")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 

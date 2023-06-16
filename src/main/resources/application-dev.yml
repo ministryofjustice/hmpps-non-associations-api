@@ -16,6 +16,11 @@ spring:
   devtools:
     add-properties: true
 
+  datasource:
+    url: jdbc:postgresql://localhost:5432/non_associations?sslmode=prefer
+    username: non_associations
+    password: non_associations
+
   flyway:
     url: jdbc:postgresql://localhost:5432/non_associations?sslmode=prefer
     user: non_associations
