@@ -8,7 +8,7 @@ class NonAssociationsService(
   private val prisonApiService: PrisonApiService,
 ) {
 
-  suspend fun getDetails(prisonerNumber: String): NonAssociationDetails {
+  fun getDetails(prisonerNumber: String): NonAssociationDetails {
     return prisonApiService.getNonAssociationDetails(prisonerNumber)
   }
 }

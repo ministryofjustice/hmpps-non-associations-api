@@ -4,8 +4,8 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpHeaders
-import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder
-import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
+import org.springframework.security.oauth2.jwt.JwtDecoder
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.stereotype.Component
 import java.security.KeyPair
 import java.security.KeyPairGenerator
@@ -25,10 +25,10 @@ class JwtAuthHelper {
   }
 
   @Bean
-  fun jwtDecoder(): ReactiveJwtDecoder = NimbusReactiveJwtDecoder.withPublicKey(keyPair.public as RSAPublicKey).build()
+  fun jwtDecoder(): JwtDecoder = NimbusJwtDecoder.withPublicKey(keyPair.public as RSAPublicKey).build()
 
   fun setAuthorisation(
-    user: String = "NON_ASSOCIATIONS_ADM",
+    user: String = "AUTH_ADM",
     roles: List<String> = listOf(),
     scopes: List<String> = listOf(),
   ): (HttpHeaders) -> Unit {
@@ -41,7 +41,7 @@ class JwtAuthHelper {
     return { it.set(HttpHeaders.AUTHORIZATION, "Bearer $token") }
   }
 
-  fun createJwt(
+  internal fun createJwt(
     subject: String?,
     scope: List<String>? = listOf(),
     roles: List<String>? = listOf(),

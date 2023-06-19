@@ -6,7 +6,6 @@ api:
     url:
       oauth: http://localhost:9090/auth
       prison: http://localhost:8082
-      offender-search: http://localhost:8083
 
 management.endpoint:
   health.cache.time-to-live: 0
@@ -21,18 +20,8 @@ spring:
     username: non_associations
     password: non_associations
 
-  flyway:
-    url: jdbc:postgresql://localhost:5432/non_associations?sslmode=prefer
-    user: non_associations
-    password: non_associations
-
-#  r2dbc:
-#    url: r2dbc:postgresql://localhost:5432/non_associations?sslmode=prefer
-#    username: non_associations
-#    password: non_associations
-#    properties:
-#      sslMode: DISABLE
-#      sslRootCert:
-
   feature-toggles:
     afine: true
+
+  jpa:
+    show-sql: true
