@@ -10,7 +10,7 @@ spring:
 
   security:
     oauth2:
-      resourceserver:
+      resource-server:
         jwt:
           jwk-set-uri: ${api.base.url.oauth}/.well-known/jwks.json
 
@@ -36,6 +36,14 @@ spring:
         - "stdout"
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+    show-sql: false
+    generate-ddl: false
+    hibernate:
+      ddl-auto: none
+
+  flyway:
+    enabled: true
 
   datasource:
     url: 'jdbc:postgresql://${DATABASE_ENDPOINT}/${DATABASE_NAME}?sslmode=verify-full'
@@ -46,12 +54,6 @@ spring:
       maximum-pool-size: 10
       connection-timeout: 1000
       validation-timeout: 500
-
-  flyway:
-    enabled: true
-    url: jdbc:postgresql://${DATABASE_ENDPOINT}/${DATABASE_NAME}?sslmode=verify-full
-    user: ${DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD}
 
 server:
   port: 8080

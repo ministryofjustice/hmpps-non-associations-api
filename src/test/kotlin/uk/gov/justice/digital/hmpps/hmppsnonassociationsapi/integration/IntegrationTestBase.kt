@@ -1,11 +1,13 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.microsoft.applicationinsights.TelemetryClient
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
@@ -27,6 +29,9 @@ abstract class IntegrationTestBase : TestBase() {
 
   @Autowired
   protected lateinit var jwtAuthHelper: JwtAuthHelper
+
+  @SpyBean
+  protected lateinit var telemetryClient: TelemetryClient
 
   @Autowired
   protected lateinit var objectMapper: ObjectMapper

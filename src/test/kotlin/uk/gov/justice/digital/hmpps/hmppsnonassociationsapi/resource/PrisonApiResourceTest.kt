@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 
 class PrisonApiResourceTest : IntegrationTestBase() {
 
-  val prisonerNumber = "A1234BC"
+  final val prisonerNumber = "A1234BC"
 
   val nonAssociationDetails =
     NonAssociationDetails(
@@ -46,7 +46,7 @@ class PrisonApiResourceTest : IntegrationTestBase() {
     )
 
   @Nested
-  inner class `GET non association details by Prisoner number` {
+  inner class `GET non association details by prisoner number` {
 
     @BeforeEach
     fun stubPrisonApi() {
@@ -64,10 +64,10 @@ class PrisonApiResourceTest : IntegrationTestBase() {
 
     @Test
     fun `when the Prison API responds 404 Not Found, client gets the same status code`() {
-      var prisonerNumber = prisonerNumber + "not-a-prisoner"
+      val prisonerNumber = prisonerNumber + "not-a-prisoner"
       webTestClient.get()
         .uri("/legacy/api/offenders/$prisonerNumber/non-association-details")
-        .headers(setAuthorisation())
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus()
         .isNotFound
@@ -78,7 +78,7 @@ class PrisonApiResourceTest : IntegrationTestBase() {
       val expectedResponse = jsonString(nonAssociationDetails)
       webTestClient.get()
         .uri("/legacy/api/offenders/$prisonerNumber/non-association-details")
-        .headers(setAuthorisation())
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus().isOk
         .expectBody().json(
