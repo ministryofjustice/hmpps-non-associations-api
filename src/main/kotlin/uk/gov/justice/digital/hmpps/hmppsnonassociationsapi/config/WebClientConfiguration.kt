@@ -20,6 +20,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.netty.http.client.HttpClient
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.utils.UserContext
+import java.time.Duration
 import java.util.*
 
 @Configuration
@@ -60,7 +61,8 @@ class WebClientConfiguration(
   private fun createForwardAuthWebClient(builder: WebClient.Builder, url: @URL String): WebClient = builder.baseUrl(url)
     .filter(addAuthHeaderFilterFunction())
     .clientConnector(
-      ReactorClientHttpConnector(HttpClient.create()),
+      ReactorClientHttpConnector(HttpClient.create().responseTimeout(Duration.ofMinutes(2))
+      ),
     )
     .build()
 
