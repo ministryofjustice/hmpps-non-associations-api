@@ -11,8 +11,7 @@ import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPublicKey
 import java.time.Duration
-import java.util.Date
-import java.util.UUID
+import java.util.*
 
 @Component
 class JwtAuthHelper {
@@ -28,7 +27,7 @@ class JwtAuthHelper {
   fun jwtDecoder(): JwtDecoder = NimbusJwtDecoder.withPublicKey(keyPair.public as RSAPublicKey).build()
 
   fun setAuthorisation(
-    user: String = "AUTH_ADM",
+    user: String = "NON_ASSOCIATIONS_ADM",
     roles: List<String> = listOf(),
     scopes: List<String> = listOf(),
   ): (HttpHeaders) -> Unit {
