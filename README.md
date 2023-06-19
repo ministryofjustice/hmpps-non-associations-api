@@ -14,8 +14,8 @@ Environment variables to be set are as follows:
 ```
 API_BASE_URL_OAUTH=https://sign-in-dev.hmpps.service.justice.gov.uk/auth
 API_BASE_URL_PRISON=https://api-dev.prison.service.justice.gov.uk
-INCENTIVES_API_CLIENT_ID=[choose a suitable hmpps-auth client]
-INCENTIVES_API_CLIENT_SECRET=
+NON_ASSOCIATIONS_API_CLIENT_ID=[choose a suitable hmpps-auth client]
+NON_ASSOCIATIONS_API_CLIENT_SECRET=
 ```
 
 Start the database and other required services via docker-compose with:
