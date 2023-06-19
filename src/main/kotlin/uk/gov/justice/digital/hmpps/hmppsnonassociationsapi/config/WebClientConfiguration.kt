@@ -61,7 +61,8 @@ class WebClientConfiguration(
   private fun createForwardAuthWebClient(builder: WebClient.Builder, url: @URL String): WebClient = builder.baseUrl(url)
     .filter(addAuthHeaderFilterFunction())
     .clientConnector(
-      ReactorClientHttpConnector(HttpClient.create().responseTimeout(Duration.ofMinutes(2))
+      ReactorClientHttpConnector(
+        HttpClient.create().responseTimeout(Duration.ofMinutes(2)),
       ),
     )
     .build()
