@@ -14,16 +14,27 @@ parameters:
 jobs:
   validate:
     executor:
-      name: hmpps/java
-      tag: "19.0"
+      name: hmpps/java_localstack_postgres
+      jdk_tag: "19.0"
+      localstack_tag: "1.2"
+      # services: "sns,sqs"
+      postgres_tag: "15"
+      postgres_username: "non_associations"
+      postgres_password: "non_associations"
     steps:
       - checkout
       - restore_cache:
           keys:
             - gradle-{{ checksum "build.gradle.kts" }}
             - gradle-
+      - hmpps/wait_till_ready_postgres
       - run:
+          name: Run check
           command: ./gradlew check
+#          name: Run check & send results to sonarcloud
+#          command: |
+#            export GRADLE_OPTS="--add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED"
+#            ./gradlew check sonar --info
       - save_cache:
           paths:
             - ~/.gradle
@@ -32,6 +43,8 @@ jobs:
           path: build/test-results
       - store_artifacts:
           path: build/reports/tests
+#      - store_artifacts:
+#          path: build/reports/jacoco/test/html
 
 workflows:
   version: 2

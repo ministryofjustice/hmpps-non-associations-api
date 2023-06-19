@@ -1,0 +1,18 @@
+version: "3"
+services:
+
+  non-associations-db:
+    image: postgres
+    networks:
+      - hmpps
+    container_name: non-associations-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=non_associations
+      - POSTGRES_USER=non_associations
+      - POSTGRES_DB=non_associations
+
+networks:
+  hmpps:
