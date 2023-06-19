@@ -1,0 +1,17 @@
+version: "3"
+services:
+  database:
+    image: postgres
+    networks:
+      - hmpps
+    container_name: non-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=non-associations
+      - POSTGRES_USER=non-associations
+      - POSTGRES_DB=non-associations
+
+networks:
+  hmpps:

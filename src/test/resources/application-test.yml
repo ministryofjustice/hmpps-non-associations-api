@@ -17,14 +17,14 @@ api:
 
 #spring:
 #  flyway:
-#    url: jdbc:postgresql://localhost:5432/incentives?sslmode=prefer
-#    user: incentives
-#    password: incentives
+#    url: jdbc:postgresql://localhost:5432/non-associations?sslmode=prefer
+#    user: non-associations
+#    password: non-associations
 
 #  r2dbc:
-#    url: r2dbc:postgresql://localhost:5432/incentives
-#    username: incentives
-#    password: incentives
+#    url: r2dbc:postgresql://localhost:5432/non-associations
+#    username: non-associations
+#    password: non-associations
 #    properties:
 #      sslMode: DISABLE
 #      sslRootCert:
