@@ -7,17 +7,19 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
 import org.springframework.security.test.context.support.WithMockUser
-import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.transaction.TestTransaction
+import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuditorAwareImpl
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.ReasonType
 
 @DataJpaTest
-@ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(AuthenticationFacade::class, AuditorAwareImpl::class)
 @WithMockUser
-class ReasonTypeRepositoryTest {
+@Transactional
+class ReasonTypeRepositoryTest : TestBase() {
 
   @Autowired
   lateinit var repository: ReasonTypeRepository
@@ -32,19 +34,22 @@ class ReasonTypeRepositoryTest {
 
   @Test
   fun getReasonTypeByCode() {
-    var reason = repository.findById("VIC").orElseThrow { Exception("ReasonType not found") }
+    val reason = repository.findById("VIC").orElseThrow { Exception("ReasonType not found") }
     assertThat(reason).isNotNull
     assertThat(reason.description).isEqualTo("Victim")
   }
 
   @Test
   fun updateRecord() {
-    var reason = repository.findById("VIC").orElseThrow { Exception("ReasonType not found") }
-    var whenCreated = reason.whenCreated
-
+    val reason = repository.findById("VIC").orElseThrow { Exception("ReasonType not found") }
+    val whenCreated = reason.whenCreated
     repository.save(reason.copy(description = "UPDATED"))
 
-    var reasonUpdated = repository.findById("VIC").orElseThrow { Exception("ReasonType not found") }
+    TestTransaction.flagForCommit()
+    TestTransaction.end()
+    TestTransaction.start()
+
+    val reasonUpdated = repository.findById("VIC").orElseThrow { Exception("ReasonType not found") }
     assertThat(reasonUpdated.description).isEqualTo("UPDATED")
     assertThat(reasonUpdated.whenCreated).isEqualTo(whenCreated)
   }
