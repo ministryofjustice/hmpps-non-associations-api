@@ -7,12 +7,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.MediaType
-import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
 class OpenApiDocsTest : IntegrationTestBase() {
   @LocalServerPort
   private var port: Int = 0
