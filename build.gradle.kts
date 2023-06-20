@@ -1,7 +1,7 @@
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.2.0"
-  kotlin("plugin.spring") version "1.8.21"
-  kotlin("plugin.jpa") version "1.8.21"
+  kotlin("plugin.spring") version "1.8.22"
+  kotlin("plugin.jpa") version "1.8.22"
   idea
 }
 
@@ -18,7 +18,7 @@ dependencies {
 
   implementation("org.flywaydb:flyway-core")
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
-  implementation("org.hibernate.orm:hibernate-community-dialects:6.2.3.Final")
+  implementation("org.hibernate.orm:hibernate-community-dialects:6.2.5.Final")
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 
