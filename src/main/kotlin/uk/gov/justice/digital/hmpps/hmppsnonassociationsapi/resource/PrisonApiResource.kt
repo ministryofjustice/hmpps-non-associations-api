@@ -21,7 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociati
 @RestController
 @Validated
 @RequestMapping("/legacy/api", produces = [MediaType.APPLICATION_JSON_VALUE])
-@Tag(name = "Non-Associations", description = "Retrieve non association details from prison-api")
+@Tag(name = "Legacy non-associations-details", description = "Retrieve non association details from Prison API")
 class PrisonApiResource(
   val nonAssociationsService: NonAssociationsService,
 ) {
