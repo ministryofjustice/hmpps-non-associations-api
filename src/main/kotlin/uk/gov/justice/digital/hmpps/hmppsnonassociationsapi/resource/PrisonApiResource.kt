@@ -48,7 +48,7 @@ class PrisonApiResource(
       ),
     ],
   )
-  fun getDetailsByPrisonerNumber(
+  fun getDetailsFromPrisonApiByPrisonerNumber(
     @Schema(description = "The offender prisoner number", example = "A1234BC", required = true)
     @PathVariable
     prisonerNumber: String,
