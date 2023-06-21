@@ -43,6 +43,9 @@ class ReasonTypeRepositoryTest : TestBase() {
   fun updateRecord() {
     val reason = repository.findById("VIC").orElseThrow { Exception("ReasonType not found") }
     val whenCreated = reason.whenCreated
+    val whenUpdated = reason.whenUpdated
+
+    // Update the record
     repository.save(reason.copy(description = "UPDATED"))
 
     TestTransaction.flagForCommit()
@@ -52,5 +55,7 @@ class ReasonTypeRepositoryTest : TestBase() {
     val reasonUpdated = repository.findById("VIC").orElseThrow { Exception("ReasonType not found") }
     assertThat(reasonUpdated.description).isEqualTo("UPDATED")
     assertThat(reasonUpdated.whenCreated).isEqualTo(whenCreated)
+    // whenUpdated has changed
+    assertThat(reasonUpdated.whenUpdated).isAfter(whenUpdated)
   }
 }

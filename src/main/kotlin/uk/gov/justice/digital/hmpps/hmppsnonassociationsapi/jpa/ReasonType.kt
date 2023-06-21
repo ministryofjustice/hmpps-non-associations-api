@@ -18,5 +18,5 @@ data class ReasonType(
   @CreatedDate
   val whenCreated: LocalDateTime = LocalDateTime.now(),
   @LastModifiedDate
-  val whenUpdated: LocalDateTime = LocalDateTime.now(),
+  var whenUpdated: LocalDateTime = LocalDateTime.now(),
 )
