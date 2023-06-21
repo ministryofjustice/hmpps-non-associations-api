@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 /**
  * Top-level type for non-association details returned by Prison API
  */
-data class NonAssociationDetails(
+data class LegacyNonAssociationDetails(
   @Schema(description = "Prisoner number", required = true, example = "A1234BC")
   val offenderNo: String,
   @Schema(description = "First name", required = true, example = "James")
@@ -20,13 +20,13 @@ data class NonAssociationDetails(
   @Schema(description = "ID of living unit (e.g. cell) the offender is assigned to.", required = false, example = "113")
   val assignedLivingUnitId: Long? = null,
   @Schema(description = "Non-associations with other prisoners", required = true)
-  val nonAssociations: List<NonAssociation>,
+  val nonAssociations: List<LegacyNonAssociation>,
 )
 
 /**
  * Prison API format for a single non-association
  */
-data class NonAssociation(
+data class LegacyNonAssociation(
   @Schema(description = "Reason code for the non-association", required = true, example = "VIC")
   val reasonCode: String,
   @Schema(description = "Reason for the non-association", required = true, example = "Victim")
@@ -44,13 +44,13 @@ data class NonAssociation(
   @Schema(description = "Additional free text comments related to the non-association.", required = false, example = "Mr. Bloggs assaulted Mr. Hall")
   val comments: String?,
   @Schema(description = "Details about the other non-association person.", required = true)
-  val offenderNonAssociation: OffenderNonAssociation,
+  val offenderNonAssociation: LegacyOffenderNonAssociation,
 )
 
 /**
  * Prison API format containing the details of the other side of the non-association relation
  */
-data class OffenderNonAssociation(
+data class LegacyOffenderNonAssociation(
   @Schema(description = "Prisoner number", required = true, example = "B1234CD")
   val offenderNo: String,
   @Schema(description = "First name", required = true, example = "Joseph")

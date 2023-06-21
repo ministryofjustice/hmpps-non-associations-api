@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.NonAssociationDetails
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
 
 @RestController
@@ -52,7 +52,7 @@ class PrisonApiResource(
     @Schema(description = "The offender prisoner number", example = "A1234BC", required = true)
     @PathVariable
     prisonerNumber: String,
-  ): NonAssociationDetails {
+  ): LegacyNonAssociationDetails {
     return nonAssociationsService.getDetails(prisonerNumber)
   }
 }
