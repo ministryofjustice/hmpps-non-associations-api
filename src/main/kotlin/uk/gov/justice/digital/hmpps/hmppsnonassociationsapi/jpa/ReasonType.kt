@@ -19,6 +19,4 @@ data class ReasonType(
   val whenCreated: LocalDateTime = LocalDateTime.now(),
   @LastModifiedDate
   val whenUpdated: LocalDateTime = LocalDateTime.now(),
-) {
-  constructor() : this("", "")
-}
+)
