@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -26,7 +25,6 @@ class PrisonApiResource(
   val nonAssociationsService: NonAssociationsService,
 ) {
   @GetMapping("/offenders/{prisonerNumber}/non-association-details")
-  @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
     summary = "Get non-associations by Prisoner number",
