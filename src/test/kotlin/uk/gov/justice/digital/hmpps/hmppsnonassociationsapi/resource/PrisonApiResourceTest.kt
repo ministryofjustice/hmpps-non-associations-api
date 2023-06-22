@@ -3,9 +3,9 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.NonAssociation
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.NonAssociationDetails
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.OffenderNonAssociation
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociation
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociationDetails
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyOffenderNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.IntegrationTestBase
 import java.time.LocalDateTime
 
@@ -14,7 +14,7 @@ class PrisonApiResourceTest : IntegrationTestBase() {
   final val prisonerNumber = "A1234BC"
 
   val nonAssociationDetails =
-    NonAssociationDetails(
+    LegacyNonAssociationDetails(
       offenderNo = prisonerNumber,
       firstName = "James",
       lastName = "Hall",
@@ -22,7 +22,7 @@ class PrisonApiResourceTest : IntegrationTestBase() {
       assignedLivingUnitDescription = "MDI-1-1-3",
       assignedLivingUnitId = 113,
       nonAssociations = listOf(
-        NonAssociation(
+        LegacyNonAssociation(
           reasonCode = "VIC",
           reasonDescription = "Victim",
           typeCode = "WING",
@@ -31,7 +31,7 @@ class PrisonApiResourceTest : IntegrationTestBase() {
           expiryDate = LocalDateTime.parse("2021-07-05T10:35:17"),
           authorisedBy = "Officer Alice B.",
           comments = "Mr. Bloggs assaulted Mr. Hall",
-          offenderNonAssociation = OffenderNonAssociation(
+          offenderNonAssociation = LegacyOffenderNonAssociation(
             offenderNo = "B1234CD",
             firstName = "Joseph",
             lastName = "Bloggs",
