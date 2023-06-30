@@ -13,6 +13,7 @@ import org.springframework.test.context.transaction.TestTransaction
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuditorAwareImpl
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
 import java.time.LocalDateTime
@@ -127,9 +128,9 @@ class NonAssociationRepositoryTest : TestBase() {
   fun nonAssociation(firstPrisonerNumber: String, secondPrisonerNumber: String): NonAssociation {
     return NonAssociation(
       firstPrisonerNumber = firstPrisonerNumber,
-      firstPrisonerReasonCode = "VIC",
+      firstPrisonerReasonCode = NonAssociationReason.VICTIM.code,
       secondPrisonerNumber = secondPrisonerNumber,
-      secondPrisonerReasonCode = "PER",
+      secondPrisonerReasonCode = NonAssociationReason.PERPETRATOR.code,
       restrictionTypeCode = "WING",
       comment = "John attacked Bob",
     )
