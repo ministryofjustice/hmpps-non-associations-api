@@ -17,9 +17,9 @@ CREATE TABLE non_association
 
     -- whether the non-association is closed and by who/why/when
     is_closed     BOOLEAN NOT NULL DEFAULT FALSE,
-    closed_by     VARCHAR(30),
-    closed_reason TEXT,
-    closed_at     TIMESTAMPTZ,
+    closed_by     VARCHAR(30) CHECK ((is_closed IS TRUE AND closed_by IS NOT NULL) OR (is_closed IS FALSE AND closed_by IS NULL)),
+    closed_reason TEXT CHECK ((is_closed IS TRUE AND closed_reason IS NOT NULL) OR (is_closed IS FALSE AND closed_reason IS NULL)),
+    closed_at     TIMESTAMPTZ CHECK ((is_closed IS TRUE AND closed_at IS NOT NULL) OR (is_closed IS FALSE AND closed_at IS NULL)),
 
     -- record creation/update time
     when_created TIMESTAMPTZ NOT NULL DEFAULT now(),
