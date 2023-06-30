@@ -36,7 +36,7 @@ class NonAssociationRepositoryTest : TestBase() {
     assertThat(savedNonna.firstPrisonerReasonCode).isEqualTo(nonna.firstPrisonerReasonCode)
     assertThat(savedNonna.secondPrisonerNumber).isEqualTo(nonna.secondPrisonerNumber)
     assertThat(savedNonna.secondPrisonerReasonCode).isEqualTo(nonna.secondPrisonerReasonCode)
-    assertThat(savedNonna.restrictionType).isEqualTo(nonna.restrictionType)
+    assertThat(savedNonna.restrictionTypeCode).isEqualTo(nonna.restrictionTypeCode)
     assertThat(savedNonna.comment).isEqualTo(nonna.comment)
     assertThat(savedNonna.incidentReportNumber).isNull()
 
@@ -55,7 +55,7 @@ class NonAssociationRepositoryTest : TestBase() {
       firstPrisonerReasonCode = "VIC",
       secondPrisonerNumber = secondPrisonerNumber,
       secondPrisonerReasonCode = "PER",
-      restrictionType = "WING",
+      restrictionTypeCode = "WING",
       comment = "John attacked Bob",
     )
   }

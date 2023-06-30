@@ -24,8 +24,9 @@ class NonAssociation(
   var secondPrisonerReasonCode: String,
 
   // Details and restrictions
-  var restrictionType: String,
+  var restrictionTypeCode: String,
   var comment: String = "",
+  var authorisedBy: String? = null,
   var incidentReportNumber: String? = null,
 
   // Non-associations can be closed (with details of who/why/when)

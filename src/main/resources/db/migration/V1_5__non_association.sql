@@ -10,9 +10,10 @@ CREATE TABLE non_association
     second_prisoner_reason_code VARCHAR(6) NOT NULL,
 
     -- non-association details
-    restriction_type       VARCHAR(6) NOT NULL,
+    restriction_type_code  VARCHAR(6) NOT NULL,
     comment                TEXT NOT NULL,
     incident_report_number VARCHAR(16),
+    authorised_by          VARCHAR(30),
 
     -- whether the non-association is closed and by who/why/when
     is_closed     BOOLEAN NOT NULL DEFAULT FALSE,
