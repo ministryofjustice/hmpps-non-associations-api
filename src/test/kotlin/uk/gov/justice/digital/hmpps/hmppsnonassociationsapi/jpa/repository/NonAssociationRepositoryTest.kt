@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuditorAwareImpl
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
 import java.time.LocalDateTime
@@ -131,7 +132,7 @@ class NonAssociationRepositoryTest : TestBase() {
       firstPrisonerReasonCode = NonAssociationReason.VICTIM.code,
       secondPrisonerNumber = secondPrisonerNumber,
       secondPrisonerReasonCode = NonAssociationReason.PERPETRATOR.code,
-      restrictionTypeCode = "WING",
+      restrictionTypeCode = NonAssociationRestrictionType.WING.code,
       comment = "John attacked Bob",
     )
   }
