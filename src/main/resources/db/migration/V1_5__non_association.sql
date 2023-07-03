@@ -25,3 +25,7 @@ CREATE TABLE non_association
     when_created TIMESTAMPTZ NOT NULL DEFAULT now(),
     when_updated TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE INDEX non_association_first_prisoner_number_idx ON non_association (first_prisoner_number);
+CREATE INDEX non_association_second_prisoner_number_idx ON non_association (second_prisoner_number);
+CREATE INDEX non_association_incident_report_number_idx ON non_association (incident_report_number);
