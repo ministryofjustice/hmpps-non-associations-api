@@ -39,10 +39,13 @@ class NonAssociationRepositoryTest : TestBase() {
     }
 
     assertThat(savedNonna.firstPrisonerNumber).isEqualTo(nonna.firstPrisonerNumber)
-    assertThat(savedNonna.firstPrisonerReasonCode).isEqualTo(nonna.firstPrisonerReasonCode)
+    assertThat(savedNonna.firstPrisonerReason).isEqualTo(nonna.firstPrisonerReason)
+    assertThat(savedNonna.firstPrisonerReason.description).isEqualTo("Victim")
     assertThat(savedNonna.secondPrisonerNumber).isEqualTo(nonna.secondPrisonerNumber)
-    assertThat(savedNonna.secondPrisonerReasonCode).isEqualTo(nonna.secondPrisonerReasonCode)
-    assertThat(savedNonna.restrictionTypeCode).isEqualTo(nonna.restrictionTypeCode)
+    assertThat(savedNonna.secondPrisonerReason).isEqualTo(nonna.secondPrisonerReason)
+    assertThat(savedNonna.secondPrisonerReason.description).isEqualTo("Perpetrator")
+    assertThat(savedNonna.restrictionType).isEqualTo(nonna.restrictionType)
+    assertThat(savedNonna.restrictionType.description).isEqualTo("Do Not Locate in Same Cell")
     assertThat(savedNonna.comment).isEqualTo(nonna.comment)
     assertThat(savedNonna.incidentReportNumber).isNull()
 
@@ -129,10 +132,10 @@ class NonAssociationRepositoryTest : TestBase() {
   fun nonAssociation(firstPrisonerNumber: String, secondPrisonerNumber: String): NonAssociation {
     return NonAssociation(
       firstPrisonerNumber = firstPrisonerNumber,
-      firstPrisonerReasonCode = NonAssociationReason.VICTIM.code,
+      firstPrisonerReason = NonAssociationReason.VICTIM,
       secondPrisonerNumber = secondPrisonerNumber,
-      secondPrisonerReasonCode = NonAssociationReason.PERPETRATOR.code,
-      restrictionTypeCode = NonAssociationRestrictionType.WING.code,
+      secondPrisonerReason = NonAssociationReason.PERPETRATOR,
+      restrictionType = NonAssociationRestrictionType.CELL,
       comment = "John attacked Bob",
     )
   }

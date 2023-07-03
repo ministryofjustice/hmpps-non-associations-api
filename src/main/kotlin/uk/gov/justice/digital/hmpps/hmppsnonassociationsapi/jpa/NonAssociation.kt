@@ -1,13 +1,18 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
 import java.time.LocalDateTime
 
 @Entity
@@ -18,13 +23,19 @@ class NonAssociation(
   val id: Long? = null,
 
   val firstPrisonerNumber: String,
-  var firstPrisonerReasonCode: String,
+  @Enumerated(value = EnumType.STRING)
+  @Column(name = "first_prisoner_reason_code")
+  var firstPrisonerReason: NonAssociationReason,
 
   val secondPrisonerNumber: String,
-  var secondPrisonerReasonCode: String,
+  @Enumerated(value = EnumType.STRING)
+  @Column(name = "second_prisoner_reason_code")
+  var secondPrisonerReason: NonAssociationReason,
 
   // Details and restrictions
-  var restrictionTypeCode: String,
+  @Enumerated(value = EnumType.STRING)
+  @Column(name = "restriction_type_code")
+  var restrictionType: NonAssociationRestrictionType,
   var comment: String = "",
   var authorisedBy: String? = null,
   var incidentReportNumber: String? = null,
