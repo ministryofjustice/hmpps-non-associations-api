@@ -4,13 +4,13 @@ CREATE TABLE non_association
     id                          BIGSERIAL PRIMARY KEY,
 
     -- prisoners to non-associate and their reasons
-    first_prisoner_number       VARCHAR(10) NOT NULL,
-    first_prisoner_reason_code  VARCHAR(6) NOT NULL,
-    second_prisoner_number      VARCHAR(10) NOT NULL,
-    second_prisoner_reason_code VARCHAR(6) NOT NULL,
+    first_prisoner_number       VARCHAR(10) NOT NULL CHECK (length(first_prisoner_number) > 0),
+    first_prisoner_reason_code  VARCHAR(6) NOT NULL CHECK (length(first_prisoner_reason_code) > 0),
+    second_prisoner_number      VARCHAR(10) NOT NULL CHECK ((length(second_prisoner_number) > 0) AND second_prisoner_number <> first_prisoner_number),
+    second_prisoner_reason_code VARCHAR(6) NOT NULL CHECK (length(second_prisoner_reason_code) > 0),
 
     -- non-association details
-    restriction_type_code  VARCHAR(6) NOT NULL,
+    restriction_type_code  VARCHAR(6) NOT NULL CHECK (length(restriction_type_code) > 0),
     comment                TEXT NOT NULL,
     incident_report_number VARCHAR(16),
     authorised_by          VARCHAR(30),
