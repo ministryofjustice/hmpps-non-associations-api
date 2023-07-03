@@ -50,4 +50,11 @@ class NonAssociation(
   var whenCreated: LocalDateTime = LocalDateTime.now(),
   @LastModifiedDate
   var whenUpdated: LocalDateTime = LocalDateTime.now(),
-)
+) {
+  fun close(closedBy: String, closedReason: String, closedAt: LocalDateTime) {
+    this.isClosed = true
+    this.closedBy = closedBy
+    this.closedReason = closedReason
+    this.closedAt = closedAt
+  }
+}

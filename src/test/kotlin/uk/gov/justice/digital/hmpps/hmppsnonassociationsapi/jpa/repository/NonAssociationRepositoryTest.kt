@@ -65,14 +65,11 @@ class NonAssociationRepositoryTest : TestBase() {
     )
 
     // Update the non-association to close it
+
     val closedBy = "Aldo"
     val closedReason = "They're friends now"
     val closedAt = LocalDateTime.now()
-    createdNonna.isClosed = true
-    createdNonna.closedBy = closedBy
-    createdNonna.closedReason = closedReason
-    createdNonna.closedAt = closedAt
-
+    createdNonna.close(closedBy, closedReason, closedAt)
     repository.save(createdNonna)
 
     // Check non-association is now closed with correct details
