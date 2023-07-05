@@ -36,7 +36,7 @@ class NonAssociation(
   @Enumerated(value = EnumType.STRING)
   @Column(name = "restriction_type_code")
   var restrictionType: NonAssociationRestrictionType,
-  var comment: String = "",
+  var comment: String,
   var authorisedBy: String? = null,
   var incidentReportNumber: String? = null,
 
