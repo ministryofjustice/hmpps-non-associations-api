@@ -113,7 +113,7 @@ class NonAssociationsResourceTest : IntegrationTestBase() {
 
     @Test
     fun `for a valid request creates the non-association`() {
-      val request = createNonAssociationRequest(
+      val request: CreateNonAssociationRequest = createNonAssociationRequest(
         firstPrisonerNumber = "A1234BC",
         firstPrisonerReason = NonAssociationReason.VICTIM,
         secondPrisonerNumber = "D5678EF",
@@ -122,6 +122,7 @@ class NonAssociationsResourceTest : IntegrationTestBase() {
         comment = "They keep fighting",
       )
 
+      val expectedUsername = "A_TEST_USER"
       val expectedResponse = NonAssociation(
         id = 1,
         firstPrisonerNumber = request.firstPrisonerNumber,
@@ -130,7 +131,7 @@ class NonAssociationsResourceTest : IntegrationTestBase() {
         secondPrisonerReason = request.secondPrisonerReason,
         restrictionType = request.restrictionType,
         comment = request.comment,
-        authorisedBy = "TODO: userId of whoever made the request",
+        authorisedBy = expectedUsername,
         isClosed = false,
         closedReason = null,
         closedBy = null,
@@ -141,6 +142,7 @@ class NonAssociationsResourceTest : IntegrationTestBase() {
         .uri(url)
         .headers(
           setAuthorisation(
+            user = expectedUsername,
             roles = listOf("ROLE_NON_ASSOCIATIONS"),
             scopes = listOf("write", "read"),
           ),
