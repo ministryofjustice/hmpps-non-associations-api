@@ -2,6 +2,10 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.IntegrationTestBase
 
 class NonAssociationsResourceTest : IntegrationTestBase() {
@@ -24,15 +28,21 @@ class NonAssociationsResourceTest : IntegrationTestBase() {
 
     @Test
     fun `without the correct role and scope responds 403 Forbidden`() {
+      val request = CreateNonAssociationRequest(
+        firstPrisonerNumber = "A1234BC",
+        firstPrisonerReason = NonAssociationReason.VICTIM,
+        secondPrisonerNumber = "D5678EF",
+        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
+        restrictionType = NonAssociationRestrictionType.CELL,
+        comment = "They keep fighting",
+      )
+
       // correct role, missing write scope
       webTestClient.post()
         .uri(url)
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
         .header("Content-Type", "application/json")
-        .bodyValue(
-          // language=json
-          "{}",
-        )
+        .bodyValue(jsonString(request))
         .exchange()
         .expectStatus()
         .isForbidden
@@ -47,10 +57,7 @@ class NonAssociationsResourceTest : IntegrationTestBase() {
           ),
         )
         .header("Content-Type", "application/json")
-        .bodyValue(
-          // language=json
-          "{}",
-        )
+        .bodyValue(jsonString(request))
         .exchange()
         .expectStatus()
         .isForbidden
@@ -83,6 +90,21 @@ class NonAssociationsResourceTest : IntegrationTestBase() {
         )
         .header("Content-Type", "text/plain")
         .bodyValue("{}")
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+
+      // request body missing some fields
+      webTestClient.post()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            scopes = listOf("write"),
+          ),
+        )
+        .header("Content-Type", "text/plain")
+        .bodyValue(jsonString("firstPrisonerNumber" to "A1234BC"))
         .exchange()
         .expectStatus()
         .isBadRequest
