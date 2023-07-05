@@ -27,7 +27,7 @@ import java.time.LocalDateTime
 class NonAssociationRepositoryTest : TestBase() {
 
   @Autowired
-  lateinit var repository: NonAssociationRepository
+  lateinit var repository: NonAssociationsRepository
 
   @Test
   fun createNonAssociation() {

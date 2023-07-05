@@ -5,4 +5,4 @@ import org.springframework.stereotype.Repository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
 
 @Repository
-interface NonAssociationRepository : JpaRepository<NonAssociation, Long>
+interface NonAssociationsRepository : JpaRepository<NonAssociation, Long>
