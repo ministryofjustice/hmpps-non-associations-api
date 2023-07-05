@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
 
 class NonAssociationsResourceTest : IntegrationTestBase() {
 
@@ -28,7 +29,7 @@ class NonAssociationsResourceTest : IntegrationTestBase() {
 
     @Test
     fun `without the correct role and scope responds 403 Forbidden`() {
-      val request = CreateNonAssociationRequest(
+      val request = createNonAssociationRequest(
         firstPrisonerNumber = "A1234BC",
         firstPrisonerReason = NonAssociationReason.VICTIM,
         secondPrisonerNumber = "D5678EF",
@@ -112,9 +113,30 @@ class NonAssociationsResourceTest : IntegrationTestBase() {
 
     @Test
     fun `for a valid request creates the non-association`() {
-      throw Exception("TODO: Make valid request")
+      val request = createNonAssociationRequest(
+        firstPrisonerNumber = "A1234BC",
+        firstPrisonerReason = NonAssociationReason.VICTIM,
+        secondPrisonerNumber = "D5678EF",
+        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
+        restrictionType = NonAssociationRestrictionType.CELL,
+        comment = "They keep fighting",
+      )
 
-      val expectedResponse = jsonString(mapOf("prisonerNumber" to prisonerNumber))
+      val expectedResponse = NonAssociation(
+        id = 1,
+        firstPrisonerNumber = request.firstPrisonerNumber,
+        firstPrisonerReason = request.firstPrisonerReason,
+        secondPrisonerNumber = request.secondPrisonerNumber,
+        secondPrisonerReason = request.secondPrisonerReason,
+        restrictionType = request.restrictionType,
+        comment = request.comment,
+        authorisedBy = "TODO: userId of whoever made the request",
+        isClosed = false,
+        closedReason = null,
+        closedBy = null,
+        closedAt = null,
+      )
+
       webTestClient.post()
         .uri(url)
         .headers(
@@ -123,10 +145,12 @@ class NonAssociationsResourceTest : IntegrationTestBase() {
             scopes = listOf("write", "read"),
           ),
         )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
         .exchange()
         .expectStatus().isCreated
         .expectBody().json(
-          expectedResponse,
+          jsonString(expectedResponse),
           true,
         )
 
