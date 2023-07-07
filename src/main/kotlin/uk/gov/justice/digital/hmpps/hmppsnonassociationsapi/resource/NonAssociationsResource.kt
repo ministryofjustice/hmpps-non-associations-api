@@ -11,17 +11,24 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationDetails
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
 
 @RestController
 @Validated
 @RequestMapping("/", produces = [MediaType.APPLICATION_JSON_VALUE])
 @Tag(name = "Non-Associations", description = "Retrieve non-associations")
-class NonAssociationsResource() {
+class NonAssociationsResource(
+  private val nonAssociationsService: NonAssociationsService,
+) {
   @GetMapping("/prisoner/{prisonerNumber}/non-associations")
   @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
@@ -56,5 +63,40 @@ class NonAssociationsResource() {
     prisonerNumber: String,
   ): NonAssociationDetails {
     return NonAssociationDetails(prisonerNumber)
+  }
+
+  @PostMapping("/non-associations")
+  @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS') and hasAuthority('SCOPE_write')")
+  @ResponseStatus(HttpStatus.CREATED)
+  @Operation(
+    summary = "Creates a non-association between two prisoners.",
+    description = "Requires ROLE_NON_ASSOCIATIONS role with write scope.",
+    responses = [
+      ApiResponse(
+        responseCode = "201",
+        description = "Returns the created non-association",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Invalid request body",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Missing required privileges. Requires the NON_ASSOCIATIONS role with write scope",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun createNonAssociation(
+    @RequestBody
+    createNonAssociation: CreateNonAssociationRequest,
+  ): NonAssociation {
+    return nonAssociationsService.createNonAssociation(createNonAssociation)
   }
 }

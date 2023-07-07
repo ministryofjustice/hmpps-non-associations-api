@@ -14,6 +14,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
 import java.time.LocalDateTime
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation as NonAssociationDTO
 
 @Entity
 @EntityListeners(AuditingEntityListener::class)
@@ -36,7 +37,7 @@ class NonAssociation(
   @Enumerated(value = EnumType.STRING)
   @Column(name = "restriction_type_code")
   var restrictionType: NonAssociationRestrictionType,
-  var comment: String = "",
+  var comment: String,
   var authorisedBy: String? = null,
   var incidentReportNumber: String? = null,
 
@@ -56,5 +57,21 @@ class NonAssociation(
     this.closedBy = closedBy
     this.closedReason = closedReason
     this.closedAt = closedAt
+  }
+
+  fun toDto(): NonAssociationDTO {
+    return NonAssociationDTO(
+      id = id!!,
+      firstPrisonerNumber = firstPrisonerNumber,
+      firstPrisonerReason = firstPrisonerReason,
+      secondPrisonerNumber = secondPrisonerNumber,
+      secondPrisonerReason = secondPrisonerReason,
+      restrictionType = restrictionType,
+      comment = comment,
+      // TODO: Do we need to do anything special with this?
+      //       This field being optional in NOMIS/Prison API
+      //       It may be one of the things we make mandatory after migration?
+      authorisedBy = authorisedBy ?: "",
+    )
   }
 }
