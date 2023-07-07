@@ -32,7 +32,10 @@ spring:
 
   profiles:
     group:
+      dev:
+        - "localstack"
       test:
+        - "localstack"
         - "stdout"
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -68,6 +71,10 @@ server:
   shutdown: graceful
   error:
     include-message: always
+
+hmpps:
+  sqs:
+    queueAdminRole: ROLE_NON_ASSOCIATIONS_API_QUEUE_ADMIN
 
 management:
   endpoints:
