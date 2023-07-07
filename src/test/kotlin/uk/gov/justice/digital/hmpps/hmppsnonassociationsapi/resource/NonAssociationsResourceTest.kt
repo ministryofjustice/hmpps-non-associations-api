@@ -2,9 +2,9 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 
-class NonAssociationsResourceTest : IntegrationTestBase() {
+class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
   final val prisonerNumber = "A1234BC"
 

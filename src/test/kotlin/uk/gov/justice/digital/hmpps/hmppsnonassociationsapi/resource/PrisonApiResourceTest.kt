@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyOffenderNonAssociation
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import java.time.LocalDateTime
 
-class PrisonApiResourceTest : IntegrationTestBase() {
+class PrisonApiResourceTest : SqsIntegrationTestBase() {
 
   final val prisonerNumber = "A1234BC"
 
