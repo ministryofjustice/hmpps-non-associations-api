@@ -24,7 +24,7 @@ import java.time.LocalDateTime
 @Import(AuthenticationFacade::class, AuditorAwareImpl::class)
 @WithMockUser
 @Transactional
-class NonAssociationRepositoryTest : TestBase() {
+class NonAssociationsRepositoryTest : TestBase() {
 
   @Autowired
   lateinit var repository: NonAssociationsRepository
