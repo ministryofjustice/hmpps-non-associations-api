@@ -34,32 +34,3 @@ class NonAssociationsService(
     return nonAssociationsRepository.save(nonAssociation)
   }
 }
-
-private fun CreateNonAssociationRequest.toNewEntity(authorisedBy: String): NonAssociationJPA {
-  return NonAssociationJPA(
-    id = null,
-    firstPrisonerNumber = firstPrisonerNumber,
-    firstPrisonerReason = firstPrisonerReason,
-    secondPrisonerNumber = secondPrisonerNumber,
-    secondPrisonerReason = secondPrisonerReason,
-    restrictionType = restrictionType,
-    comment = comment,
-    authorisedBy = authorisedBy,
-  )
-}
-
-private fun NonAssociationJPA.toDto(): NonAssociationDTO {
-  return NonAssociationDTO(
-    id = id!!,
-    firstPrisonerNumber = firstPrisonerNumber,
-    firstPrisonerReason = firstPrisonerReason,
-    secondPrisonerNumber = secondPrisonerNumber,
-    secondPrisonerReason = secondPrisonerReason,
-    restrictionType = restrictionType,
-    comment = comment,
-    // TODO: Do we need to do anything special with this?
-    //       This field being optional in NOMIS/Prison API
-    //       It may be one of the things we make mandatory after migration?
-    authorisedBy = authorisedBy ?: "",
-  )
-}

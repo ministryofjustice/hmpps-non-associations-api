@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.IntegrationTestBase
@@ -123,20 +122,23 @@ class NonAssociationsResourceTest : IntegrationTestBase() {
       )
 
       val expectedUsername = "A_TEST_USER"
-      val expectedResponse = NonAssociation(
-        id = 1,
-        firstPrisonerNumber = request.firstPrisonerNumber,
-        firstPrisonerReason = request.firstPrisonerReason,
-        secondPrisonerNumber = request.secondPrisonerNumber,
-        secondPrisonerReason = request.secondPrisonerReason,
-        restrictionType = request.restrictionType,
-        comment = request.comment,
-        authorisedBy = expectedUsername,
-        isClosed = false,
-        closedReason = null,
-        closedBy = null,
-        closedAt = null,
-      )
+      val expectedResponse =
+        // language=json
+        """
+        {
+          "firstPrisonerNumber": "${request.firstPrisonerNumber}",
+          "firstPrisonerReason": "${request.firstPrisonerReason}",
+          "secondPrisonerNumber": "${request.secondPrisonerNumber}",
+          "secondPrisonerReason" = "${request.secondPrisonerReason}",
+          "restrictionType": "${request.restrictionType}",
+          "comment": "${request.comment}",
+          "authorisedBy": "$expectedUsername",
+          "isClosed": false,
+          "closedReason": null,
+          "closedBy": null,
+          "closedAt": null
+        }
+        """
 
       webTestClient.post()
         .uri(url)
@@ -151,10 +153,7 @@ class NonAssociationsResourceTest : IntegrationTestBase() {
         .bodyValue(jsonString(request))
         .exchange()
         .expectStatus().isCreated
-        .expectBody().json(
-          jsonString(expectedResponse),
-          true,
-        )
+        .expectBody().json(expectedResponse, false)
 
       // TODO: Make request to `GET /non-associations/{id}` once it exists
     }

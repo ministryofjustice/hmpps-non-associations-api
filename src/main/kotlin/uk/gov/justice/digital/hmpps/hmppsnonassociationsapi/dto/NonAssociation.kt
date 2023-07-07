@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
 /**
  * Non-association between two prisoners
@@ -54,4 +55,17 @@ data class CreateNonAssociationRequest(
 
   @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "John and Luke always end up fighting")
   val comment: String,
-)
+) {
+  fun toNewEntity(authorisedBy: String): NonAssociationJPA {
+    return NonAssociationJPA(
+      id = null,
+      firstPrisonerNumber = firstPrisonerNumber,
+      firstPrisonerReason = firstPrisonerReason,
+      secondPrisonerNumber = secondPrisonerNumber,
+      secondPrisonerReason = secondPrisonerReason,
+      restrictionType = restrictionType,
+      comment = comment,
+      authorisedBy = authorisedBy,
+    )
+  }
+}
