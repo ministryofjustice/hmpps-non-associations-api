@@ -24,10 +24,10 @@ import java.time.LocalDateTime
 @Import(AuthenticationFacade::class, AuditorAwareImpl::class)
 @WithMockUser
 @Transactional
-class NonAssociationRepositoryTest : TestBase() {
+class NonAssociationsRepositoryTest : TestBase() {
 
   @Autowired
-  lateinit var repository: NonAssociationRepository
+  lateinit var repository: NonAssociationsRepository
 
   @Test
   fun createNonAssociation() {
