@@ -6,6 +6,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.Authenticatio
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
+import kotlin.jvm.optionals.getOrNull
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation as NonAssociationDTO
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
@@ -22,6 +23,10 @@ class NonAssociationsService(
       authorisedBy = authenticationFacade.currentUsername ?: throw Exception("Could not determine current user's username'"),
     )
     return persistNonAssociation(nonAssociationJpa).toDto()
+  }
+
+  fun getById(id: Long): NonAssociationDTO? {
+    return nonAssociationsRepository.findById(id).getOrNull()?.toDto()
   }
 
   fun getDetails(prisonerNumber: String): LegacyNonAssociationDetails {
