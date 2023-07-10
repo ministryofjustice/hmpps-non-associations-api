@@ -4,7 +4,7 @@ hmpps.sqs:
   queues:
     audit:
       queueName: ${random.uuid}
-    non-associations:
+    nonassociations:
       queueName: non-associations-event-queue
       dlqName: non-associations-event-dlq
       subscribeTopicId: domainevents
