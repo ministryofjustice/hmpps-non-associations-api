@@ -71,8 +71,22 @@ class HmppsNonAssociationsApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(NonAssociationNotFoundException::class)
+  fun handleNotFound(e: NonAssociationNotFoundException): ResponseEntity<ErrorResponse?>? {
+    log.debug("Not found exception caught: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.NOT_FOUND)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.NOT_FOUND,
+          userMessage = "Not Found: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
   @ExceptionHandler(NotFound::class)
-  fun handleNotFound(e: NotFound): ResponseEntity<ErrorResponse?>? {
+  fun handleSpringNotFound(e: NotFound): ResponseEntity<ErrorResponse?>? {
     log.debug("Not found exception caught: {}", e.message)
     return ResponseEntity
       .status(HttpStatus.NOT_FOUND)
