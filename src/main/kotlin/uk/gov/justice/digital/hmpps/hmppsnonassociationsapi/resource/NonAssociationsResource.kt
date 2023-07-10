@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationDetails
@@ -102,4 +103,40 @@ class NonAssociationsResource(
     eventPublishWrapper(NonAssociationDomainEventType.NON_ASSOCIATION_CREATED) {
       nonAssociationsService.createNonAssociation(createNonAssociation)
     }
+
+  @GetMapping("/non-associations/{id}")
+  @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+    summary = "Get a non-association between two prisoners by ID.",
+    description = "Requires ROLE_NON_ASSOCIATIONS role.",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returns the non-association",
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Missing required role. Requires the NON_ASSOCIATIONS role",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Non-association not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun getNonAssociation(
+    @Schema(description = "The non-association ID", example = "42", required = true)
+    @PathVariable
+    id: Long,
+  ): NonAssociation {
+    return nonAssociationsService.getById(id) ?: throw NonAssociationNotFoundException(id)
+  }
 }
