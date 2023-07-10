@@ -104,6 +104,9 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 }
 
+class NonAssociationNotFoundException(id: Long) :
+  Exception("Non-association with ID $id not found")
+
 data class ErrorResponse(
   val status: Int,
   val errorCode: Int? = null,
