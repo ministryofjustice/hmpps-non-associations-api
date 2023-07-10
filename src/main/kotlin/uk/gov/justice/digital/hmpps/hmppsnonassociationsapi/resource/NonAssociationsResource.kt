@@ -96,6 +96,7 @@ class NonAssociationsResource(
   )
   fun createNonAssociation(
     @RequestBody
+    @Validated
     createNonAssociation: CreateNonAssociationRequest,
   ): NonAssociation =
     eventPublishWrapper(NonAssociationDomainEventType.NON_ASSOCIATION_CREATED) {
