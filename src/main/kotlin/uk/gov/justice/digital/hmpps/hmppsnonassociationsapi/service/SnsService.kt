@@ -63,9 +63,9 @@ class SnsService(hmppsQueueService: HmppsQueueService, private val objectMapper:
 
 data class AdditionalInformation(
   val nonAssociationId: String? = null,
-  val prisonerNumber: String? = null,
+  val nsPrisonerNumber1: String? = null,
+  val nsPrisonerNumber2: String? = null,
   val reason: String? = null,
-  val prisonId: String? = null,
 )
 
 data class HMPPSDomainEvent(
@@ -90,8 +90,8 @@ data class HMPPSDomainEvent(
 }
 
 enum class NonAssociationDomainEventType(val value: String, val description: String, val auditType: AuditType) {
-  NON_ASSOCIATION_CREATED("non-association.created", "A non-association has been created: ", AuditType.NON_ASSOCIATION_CREATED),
-  NON_ASSOCIATION_UPSERT("non-association.amended", "A non-association has been amended: ", AuditType.NON_ASSOCIATION_UPDATED),
+  NON_ASSOCIATION_CREATED("non-associations.created", "A non-association has been created: ", AuditType.NON_ASSOCIATION_CREATED),
+  NON_ASSOCIATION_UPSERT("non-associations.amended", "A non-association has been amended: ", AuditType.NON_ASSOCIATION_UPDATED),
 }
 
 fun Instant.toOffsetDateFormat(): String =

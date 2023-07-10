@@ -21,6 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssocia
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociationDomainEventType
 
 @RestController
 @Validated
@@ -28,7 +29,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociati
 @Tag(name = "Non-Associations", description = "Retrieve non-associations")
 class NonAssociationsResource(
   private val nonAssociationsService: NonAssociationsService,
-) {
+) : NonAssociationsBaseResource() {
   @GetMapping("/prisoner/{prisonerNumber}/non-associations")
   @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
@@ -96,7 +97,8 @@ class NonAssociationsResource(
   fun createNonAssociation(
     @RequestBody
     createNonAssociation: CreateNonAssociationRequest,
-  ): NonAssociation {
-    return nonAssociationsService.createNonAssociation(createNonAssociation)
-  }
+  ): NonAssociation =
+    eventPublishWrapper(NonAssociationDomainEventType.NON_ASSOCIATION_CREATED) {
+      nonAssociationsService.createNonAssociation(createNonAssociation)
+    }
 }

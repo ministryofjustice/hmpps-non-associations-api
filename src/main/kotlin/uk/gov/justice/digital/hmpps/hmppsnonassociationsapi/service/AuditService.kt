@@ -12,6 +12,8 @@ import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import java.time.Instant
 
+const val SYSTEM_USERNAME = "NON_ASSOCIATIONS_API"
+
 @Service
 class AuditService(
   @Value("\${spring.application.name}")
@@ -32,9 +34,9 @@ class AuditService(
   fun sendMessage(auditType: AuditType, id: String, details: Any, username: String? = null) {
     val auditEvent = AuditEvent(
       what = auditType.name,
-      who = username ?: authenticationFacade.currentUsername ?: "non-associations-api",
+      who = username ?: authenticationFacade.currentUsername ?: SYSTEM_USERNAME,
       service = serviceName,
-      details = objectMapper.writeValueAsString(details),
+      details = details.toJson(),
     )
     log.debug("Audit {} ", auditEvent)
 

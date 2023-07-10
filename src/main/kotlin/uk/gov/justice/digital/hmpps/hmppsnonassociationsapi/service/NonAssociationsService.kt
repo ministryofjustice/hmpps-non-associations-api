@@ -10,6 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation a
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
 @Service
+@Transactional
 class NonAssociationsService(
   private val nonAssociationsRepository: NonAssociationsRepository,
   private val authenticationFacade: AuthenticationFacade,
@@ -20,16 +21,13 @@ class NonAssociationsService(
     val nonAssociationJpa = createNonAssociationRequest.toNewEntity(
       authorisedBy = authenticationFacade.currentUsername ?: throw Exception("Could not determine current user's username'"),
     )
-    return persistNonAssociation(nonAssociationJpa).also {
-      // TODO: Publish domain event (outside transaction)
-    }.toDto()
+    return persistNonAssociation(nonAssociationJpa).toDto()
   }
 
   fun getDetails(prisonerNumber: String): LegacyNonAssociationDetails {
     return prisonApiService.getNonAssociationDetails(prisonerNumber)
   }
 
-  @Transactional
   private fun persistNonAssociation(nonAssociation: NonAssociationJPA): NonAssociationJPA {
     return nonAssociationsRepository.save(nonAssociation)
   }
