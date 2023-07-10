@@ -10,12 +10,7 @@ import org.springframework.test.context.DynamicPropertySource
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.LocalStackContainer
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.LocalStackContainer.setLocalStackProperties
-import uk.gov.justice.hmpps.sqs.HmppsQueue
-import uk.gov.justice.hmpps.sqs.HmppsQueueService
-import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
-import uk.gov.justice.hmpps.sqs.MissingQueueException
-import uk.gov.justice.hmpps.sqs.MissingTopicException
-import uk.gov.justice.hmpps.sqs.countMessagesOnQueue
+import uk.gov.justice.hmpps.sqs.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -35,7 +30,7 @@ class SqsIntegrationTestBase : IntegrationTestBase() {
   protected val domainEventsTopicArn by lazy { domainEventsTopic.arn }
 
   protected val auditQueue by lazy { hmppsQueueService.findByQueueId("audit") as HmppsQueue }
-  protected val nonAssociationsQueue by lazy { hmppsQueueService.findByQueueId("non-associations") as HmppsQueue }
+  protected val nonAssociationsQueue by lazy { hmppsQueueService.findByQueueId("nonassociations") as HmppsQueue }
 
   fun HmppsSqsProperties.domaineventsTopicConfig() =
     topics["domainevents"]
