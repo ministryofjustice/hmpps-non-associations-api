@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
 
-class NonAssociationsResourceTest : IntegrationTestBase() {
+class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
   final val prisonerNumber = "A1234BC"
 

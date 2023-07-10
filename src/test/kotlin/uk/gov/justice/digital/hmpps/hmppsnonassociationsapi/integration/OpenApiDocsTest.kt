@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class OpenApiDocsTest : IntegrationTestBase() {
+class OpenApiDocsTest : SqsIntegrationTestBase() {
   @LocalServerPort
   private var port: Int = 0
 
