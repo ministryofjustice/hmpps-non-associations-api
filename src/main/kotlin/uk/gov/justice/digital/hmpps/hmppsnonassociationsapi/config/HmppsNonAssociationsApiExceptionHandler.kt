@@ -12,6 +12,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.reactive.function.client.WebClientResponseException.NotFound
+import org.springframework.web.server.ResponseStatusException
 
 @RestControllerAdvice
 class HmppsNonAssociationsApiExceptionHandler {
@@ -71,8 +72,8 @@ class HmppsNonAssociationsApiExceptionHandler {
       )
   }
 
-  @ExceptionHandler(NonAssociationNotFoundException::class)
-  fun handleNotFound(e: NonAssociationNotFoundException): ResponseEntity<ErrorResponse?>? {
+  @ExceptionHandler(NotFound::class)
+  fun handleSpringNotFound(e: NotFound): ResponseEntity<ErrorResponse?>? {
     log.debug("Not found exception caught: {}", e.message)
     return ResponseEntity
       .status(HttpStatus.NOT_FOUND)
@@ -85,15 +86,15 @@ class HmppsNonAssociationsApiExceptionHandler {
       )
   }
 
-  @ExceptionHandler(NotFound::class)
-  fun handleSpringNotFound(e: NotFound): ResponseEntity<ErrorResponse?>? {
-    log.debug("Not found exception caught: {}", e.message)
+  @ExceptionHandler(ResponseStatusException::class)
+  fun handleResponseStatusException(e: ResponseStatusException): ResponseEntity<ErrorResponse?>? {
+    log.debug("Response status exception caught: {}", e.message)
     return ResponseEntity
-      .status(HttpStatus.NOT_FOUND)
+      .status(e.statusCode)
       .body(
         ErrorResponse(
-          status = HttpStatus.NOT_FOUND,
-          userMessage = "Not Found: ${e.message}",
+          status = e.statusCode.value(),
+          userMessage = e.message,
           developerMessage = e.message,
         ),
       )
@@ -117,9 +118,6 @@ class HmppsNonAssociationsApiExceptionHandler {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 }
-
-class NonAssociationNotFoundException(id: Long) :
-  Exception("Non-association with ID $id not found")
 
 data class ErrorResponse(
   val status: Int,
