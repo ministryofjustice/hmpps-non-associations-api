@@ -2,6 +2,8 @@
 generic-service:
   nameOverride: hmpps-non-associations-api
 
+  serviceAccountName: hmpps-non-associations-api
+
   replicaCount: 4
 
   image:
