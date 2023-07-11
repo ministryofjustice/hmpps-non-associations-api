@@ -19,7 +19,7 @@ class PrisonOffenderEventListener(
     const val PRISONER_MERGE_EVENT_TYPE = "prison-offender-events.prisoner.merged"
   }
 
-  @SqsListener("non-associations", factory = "hmppsQueueContainerFactoryProxy")
+  @SqsListener("nonassociations", factory = "hmppsQueueContainerFactoryProxy")
   @WithSpan(value = "hmpps-non-associations-prisoner-event-queue", kind = SpanKind.SERVER)
   fun onPrisonOffenderEvent(requestJson: String) {
     val (message, messageAttributes) = mapper.readValue(requestJson, HMPPSMessage::class.java)

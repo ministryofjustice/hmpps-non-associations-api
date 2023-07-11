@@ -35,7 +35,7 @@ class SqsIntegrationTestBase : IntegrationTestBase() {
   protected val domainEventsTopicArn by lazy { domainEventsTopic.arn }
 
   protected val auditQueue by lazy { hmppsQueueService.findByQueueId("audit") as HmppsQueue }
-  protected val nonAssociationsQueue by lazy { hmppsQueueService.findByQueueId("non-associations") as HmppsQueue }
+  protected val nonAssociationsQueue by lazy { hmppsQueueService.findByQueueId("nonassociations") as HmppsQueue }
 
   fun HmppsSqsProperties.domaineventsTopicConfig() =
     topics["domainevents"]
