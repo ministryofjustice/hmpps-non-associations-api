@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
@@ -26,7 +27,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociat
 @RestController
 @Validated
 @RequestMapping("/", produces = [MediaType.APPLICATION_JSON_VALUE])
-@Tag(name = "Non-Associations", description = "Retrieve non-associations")
+@Tag(name = "Non-Associations", description = "**IMPORTANT**: This is a work in progress API and it's subject to change, DO NOT USE.")
 class NonAssociationsResource(
   private val nonAssociationsService: NonAssociationsService,
 ) : NonAssociationsBaseResource() {
@@ -34,7 +35,7 @@ class NonAssociationsResource(
   @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
-    summary = "**IMPORTANT**: This is a work in progress API and it's subject to change, DO NOT USE. Get non-associations by prisoner number. Requires ROLE_NON_ASSOCIATIONS role.",
+    summary = "Get non-associations by prisoner number. Requires ROLE_NON_ASSOCIATIONS role.",
     description = "The offender prisoner number",
     responses = [
       ApiResponse(
@@ -96,9 +97,49 @@ class NonAssociationsResource(
   )
   fun createNonAssociation(
     @RequestBody
+    @Validated
     createNonAssociation: CreateNonAssociationRequest,
   ): NonAssociation =
     eventPublishWrapper(NonAssociationDomainEventType.NON_ASSOCIATION_CREATED) {
       nonAssociationsService.createNonAssociation(createNonAssociation)
     }
+
+  @GetMapping("/non-associations/{id}")
+  @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+    summary = "Get a non-association between two prisoners by ID.",
+    description = "Requires ROLE_NON_ASSOCIATIONS role.",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returns the non-association",
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Missing required role. Requires the NON_ASSOCIATIONS role",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Non-association not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun getNonAssociation(
+    @Schema(description = "The non-association ID", example = "42", required = true)
+    @PathVariable
+    id: Long,
+  ): NonAssociation {
+    return nonAssociationsService.getById(id) ?: throw ResponseStatusException(
+      HttpStatus.NOT_FOUND,
+      "Non-association with ID $id not found",
+    )
+  }
 }
