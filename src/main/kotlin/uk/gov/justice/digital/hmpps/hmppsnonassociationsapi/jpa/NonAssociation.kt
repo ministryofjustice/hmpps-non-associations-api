@@ -18,7 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation a
 
 @Entity
 @EntityListeners(AuditingEntityListener::class)
-class NonAssociation(
+data class NonAssociation(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   val id: Long? = null,
