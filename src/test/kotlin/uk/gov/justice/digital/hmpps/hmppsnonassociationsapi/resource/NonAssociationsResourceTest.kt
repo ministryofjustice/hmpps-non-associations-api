@@ -2,7 +2,9 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.test.web.reactive.server.returnResult
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
@@ -156,6 +158,98 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .expectBody().json(expectedResponse, false)
 
       // TODO: Make request to `GET /non-associations/{id}` once it exists
+    }
+  }
+
+  @Nested
+  inner class `Get a non-association` {
+
+    private val url = "/non-associations"
+
+    @Test
+    fun `without a valid token responds 401 Unauthorized`() {
+      webTestClient.get()
+        .uri("/non-associations/42")
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `without the correct role responds 403 Forbidden`() {
+      val existingNonAssociation = createNonAssociation()
+
+      // wrong role
+      webTestClient.get()
+        .uri("/non-associations/${existingNonAssociation.id}")
+        .headers(setAuthorisation(roles = listOf("ROLE_SOMETHING_ELSE")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `when the non-association doesn't exist responds 404 Not Found`() {
+      webTestClient.get()
+        .uri("/non-associations/42")
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isNotFound
+    }
+
+    @Test
+    fun `when the non-association exists returns it`() {
+      val existingNonAssociation = createNonAssociation()
+
+      webTestClient.get()
+        .uri("/non-associations/${existingNonAssociation.id}")
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody()
+        .jsonPath("id").isEqualTo(existingNonAssociation.id)
+        .jsonPath("firstPrisonerNumber").isEqualTo(existingNonAssociation.firstPrisonerNumber)
+        .jsonPath("firstPrisonerReason").isEqualTo(existingNonAssociation.firstPrisonerReason.toString())
+        .jsonPath("secondPrisonerNumber").isEqualTo(existingNonAssociation.secondPrisonerNumber)
+        .jsonPath("secondPrisonerReason").isEqualTo(existingNonAssociation.secondPrisonerReason.toString())
+        .jsonPath("restrictionType").isEqualTo(existingNonAssociation.restrictionType.toString())
+        .jsonPath("comment").isEqualTo(existingNonAssociation.comment)
+    }
+
+    private fun createNonAssociation(): NonAssociation {
+      val createRequest: CreateNonAssociationRequest = createNonAssociationRequest(
+        firstPrisonerNumber = "A1234BC",
+        firstPrisonerReason = NonAssociationReason.VICTIM,
+        secondPrisonerNumber = "D5678EF",
+        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
+        restrictionType = NonAssociationRestrictionType.CELL,
+        comment = "They keep fighting",
+      )
+
+      return webTestClient.post()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            scopes = listOf("write", "read"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(createRequest))
+        .exchange()
+        .expectStatus().isCreated
+        .returnResult<NonAssociation>()
+        .responseBody
+        .blockFirst()
     }
   }
 
