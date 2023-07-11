@@ -27,7 +27,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociat
 @RestController
 @Validated
 @RequestMapping("/", produces = [MediaType.APPLICATION_JSON_VALUE])
-@Tag(name = "Non-Associations", description = "Retrieve non-associations")
+@Tag(name = "Non-Associations", description = "**IMPORTANT**: This is a work in progress API and it's subject to change, DO NOT USE.")
 class NonAssociationsResource(
   private val nonAssociationsService: NonAssociationsService,
 ) : NonAssociationsBaseResource() {
@@ -35,7 +35,7 @@ class NonAssociationsResource(
   @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
-    summary = "**IMPORTANT**: This is a work in progress API and it's subject to change, DO NOT USE. Get non-associations by prisoner number. Requires ROLE_NON_ASSOCIATIONS role.",
+    summary = "Get non-associations by prisoner number. Requires ROLE_NON_ASSOCIATIONS role.",
     description = "The offender prisoner number",
     responses = [
       ApiResponse(
