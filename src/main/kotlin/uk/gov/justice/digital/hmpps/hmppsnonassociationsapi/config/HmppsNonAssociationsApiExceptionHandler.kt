@@ -12,6 +12,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.reactive.function.client.WebClientResponseException.NotFound
+import org.springframework.web.server.ResponseStatusException
 
 @RestControllerAdvice
 class HmppsNonAssociationsApiExceptionHandler {
@@ -72,7 +73,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(NotFound::class)
-  fun handleNotFound(e: NotFound): ResponseEntity<ErrorResponse?>? {
+  fun handleSpringNotFound(e: NotFound): ResponseEntity<ErrorResponse?>? {
     log.debug("Not found exception caught: {}", e.message)
     return ResponseEntity
       .status(HttpStatus.NOT_FOUND)
@@ -80,6 +81,20 @@ class HmppsNonAssociationsApiExceptionHandler {
         ErrorResponse(
           status = HttpStatus.NOT_FOUND,
           userMessage = "Not Found: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
+  @ExceptionHandler(ResponseStatusException::class)
+  fun handleResponseStatusException(e: ResponseStatusException): ResponseEntity<ErrorResponse?>? {
+    log.debug("Response status exception caught: {}", e.message)
+    return ResponseEntity
+      .status(e.statusCode)
+      .body(
+        ErrorResponse(
+          status = e.statusCode.value(),
+          userMessage = e.message,
           developerMessage = e.message,
         ),
       )
