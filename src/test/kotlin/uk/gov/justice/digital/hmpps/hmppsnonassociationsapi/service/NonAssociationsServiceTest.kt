@@ -84,7 +84,6 @@ class NonAssociationsServiceTest {
 
     val nonAssociationList = service.mergePrisonerNumbers("A1234AA", "A1234BB")
 
-
     val resultantNonAssociations = listOf(
       genNonAssociation(1, "A1234BB", "X12234AA", now),
       genNonAssociation(2, "A1234BB", "X12234AB", now),
