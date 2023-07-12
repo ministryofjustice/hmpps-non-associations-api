@@ -17,12 +17,12 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:2.0.1")
-  implementation("io.opentelemetry:opentelemetry-api:1.27.0")
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.27.0")
+  implementation("io.opentelemetry:opentelemetry-api:1.28.0")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:1.28.0")
 
   implementation("org.flywaydb:flyway-core")
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
-  implementation("org.hibernate.orm:hibernate-community-dialects:6.2.5.Final")
+  implementation("org.hibernate.orm:hibernate-community-dialects:6.2.6.Final")
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 
