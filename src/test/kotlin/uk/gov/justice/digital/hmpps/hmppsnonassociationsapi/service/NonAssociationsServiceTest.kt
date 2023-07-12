@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
@@ -65,41 +66,48 @@ class NonAssociationsServiceTest {
 
     whenever(nonAssociationsRepository.findAllByFirstPrisonerNumber("A1234AA")).thenReturn(
       listOf(
-        testNonAssociation(1, "A1234AA", "X12234AA", now),
-        testNonAssociation(2, "A1234AA", "X12234AB", now),
-        testNonAssociation(3, "A1234AA", "X12234AC", now),
-        testNonAssociation(4, "A1234AA", "X12234AD", now),
-        testNonAssociation(5, "A1234AA", "X12234AE", now),
+        genNonAssociation(1, "A1234AA", "X12234AA", now),
+        genNonAssociation(2, "A1234AA", "X12234AB", now),
+        genNonAssociation(3, "A1234AA", "X12234AC", now),
+        genNonAssociation(4, "A1234AA", "X12234AD", now),
+        genNonAssociation(5, "A1234AA", "X12234AE", now),
       ),
     )
 
     whenever(nonAssociationsRepository.findAllBySecondPrisonerNumber("A1234AA")).thenReturn(
       listOf(
-        testNonAssociation(11, "Y1234AA", "A1234AA", now),
-        testNonAssociation(22, "Y1234AB", "A1234AA", now),
-        testNonAssociation(33, "Y1234AC", "A1234AA", now),
+        genNonAssociation(11, "Y1234AA", "A1234AA", now),
+        genNonAssociation(22, "Y1234AB", "A1234AA", now),
+        genNonAssociation(33, "Y1234AC", "A1234AA", now),
       ),
     )
 
     val nonAssociationList = service.mergePrisonerNumbers("A1234AA", "A1234BB")
 
+
+    val resultantNonAssociations = listOf(
+      genNonAssociation(1, "A1234BB", "X12234AA", now),
+      genNonAssociation(2, "A1234BB", "X12234AB", now),
+      genNonAssociation(3, "A1234BB", "X12234AC", now),
+      genNonAssociation(4, "A1234BB", "X12234AD", now),
+      genNonAssociation(5, "A1234BB", "X12234AE", now),
+      genNonAssociation(11, "Y1234AA", "A1234BB", now),
+      genNonAssociation(22, "Y1234AB", "A1234BB", now),
+      genNonAssociation(33, "Y1234AC", "A1234BB", now),
+    )
+
+    verify(nonAssociationsRepository).saveAll(resultantNonAssociations)
     assertThat(nonAssociationList).hasSize(8)
 
-    assertThat(nonAssociationList).isEqualTo(
-      listOf(
-        testNonAssociation(1, "A1234BB", "X12234AA", now),
-        testNonAssociation(2, "A1234BB", "X12234AB", now),
-        testNonAssociation(3, "A1234BB", "X12234AC", now),
-        testNonAssociation(4, "A1234BB", "X12234AD", now),
-        testNonAssociation(5, "A1234BB", "X12234AE", now),
-        testNonAssociation(11, "Y1234AA", "A1234BB", now),
-        testNonAssociation(22, "Y1234AB", "A1234BB", now),
-        testNonAssociation(33, "Y1234AC", "A1234BB", now),
-      ),
-    )
+    assertThat(nonAssociationList).isEqualTo(resultantNonAssociations)
   }
 
-  private fun testNonAssociation(id: Long, firstPrisonerNumber: String, secondPrisonerNumber: String, createTime: LocalDateTime = LocalDateTime.now()) = NonAssociation(
+  private fun genNonAssociation(
+    id: Long,
+    firstPrisonerNumber: String,
+    secondPrisonerNumber: String,
+    createTime: LocalDateTime = LocalDateTime.now(),
+  ) = NonAssociation(
     id = id,
     firstPrisonerNumber = firstPrisonerNumber,
     firstPrisonerReason = NonAssociationReason.BULLYING,

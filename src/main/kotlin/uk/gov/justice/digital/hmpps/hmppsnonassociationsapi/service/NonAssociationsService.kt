@@ -54,6 +54,9 @@ class NonAssociationsService(
       it.copy(secondPrisonerNumber = newPrisonerNumber)
     }
 
-    return nonAssociationList1.plus(nonAssociationList2)
+    val nonAssociationsToUpdate = nonAssociationList1.plus(nonAssociationList2)
+    nonAssociationsRepository.saveAll(nonAssociationsToUpdate)
+    log.info("Updated ${nonAssociationsToUpdate.size} records")
+    return nonAssociationsToUpdate
   }
 }
