@@ -62,10 +62,9 @@ class SnsService(hmppsQueueService: HmppsQueueService, private val objectMapper:
 }
 
 data class AdditionalInformation(
-  val nonAssociationId: String? = null,
+  val id: Long? = null,
   val nsPrisonerNumber1: String? = null,
   val nsPrisonerNumber2: String? = null,
-  val reason: String? = null,
 )
 
 data class HMPPSDomainEvent(

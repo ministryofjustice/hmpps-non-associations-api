@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
 import jakarta.transaction.Transactional
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
@@ -17,6 +19,10 @@ class NonAssociationsService(
   private val authenticationFacade: AuthenticationFacade,
   private val prisonApiService: PrisonApiService,
 ) {
+
+  companion object {
+    val log: Logger = LoggerFactory.getLogger(this::class.java)
+  }
 
   fun createNonAssociation(createNonAssociationRequest: CreateNonAssociationRequest): NonAssociationDTO {
     val nonAssociationJpa = createNonAssociationRequest.toNewEntity(
@@ -35,5 +41,22 @@ class NonAssociationsService(
 
   private fun persistNonAssociation(nonAssociation: NonAssociationJPA): NonAssociationJPA {
     return nonAssociationsRepository.save(nonAssociation)
+  }
+
+  fun mergePrisonerNumbers(oldPrisonerNumber: String, newPrisonerNumber: String): List<NonAssociationJPA> {
+    log.info("Replacing prisoner number $oldPrisonerNumber to $newPrisonerNumber")
+
+    val nonAssociationList1 = nonAssociationsRepository.findAllByFirstPrisonerNumber(oldPrisonerNumber).map {
+      it.copy(firstPrisonerNumber = newPrisonerNumber)
+    }
+
+    val nonAssociationList2 = nonAssociationsRepository.findAllBySecondPrisonerNumber(oldPrisonerNumber).map {
+      it.copy(secondPrisonerNumber = newPrisonerNumber)
+    }
+
+    val nonAssociationsToUpdate = nonAssociationList1.plus(nonAssociationList2)
+    nonAssociationsRepository.saveAll(nonAssociationsToUpdate)
+    log.info("Updated ${nonAssociationsToUpdate.size} records")
+    return nonAssociationsToUpdate
   }
 }

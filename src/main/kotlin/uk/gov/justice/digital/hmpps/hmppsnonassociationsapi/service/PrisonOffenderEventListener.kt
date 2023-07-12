@@ -7,11 +7,11 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.HMPPSDomainEvent
 
 @Service
 class PrisonOffenderEventListener(
   private val mapper: ObjectMapper,
+  private val nonAssociationsService: NonAssociationsService,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -26,10 +26,10 @@ class PrisonOffenderEventListener(
     val eventType = messageAttributes.eventType.Value
     log.info("Received message $message, type $eventType")
 
-    val hmppsDomainEvent = mapper.readValue(message, HMPPSDomainEvent::class.java)
     when (eventType) {
       PRISONER_MERGE_EVENT_TYPE -> {
-        // TODO: call to update prisoner number
+        val mergeEvent = mapper.readValue(message, HMPPSMergeDomainEvent::class.java)
+        nonAssociationsService.mergePrisonerNumbers(mergeEvent.additionalInformation.removedNomsNumber, mergeEvent.additionalInformation.nomsNumber)
       }
       else -> {
         log.debug("Ignoring message with type $eventType")
@@ -37,6 +37,19 @@ class PrisonOffenderEventListener(
     }
   }
 }
+
+data class HMPPSMergeDomainEvent(
+  val eventType: String? = null,
+  val additionalInformation: AdditionalInformationMerge,
+  val version: String,
+  val occurredAt: String,
+  val description: String,
+)
+
+data class AdditionalInformationMerge(
+  val nomsNumber: String,
+  val removedNomsNumber: String,
+)
 
 data class HMPPSEventType(val Value: String, val Type: String)
 data class HMPPSMessageAttributes(val eventType: HMPPSEventType)
