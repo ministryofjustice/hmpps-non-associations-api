@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssocia
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
 
@@ -113,11 +114,84 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `for a valid request creates the non-association`() {
+    fun `when any of the prisoners can't be found in OffenderSearch responds 404 Not Found`() {
+      val foundPrisoner = OffenderSearchPrisoner(
+        prisonerNumber = "A1234BC",
+        firstName = "John",
+        lastName = "Doe",
+        prisonId = "MDI",
+        prisonName = "Moorland",
+        cellLocation = "MDI-A-1",
+      )
+      val notFoundPrisonerNumber = "NOT-FOUND-PRISONER"
+      val prisonerNumbers = listOf(
+        foundPrisoner.prisonerNumber,
+        notFoundPrisonerNumber,
+      )
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers,
+        listOf(foundPrisoner),
+      )
+
       val request: CreateNonAssociationRequest = createNonAssociationRequest(
-        firstPrisonerNumber = "A9234BC",
+        firstPrisonerNumber = foundPrisoner.prisonerNumber,
         firstPrisonerReason = NonAssociationReason.VICTIM,
-        secondPrisonerNumber = "D9678EF",
+        secondPrisonerNumber = notFoundPrisonerNumber,
+        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
+        restrictionType = NonAssociationRestrictionType.CELL,
+        comment = "They keep fighting",
+      )
+
+      webTestClient.post()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            scopes = listOf("write", "read"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isNotFound
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo(
+          "Could not find the following prisoners: [NOT-FOUND-PRISONER]",
+        )
+    }
+
+    @Test
+    fun `for a valid request creates the non-association`() {
+      val firstPrisoner = OffenderSearchPrisoner(
+        prisonerNumber = "A1234BC",
+        firstName = "John",
+        lastName = "Doe",
+        prisonId = "MDI",
+        prisonName = "Moorland",
+        cellLocation = "MDI-A-1",
+      )
+      val secondPrisoner = OffenderSearchPrisoner(
+        prisonerNumber = "D5678EF",
+        firstName = "Merlin",
+        lastName = "Somerplumbs",
+        prisonId = "MDI",
+        prisonName = "Moorland",
+        cellLocation = "MDI-A-2",
+      )
+      val prisonerNumbers = listOf(
+        firstPrisoner.prisonerNumber,
+        secondPrisoner.prisonerNumber,
+      )
+      val prisoners = listOf(firstPrisoner, secondPrisoner)
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers,
+        prisoners,
+      )
+
+      val request: CreateNonAssociationRequest = createNonAssociationRequest(
+        firstPrisonerNumber = firstPrisoner.prisonerNumber,
+        firstPrisonerReason = NonAssociationReason.VICTIM,
+        secondPrisonerNumber = secondPrisoner.prisonerNumber,
         secondPrisonerReason = NonAssociationReason.PERPETRATOR,
         restrictionType = NonAssociationRestrictionType.CELL,
         comment = "They keep fighting",
@@ -156,8 +230,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus().isCreated
         .expectBody().json(expectedResponse, false)
-
-      // TODO: Make request to `GET /non-associations/{id}` once it exists
     }
   }
 

@@ -16,6 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation a
 @Transactional
 class NonAssociationsService(
   private val nonAssociationsRepository: NonAssociationsRepository,
+  private val offenderSearch: OffenderSearchService,
   private val authenticationFacade: AuthenticationFacade,
   private val prisonApiService: PrisonApiService,
 ) {
@@ -25,6 +26,13 @@ class NonAssociationsService(
   }
 
   fun createNonAssociation(createNonAssociationRequest: CreateNonAssociationRequest): NonAssociationDTO {
+    offenderSearch.searchByPrisonerNumbers(
+      listOf(
+        createNonAssociationRequest.firstPrisonerNumber,
+        createNonAssociationRequest.secondPrisonerNumber,
+      ),
+    )
+
     val nonAssociationJpa = createNonAssociationRequest.toNewEntity(
       authorisedBy = authenticationFacade.currentUsername
         ?: throw Exception("Could not determine current user's username'"),

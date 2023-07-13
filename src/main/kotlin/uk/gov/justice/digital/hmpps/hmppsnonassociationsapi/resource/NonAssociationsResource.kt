@@ -72,7 +72,7 @@ class NonAssociationsResource(
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(
     summary = "Creates a non-association between two prisoners.",
-    description = "Requires ROLE_NON_ASSOCIATIONS role with write scope.",
+    description = "Requires ROLE_NON_ASSOCIATIONS role with write scope. Also requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role.",
     responses = [
       ApiResponse(
         responseCode = "201",
@@ -91,6 +91,11 @@ class NonAssociationsResource(
       ApiResponse(
         responseCode = "403",
         description = "Missing required privileges. Requires the NON_ASSOCIATIONS role with write scope",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Any of the prisoners could not be found.",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],
