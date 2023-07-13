@@ -51,6 +51,6 @@ class PrisonApiResource(
     @PathVariable
     prisonerNumber: String,
   ): LegacyNonAssociationDetails {
-    return nonAssociationsService.getDetails(prisonerNumber)
+    return nonAssociationsService.getLegacyDetails(prisonerNumber)
   }
 }

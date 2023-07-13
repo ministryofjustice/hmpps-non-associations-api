@@ -44,7 +44,7 @@ class NonAssociationsService(
     return nonAssociationsRepository.findById(id).getOrNull()?.toDto()
   }
 
-  fun getDetails(prisonerNumber: String): LegacyNonAssociationDetails {
+  fun getLegacyDetails(prisonerNumber: String): LegacyNonAssociationDetails {
     return prisonApiService.getNonAssociationDetails(prisonerNumber)
   }
 
