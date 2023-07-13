@@ -22,7 +22,7 @@ data class NonAssociation(
   @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "CELL")
   val restrictionType: NonAssociationRestrictionType,
 
-  @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "John and Luke always end up fighting")
+  @Schema(description = "Explanation of why prisoners are non-associated", required = true, example = "John and Luke always end up fighting")
   val comment: String,
   @Schema(description = "User ID of the person who created the non-association. NOTE: For records migrated from NOMIS/Prison API this is free text and may not be a valid User ID", required = true, example = "OFF3_GEN")
   val authorisedBy: String,

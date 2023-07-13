@@ -20,7 +20,7 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationDetails
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociationDomainEventType
 
@@ -63,8 +63,8 @@ class NonAssociationsResource(
     @Schema(description = "The offender prisoner number", example = "A1234BC", required = true)
     @PathVariable
     prisonerNumber: String,
-  ): NonAssociationDetails {
-    return NonAssociationDetails(prisonerNumber)
+  ): PrisonerNonAssociations {
+    return PrisonerNonAssociations(prisonerNumber)
   }
 
   @PostMapping("/non-associations")
