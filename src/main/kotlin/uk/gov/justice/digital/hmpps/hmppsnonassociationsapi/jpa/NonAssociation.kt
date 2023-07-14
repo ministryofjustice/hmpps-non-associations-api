@@ -75,6 +75,7 @@ class NonAssociation(
       //       This field being optional in NOMIS/Prison API
       //       It may be one of the things we make mandatory after migration?
       authorisedBy = authorisedBy ?: "",
+      whenCreated = whenCreated,
     )
   }
 
