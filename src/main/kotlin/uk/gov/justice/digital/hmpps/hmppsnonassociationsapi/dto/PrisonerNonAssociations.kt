@@ -1,7 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
 import java.time.LocalDateTime
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
 /**
  * Non-associations for a given prisoner
@@ -81,3 +83,80 @@ data class OtherPrisonerDetails(
   @Schema(description = "Cell the prisoner is assigned to", required = true, example = "B-2-007")
   val cellLocation: String,
 )
+
+/**
+ * Converts a list of non-associations (JPA) into the `PrisonerNonAssociations` format
+ *
+ * @param prisonerNumber prisoner number of the "main" prisoner
+ * @param prisoners is a dictionary with the information about the prisoners
+ *                  from Offender Search API (e.g first name, etc...)
+ *
+ * @return an instance of `PrisonerNonAssociations`
+ */
+fun List<NonAssociationJPA>.toPrisonerNonAssociations(
+  prisonerNumber: String,
+  prisoners: Map<String, OffenderSearchPrisoner>,
+): PrisonerNonAssociations {
+  return PrisonerNonAssociations(
+    prisonerNumber = prisonerNumber,
+    firstName = prisoners[prisonerNumber]!!.firstName,
+    lastName = prisoners[prisonerNumber]!!.lastName,
+    prisonId = prisoners[prisonerNumber]!!.prisonId,
+    prisonName = prisoners[prisonerNumber]!!.prisonName,
+    cellLocation = prisoners[prisonerNumber]!!.cellLocation,
+    nonAssociations = this.toNonAssociationsDetails(prisonerNumber, prisoners),
+  )
+}
+
+private fun List<NonAssociationJPA>.toNonAssociationsDetails(
+  prisonerNumber: String,
+  prisoners: Map<String, OffenderSearchPrisoner>,
+): List<NonAssociationDetails> {
+  data class PrisonersInfo(
+    val prisoner: OffenderSearchPrisoner,
+    val otherPrisoner: OffenderSearchPrisoner,
+    val reason: NonAssociationReason,
+    val otherReason: NonAssociationReason,
+  )
+
+  return this.map { nonna ->
+    val prisonersInfo = if (nonna.firstPrisonerNumber == prisonerNumber) {
+      PrisonersInfo(
+        prisoners[nonna.firstPrisonerNumber]!!,
+        prisoners[nonna.secondPrisonerNumber]!!,
+        nonna.firstPrisonerReason,
+        nonna.secondPrisonerReason,
+      )
+    } else if (nonna.secondPrisonerNumber == prisonerNumber) {
+      PrisonersInfo(
+        prisoners[nonna.secondPrisonerNumber]!!,
+        prisoners[nonna.firstPrisonerNumber]!!,
+        nonna.secondPrisonerReason,
+        nonna.firstPrisonerReason,
+      )
+    } else {
+      throw Exception("One of the non-association is not for the desired prisoner $prisonerNumber")
+    }
+    val (_, otherPrisoner, reason, otherReason) = prisonersInfo
+
+    NonAssociationDetails(
+      reasonCode = reason,
+      reasonDescription = reason.description,
+      restrictionTypeCode = nonna.restrictionType,
+      restrictionTypeDescription = nonna.restrictionType.description,
+      comment = nonna.comment,
+      authorisedBy = nonna.authorisedBy ?: "",
+      whenCreated = nonna.whenCreated,
+      otherPrisonerDetails = OtherPrisonerDetails(
+        prisonerNumber = otherPrisoner.prisonerNumber,
+        reasonCode = otherReason,
+        reasonDescription = otherReason.description,
+        firstName = otherPrisoner.firstName,
+        lastName = otherPrisoner.lastName,
+        prisonId = otherPrisoner.prisonId,
+        prisonName = otherPrisoner.prisonName,
+        cellLocation = otherPrisoner.cellLocation,
+      ),
+    )
+  }
+}
