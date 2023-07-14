@@ -26,13 +26,16 @@ class OffenderSearchMockServer : WireMockServer(WIREMOCK_PORT) {
     )
   }
 
-  fun stubSearchByPrisonerNumbers(prisonerNumbers: List<String>, prisoners: List<OffenderSearchPrisoner>) {
+  fun stubSearchByPrisonerNumbers(
+    prisonerNumbers: List<String>,
+    prisoners: List<OffenderSearchPrisoner>,
+  ) {
     val requestBody = mapper.writeValueAsString("prisonerNumbers" to prisonerNumbers)
 
     stubFor(
       post("/prisoner-search/prisoner-numbers")
         .withRequestBody(
-          WireMock.equalToJson(requestBody, false, false),
+          WireMock.equalToJson(requestBody, true, false),
         )
         .willReturn(
           aResponse()

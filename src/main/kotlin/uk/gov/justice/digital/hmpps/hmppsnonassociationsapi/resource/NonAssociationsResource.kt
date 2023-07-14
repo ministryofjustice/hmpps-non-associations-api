@@ -21,6 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationOptions
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociationDomainEventType
 
@@ -54,7 +55,7 @@ class NonAssociationsResource(
       ),
       ApiResponse(
         responseCode = "404",
-        description = "Prisoner number not found",
+        description = "Any of the prisoners could not be found.",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],
@@ -64,7 +65,13 @@ class NonAssociationsResource(
     @PathVariable
     prisonerNumber: String,
   ): PrisonerNonAssociations {
-    return PrisonerNonAssociations(prisonerNumber)
+    return nonAssociationsService.getPrisonerNonAssociations(
+      prisonerNumber,
+      NonAssociationOptions(
+        onlySamePrison = true,
+        includeClosed = false,
+      ),
+    )
   }
 
   @PostMapping("/non-associations")

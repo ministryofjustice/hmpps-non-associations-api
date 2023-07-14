@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -15,12 +16,19 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.HmppsAuthMockServer
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.OffenderSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.PrisonApiMockServer
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 abstract class IntegrationTestBase : TestBase() {
+
+  @Autowired
+  lateinit var repository: NonAssociationsRepository
+
+//  @Autowired
+//  lateinit var authenticationFacade: AuthenticationFacade
 
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
@@ -66,6 +74,12 @@ abstract class IntegrationTestBase : TestBase() {
       prisonApiMockServer.stop()
       hmppsAuthMockServer.stop()
     }
+  }
+
+  @BeforeEach
+  fun setUp() {
+    offenderSearchMockServer.resetAll()
+    repository.deleteAll()
   }
 
   init {
