@@ -4,10 +4,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.reactive.server.returnResult
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.OtherPrisonerDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
@@ -359,38 +357,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       val secondPrisoner = offenderSearchPrisoners[nonAssociation.secondPrisonerNumber]!!
 
       // NOTE: Non-associations for the 2nd prisoner
-      val expectedResponse = jsonString(
-        PrisonerNonAssociations(
-          prisonerNumber = secondPrisoner.prisonerNumber,
-          firstName = secondPrisoner.firstName,
-          lastName = secondPrisoner.lastName,
-          prisonId = secondPrisoner.prisonId,
-          prisonName = secondPrisoner.prisonName,
-          cellLocation = secondPrisoner.cellLocation,
-          nonAssociations = listOf(
-            NonAssociationDetails(
-              reasonCode = nonAssociation.secondPrisonerReason,
-              reasonDescription = nonAssociation.secondPrisonerReason.description,
-              restrictionTypeCode = nonAssociation.restrictionType,
-              restrictionTypeDescription = nonAssociation.restrictionType.description,
-              comment = nonAssociation.comment,
-              authorisedBy = nonAssociation.authorisedBy,
-              whenCreated = nonAssociation.whenCreated,
-              otherPrisonerDetails = OtherPrisonerDetails(
-                prisonerNumber = firstPrisoner.prisonerNumber,
-                reasonCode = nonAssociation.firstPrisonerReason,
-                reasonDescription = nonAssociation.firstPrisonerReason.description,
-                firstName = firstPrisoner.firstName,
-                lastName = firstPrisoner.lastName,
-                prisonId = firstPrisoner.prisonId,
-                prisonName = firstPrisoner.prisonName,
-                cellLocation = firstPrisoner.cellLocation,
-              ),
-            ),
-          ),
-        ),
-      )
-
       val url = "/prisoner/${secondPrisoner.prisonerNumber}/non-associations"
       webTestClient.get()
         .uri(url)
@@ -398,8 +364,42 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody().json(
-          expectedResponse,
-          true,
+          // language=json
+          """
+            {
+              "prisonerNumber": "${secondPrisoner.prisonerNumber}",
+              "firstName": "${secondPrisoner.firstName}",
+              "lastName": "${secondPrisoner.lastName}",
+              "prisonId": "${secondPrisoner.prisonId}",
+              "prisonName": "${secondPrisoner.prisonName}",
+              "cellLocation": "${secondPrisoner.cellLocation}",
+              "nonAssociations": [
+                {
+                  "reasonCode": "${nonAssociation.secondPrisonerReason}",
+                  "reasonDescription": "${nonAssociation.secondPrisonerReason.description}",
+                  "restrictionTypeCode": "${nonAssociation.restrictionType}",
+                  "restrictionTypeDescription": "${nonAssociation.restrictionType.description}",
+                  "comment": "${nonAssociation.comment}",
+                  "authorisedBy": "${nonAssociation.authorisedBy}",
+                  "isClosed": false,
+                  "closedReason": null,
+                  "closedBy": null,
+                  "closedAt": null,
+                  "otherPrisonerDetails": {
+                    "prisonerNumber": "${firstPrisoner.prisonerNumber}",
+                    "reasonCode": "${nonAssociation.firstPrisonerReason}",
+                    "reasonDescription": "${nonAssociation.firstPrisonerReason.description}",
+                    "firstName": "${firstPrisoner.firstName}",
+                    "lastName": "${firstPrisoner.lastName}",
+                    "prisonId": "${firstPrisoner.prisonId}",
+                    "prisonName": "${firstPrisoner.prisonName}",
+                    "cellLocation": "${firstPrisoner.cellLocation}"
+                  }
+                }
+              ]
+            }
+          """,
+          false,
         )
     }
   }
