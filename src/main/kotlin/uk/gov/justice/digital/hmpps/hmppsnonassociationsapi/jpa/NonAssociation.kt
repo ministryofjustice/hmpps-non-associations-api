@@ -1,6 +1,13 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa
 
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
 import org.hibernate.Hibernate
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
@@ -53,7 +60,6 @@ class NonAssociation(
     this.closedAt = closedAt
   }
 
-
   fun isOpen() = !isClosed
 
   fun toDto(): NonAssociationDTO {
@@ -100,6 +106,4 @@ class NonAssociation(
   override fun toString(): String {
     return "NonAssociation(id=$id, firstPrisonerNumber='$firstPrisonerNumber', secondPrisonerNumber='$secondPrisonerNumber', isClosed=$isClosed)"
   }
-
-
 }
