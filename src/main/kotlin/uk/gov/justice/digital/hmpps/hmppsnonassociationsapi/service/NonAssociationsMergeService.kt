@@ -27,7 +27,7 @@ class NonAssociationsMergeService(
       .plus(nonAssociationsRepository.findAllBySecondPrisonerNumber(oldPrisonerNumber))
       .forEach { nonAssociation ->
 
-        log.debug("Looking at record ${nonAssociation.id}")
+        log.debug("Looking at record $nonAssociation")
         if (nonAssociation.firstPrisonerNumber == oldPrisonerNumber) {
           nonAssociationsRepository.findByFirstPrisonerNumberAndSecondPrisonerNumber(
             firstPrisonerNumber = newPrisonerNumber,
@@ -74,18 +74,17 @@ class NonAssociationsMergeService(
     primary: Boolean,
   ) =
     if (duplicateRecord != null) {
-      log.info("Deleting non-association record ${nonAssociation.id} - Duplicate")
-      nonAssociationsRepository.delete(duplicateRecord)
+      log.info("Deleting non-association record $nonAssociation - Duplicate")
+      nonAssociationsRepository.delete(nonAssociation)
       duplicateRecord
     } else {
       if (newPrisonerNumber == otherPrisonerNumber) {
-        log.info("Deleting non-association record ${nonAssociation.id} - same prisoner number")
+        log.info("Deleting non-association record $nonAssociation - same prisoner number")
         nonAssociationsRepository.delete(nonAssociation)
         null
       } else {
-        log.info("Merge Non association record ${nonAssociation.id}")
+        log.info("Merge Non association record $nonAssociation")
         nonAssociation.updatePrisonerNumber(newPrisonerNumber, primary)
-        nonAssociation
       }
     }
 }

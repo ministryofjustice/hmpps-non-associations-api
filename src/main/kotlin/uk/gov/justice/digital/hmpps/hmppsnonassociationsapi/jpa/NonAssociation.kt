@@ -1,13 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EntityListeners
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
+import jakarta.persistence.*
 import org.hibernate.Hibernate
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
@@ -60,6 +53,7 @@ class NonAssociation(
     this.closedAt = closedAt
   }
 
+
   fun isOpen() = !isClosed
 
   fun toDto(): NonAssociationDTO {
@@ -78,12 +72,13 @@ class NonAssociation(
     )
   }
 
-  fun updatePrisonerNumber(prisonerNumber: String, primary: Boolean) {
+  fun updatePrisonerNumber(prisonerNumber: String, primary: Boolean): NonAssociation {
     if (primary) {
       firstPrisonerNumber = prisonerNumber
     } else {
       secondPrisonerNumber = prisonerNumber
     }
+    return this
   }
 
   override fun equals(other: Any?): Boolean {
@@ -101,4 +96,10 @@ class NonAssociation(
     result = 31 * result + secondPrisonerNumber.hashCode()
     return result
   }
+
+  override fun toString(): String {
+    return "NonAssociation(id=$id, firstPrisonerNumber='$firstPrisonerNumber', secondPrisonerNumber='$secondPrisonerNumber', isClosed=$isClosed)"
+  }
+
+
 }
