@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 @Service
 class PrisonOffenderEventListener(
   private val mapper: ObjectMapper,
-  private val nonAssociationsService: NonAssociationsService,
+  private val nonAssociationsMergeService: NonAssociationsMergeService,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -29,7 +29,7 @@ class PrisonOffenderEventListener(
     when (eventType) {
       PRISONER_MERGE_EVENT_TYPE -> {
         val mergeEvent = mapper.readValue(message, HMPPSMergeDomainEvent::class.java)
-        nonAssociationsService.mergePrisonerNumbers(mergeEvent.additionalInformation.removedNomsNumber, mergeEvent.additionalInformation.nomsNumber)
+        nonAssociationsMergeService.mergePrisonerNumbers(mergeEvent.additionalInformation.removedNomsNumber, mergeEvent.additionalInformation.nomsNumber)
       }
       else -> {
         log.debug("Ignoring message with type $eventType")

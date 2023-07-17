@@ -34,9 +34,11 @@ class NonAssociationsRepositoryTest : TestBase() {
     val nonna = nonAssociation(firstPrisonerNumber = "A1234BC", secondPrisonerNumber = "D5678EF")
     var savedNonna = repository.save(nonna)
 
-    savedNonna = repository.findById(savedNonna.id).orElseThrow {
-      Exception("NonAssociation with id=${savedNonna.id} couldn't be found")
-    }
+    savedNonna = savedNonna.id?.let {
+      repository.findById(it).orElseThrow {
+        Exception("NonAssociation with id=${savedNonna.id} couldn't be found")
+      }
+    }!!
 
     assertThat(savedNonna.firstPrisonerNumber).isEqualTo(nonna.firstPrisonerNumber)
     assertThat(savedNonna.firstPrisonerReason).isEqualTo(nonna.firstPrisonerReason)
@@ -60,7 +62,7 @@ class NonAssociationsRepositoryTest : TestBase() {
 
   @Test
   fun closeNonAssociationWithDetailsSucceeds() {
-    var createdNonna = repository.save(
+    val createdNonna = repository.save(
       nonAssociation(firstPrisonerNumber = "A1234BC", secondPrisonerNumber = "D5678EF"),
     )
 
@@ -73,17 +75,17 @@ class NonAssociationsRepositoryTest : TestBase() {
     repository.save(createdNonna)
 
     // Check non-association is now closed with correct details
-    val updatedNonna = repository.findById(createdNonna.id).get()
-    assertThat(updatedNonna.isClosed).isTrue
-    assertThat(updatedNonna.closedBy).isEqualTo(closedBy)
-    assertThat(updatedNonna.closedAt).isEqualTo(closedAt)
-    assertThat(updatedNonna.closedReason).isEqualTo(closedReason)
+    val updatedNonna = createdNonna.id?.let { repository.findById(it).get() }
+    assertThat(updatedNonna?.isClosed).isTrue
+    assertThat(updatedNonna?.closedBy).isEqualTo(closedBy)
+    assertThat(updatedNonna?.closedAt).isEqualTo(closedAt)
+    assertThat(updatedNonna?.closedReason).isEqualTo(closedReason)
   }
 
   @Test
   fun closeNonAssociationWithoutDetailsFails() {
     var createdNonna = repository.save(
-      nonAssociation(firstPrisonerNumber = "A1234BC", secondPrisonerNumber = "D5678EF"),
+      nonAssociation(firstPrisonerNumber = "A1234BC", secondPrisonerNumber = "D5678EG"),
     )
     TestTransaction.flagForCommit()
     TestTransaction.end()
@@ -102,13 +104,13 @@ class NonAssociationsRepositoryTest : TestBase() {
     }.isInstanceOf(DataIntegrityViolationException::class.java)
 
     // Check non-association is still open
-    val freshNonna = repository.findById(createdNonna.id).get()
-    assertThat(freshNonna.isClosed).isFalse
+    val freshNonna = createdNonna.id?.let { repository.findById(it).get() }
+    assertThat(freshNonna?.isClosed).isFalse
   }
 
   @Test
   fun whenUpdatedIsUpdated() {
-    var created = repository.save(
+    val created = repository.save(
       nonAssociation(firstPrisonerNumber = "A1234BC", secondPrisonerNumber = "D5678EF"),
     )
     TestTransaction.flagForCommit()

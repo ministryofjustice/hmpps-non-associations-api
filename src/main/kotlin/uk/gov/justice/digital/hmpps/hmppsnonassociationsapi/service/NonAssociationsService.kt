@@ -43,24 +43,4 @@ class NonAssociationsService(
   private fun persistNonAssociation(nonAssociation: NonAssociationJPA): NonAssociationJPA {
     return nonAssociationsRepository.save(nonAssociation)
   }
-
-  fun mergePrisonerNumbers(oldPrisonerNumber: String, newPrisonerNumber: String): List<NonAssociationJPA> {
-    log.info("Replacing prisoner number $oldPrisonerNumber to $newPrisonerNumber")
-
-    val nonAssociationList = nonAssociationsRepository.findAllByFirstPrisonerNumber(oldPrisonerNumber)
-      .plus(nonAssociationsRepository.findAllBySecondPrisonerNumber(oldPrisonerNumber))
-
-    nonAssociationList.forEach { nonAssociation ->
-      if (nonAssociation.firstPrisonerNumber == oldPrisonerNumber) {
-        nonAssociation.firstPrisonerNumber = newPrisonerNumber
-      }
-
-      if (nonAssociation.secondPrisonerNumber == oldPrisonerNumber) {
-        nonAssociation.secondPrisonerNumber = newPrisonerNumber
-      }
-    }
-
-    log.info("Updated ${nonAssociationList.size} records")
-    return nonAssociationList
-  }
 }
