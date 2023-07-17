@@ -24,28 +24,23 @@ class NonAssociationsMergeService(
     val updatedRecords = mutableListOf<NonAssociation>()
 
     nonAssociationsRepository.findAllByFirstPrisonerNumber(oldPrisonerNumber)
-      .plus(nonAssociationsRepository.findAllBySecondPrisonerNumber(oldPrisonerNumber)).forEach { nonAssociation ->
+      .plus(nonAssociationsRepository.findAllBySecondPrisonerNumber(oldPrisonerNumber))
+      .forEach { nonAssociation ->
 
         log.debug("Looking at record ${nonAssociation.id}")
         if (nonAssociation.firstPrisonerNumber == oldPrisonerNumber) {
           nonAssociationsRepository.findByFirstPrisonerNumberAndSecondPrisonerNumber(
             firstPrisonerNumber = newPrisonerNumber,
             secondPrisonerNumber = nonAssociation.secondPrisonerNumber,
-          ).let {
-            if (it != null) {
-              nonAssociationsRepository.delete(nonAssociation)
-              log.info("Deleted Non association record ${nonAssociation.id}")
-              it.comment = nonAssociation.comment // replace comment??
-              updatedRecords.add(it)
-            } else {
-              if (newPrisonerNumber == nonAssociation.secondPrisonerNumber) {
-                nonAssociationsRepository.delete(nonAssociation)
-                log.info("Deleted Non association record ${nonAssociation.id} as same prisoner both ways")
-              } else {
-                log.info("Updated Non association record ${nonAssociation.id} from ${nonAssociation.firstPrisonerNumber} to $newPrisonerNumber")
-                nonAssociation.firstPrisonerNumber = newPrisonerNumber
-                updatedRecords.add(nonAssociation)
-              }
+          ).let { duplicateRecord ->
+            merge(
+              nonAssociation,
+              duplicateRecord,
+              newPrisonerNumber,
+              nonAssociation.secondPrisonerNumber,
+              true,
+            )?.let { updatedRecord ->
+              updatedRecords.add(updatedRecord)
             }
           }
         }
@@ -54,21 +49,15 @@ class NonAssociationsMergeService(
           nonAssociationsRepository.findByFirstPrisonerNumberAndSecondPrisonerNumber(
             firstPrisonerNumber = nonAssociation.firstPrisonerNumber,
             secondPrisonerNumber = newPrisonerNumber,
-          ).let {
-            if (it != null) {
-              nonAssociationsRepository.delete(nonAssociation)
-              log.info("Deleted Non association record ${nonAssociation.id}")
-              it.comment = nonAssociation.comment // replace comment??
-              updatedRecords.add(it)
-            } else {
-              if (newPrisonerNumber == nonAssociation.firstPrisonerNumber) {
-                nonAssociationsRepository.delete(nonAssociation)
-                log.info("Deleted Non association record ${nonAssociation.id} as same prisoner both ways")
-              } else {
-                log.info("Updated Non association record ${nonAssociation.id} from ${nonAssociation.secondPrisonerNumber} to $newPrisonerNumber")
-                nonAssociation.secondPrisonerNumber = newPrisonerNumber
-                updatedRecords.add(nonAssociation)
-              }
+          ).let { duplicateRecord ->
+            merge(
+              nonAssociation,
+              duplicateRecord,
+              newPrisonerNumber,
+              nonAssociation.firstPrisonerNumber,
+              false,
+            )?.let { updatedRecord ->
+              updatedRecords.add(updatedRecord)
             }
           }
         }
@@ -76,4 +65,27 @@ class NonAssociationsMergeService(
 
     return updatedRecords.toList()
   }
+
+  private fun merge(
+    nonAssociation: NonAssociation,
+    duplicateRecord: NonAssociation?,
+    newPrisonerNumber: String,
+    otherPrisonerNumber: String,
+    primary: Boolean,
+  ) =
+    if (duplicateRecord != null) {
+      log.info("Deleting non-association record ${nonAssociation.id} - Duplicate")
+      nonAssociationsRepository.delete(duplicateRecord)
+      duplicateRecord
+    } else {
+      if (newPrisonerNumber == otherPrisonerNumber) {
+        log.info("Deleting non-association record ${nonAssociation.id} - same prisoner number")
+        nonAssociationsRepository.delete(nonAssociation)
+        null
+      } else {
+        log.info("Merge Non association record ${nonAssociation.id}")
+        nonAssociation.updatePrisonerNumber(newPrisonerNumber, primary)
+        nonAssociation
+      }
+    }
 }
