@@ -4,8 +4,11 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.reactive.server.returnResult
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.OtherPrisonerDetails
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchPrisoners
