@@ -8,6 +8,7 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import org.hibernate.Hibernate
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -18,17 +19,17 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation a
 
 @Entity
 @EntityListeners(AuditingEntityListener::class)
-data class NonAssociation(
+class NonAssociation(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   val id: Long? = null,
 
-  val firstPrisonerNumber: String,
+  var firstPrisonerNumber: String,
   @Enumerated(value = EnumType.STRING)
   @Column(name = "first_prisoner_reason_code")
   var firstPrisonerReason: NonAssociationReason,
 
-  val secondPrisonerNumber: String,
+  var secondPrisonerNumber: String,
   @Enumerated(value = EnumType.STRING)
   @Column(name = "second_prisoner_reason_code")
   var secondPrisonerReason: NonAssociationReason,
@@ -59,6 +60,8 @@ data class NonAssociation(
     this.closedAt = closedAt
   }
 
+  fun isOpen() = !isClosed
+
   fun toDto(): NonAssociationDTO {
     return NonAssociationDTO(
       id = id!!,
@@ -73,5 +76,21 @@ data class NonAssociation(
       //       It may be one of the things we make mandatory after migration?
       authorisedBy = authorisedBy ?: "",
     )
+  }
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
+
+    other as NonAssociation
+
+    if (firstPrisonerNumber != other.firstPrisonerNumber) return false
+    return secondPrisonerNumber == other.secondPrisonerNumber
+  }
+
+  override fun hashCode(): Int {
+    var result = firstPrisonerNumber.hashCode()
+    result = 31 * result + secondPrisonerNumber.hashCode()
+    return result
   }
 }

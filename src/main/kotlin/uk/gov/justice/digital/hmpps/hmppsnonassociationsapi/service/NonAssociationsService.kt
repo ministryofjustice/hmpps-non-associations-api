@@ -26,7 +26,8 @@ class NonAssociationsService(
 
   fun createNonAssociation(createNonAssociationRequest: CreateNonAssociationRequest): NonAssociationDTO {
     val nonAssociationJpa = createNonAssociationRequest.toNewEntity(
-      authorisedBy = authenticationFacade.currentUsername ?: throw Exception("Could not determine current user's username'"),
+      authorisedBy = authenticationFacade.currentUsername
+        ?: throw Exception("Could not determine current user's username'"),
     )
     return persistNonAssociation(nonAssociationJpa).toDto()
   }
@@ -46,17 +47,20 @@ class NonAssociationsService(
   fun mergePrisonerNumbers(oldPrisonerNumber: String, newPrisonerNumber: String): List<NonAssociationJPA> {
     log.info("Replacing prisoner number $oldPrisonerNumber to $newPrisonerNumber")
 
-    val nonAssociationList1 = nonAssociationsRepository.findAllByFirstPrisonerNumber(oldPrisonerNumber).map {
-      it.copy(firstPrisonerNumber = newPrisonerNumber)
+    val nonAssociationList = nonAssociationsRepository.findAllByFirstPrisonerNumber(oldPrisonerNumber)
+      .plus(nonAssociationsRepository.findAllBySecondPrisonerNumber(oldPrisonerNumber))
+
+    nonAssociationList.forEach { nonAssociation ->
+      if (nonAssociation.firstPrisonerNumber == oldPrisonerNumber) {
+        nonAssociation.firstPrisonerNumber = newPrisonerNumber
+      }
+
+      if (nonAssociation.secondPrisonerNumber == oldPrisonerNumber) {
+        nonAssociation.secondPrisonerNumber = newPrisonerNumber
+      }
     }
 
-    val nonAssociationList2 = nonAssociationsRepository.findAllBySecondPrisonerNumber(oldPrisonerNumber).map {
-      it.copy(secondPrisonerNumber = newPrisonerNumber)
-    }
-
-    val nonAssociationsToUpdate = nonAssociationList1.plus(nonAssociationList2)
-    nonAssociationsRepository.saveAll(nonAssociationsToUpdate)
-    log.info("Updated ${nonAssociationsToUpdate.size} records")
-    return nonAssociationsToUpdate
+    log.info("Updated ${nonAssociationList.size} records")
+    return nonAssociationList
   }
 }
