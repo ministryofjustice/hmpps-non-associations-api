@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.test.web.reactive.server.returnResult
+import org.springframework.security.test.context.support.WithMockUser
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
@@ -10,8 +10,9 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssoc
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchPrisoners
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation as NonAssociationDTO
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
+@WithMockUser
 class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
   final val prisonerNumber = "A1234BC"
@@ -356,6 +357,13 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       val firstPrisoner = offenderSearchPrisoners[nonAssociation.firstPrisonerNumber]!!
       val secondPrisoner = offenderSearchPrisoners[nonAssociation.secondPrisonerNumber]!!
 
+      val prisonerNumbers = listOf(firstPrisoner.prisonerNumber, secondPrisoner.prisonerNumber)
+      val prisoners = listOf(firstPrisoner, secondPrisoner)
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers,
+        prisoners,
+      )
+
       // NOTE: Non-associations for the 2nd prisoner
       val url = "/prisoner/${secondPrisoner.prisonerNumber}/non-associations"
       webTestClient.get()
@@ -404,56 +412,17 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
   }
 
-  // TODO: Create record using repository directly
-  //       Currently getting some weird authenticationFacade error
-  private fun createNonAssociation(): NonAssociationDTO {
-//    return repository.save(
-//      NonAssociationJPA(
-//        firstPrisonerNumber = "A1234BC",
-//        firstPrisonerReason = NonAssociationReason.VICTIM,
-//        secondPrisonerNumber = "D5678EF",
-//        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
-//        restrictionType = NonAssociationRestrictionType.CELL,
-//        comment = "They keep fighting",
-//        authorisedBy = "USER_1",
-//      ),
-//    ).toDto()
-
-    val firstPrisoner = offenderSearchPrisoners["A1234BC"]!!
-    val secondPrisoner = offenderSearchPrisoners["D5678EF"]!!
-    val prisonerNumbers = listOf(
-      firstPrisoner.prisonerNumber,
-      secondPrisoner.prisonerNumber,
+  private fun createNonAssociation(): NonAssociationJPA {
+    return repository.save(
+      NonAssociationJPA(
+        firstPrisonerNumber = "A1234BC",
+        firstPrisonerReason = NonAssociationReason.VICTIM,
+        secondPrisonerNumber = "D5678EF",
+        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
+        restrictionType = NonAssociationRestrictionType.CELL,
+        comment = "They keep fighting",
+        authorisedBy = "USER_1",
+      ),
     )
-    val prisoners = listOf(firstPrisoner, secondPrisoner)
-    offenderSearchMockServer.stubSearchByPrisonerNumbers(
-      prisonerNumbers,
-      prisoners,
-    )
-
-    val createRequest: CreateNonAssociationRequest = createNonAssociationRequest(
-      firstPrisonerNumber = firstPrisoner.prisonerNumber,
-      firstPrisonerReason = NonAssociationReason.VICTIM,
-      secondPrisonerNumber = secondPrisoner.prisonerNumber,
-      secondPrisonerReason = NonAssociationReason.PERPETRATOR,
-      restrictionType = NonAssociationRestrictionType.CELL,
-      comment = "They keep fighting",
-    )
-
-    return webTestClient.post()
-      .uri("/non-associations")
-      .headers(
-        setAuthorisation(
-          roles = listOf("ROLE_NON_ASSOCIATIONS"),
-          scopes = listOf("write", "read"),
-        ),
-      )
-      .header("Content-Type", "application/json")
-      .bodyValue(jsonString(createRequest))
-      .exchange()
-      .expectStatus().isCreated
-      .returnResult<NonAssociationDTO>()
-      .responseBody
-      .blockFirst()
   }
 }

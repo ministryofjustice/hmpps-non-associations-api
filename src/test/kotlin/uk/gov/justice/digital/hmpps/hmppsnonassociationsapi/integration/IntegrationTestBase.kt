@@ -27,9 +27,6 @@ abstract class IntegrationTestBase : TestBase() {
   @Autowired
   lateinit var repository: NonAssociationsRepository
 
-//  @Autowired
-//  lateinit var authenticationFacade: AuthenticationFacade
-
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   lateinit var webTestClient: WebTestClient
