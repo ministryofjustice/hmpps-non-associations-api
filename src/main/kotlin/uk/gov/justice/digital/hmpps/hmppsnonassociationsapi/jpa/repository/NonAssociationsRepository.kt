@@ -5,4 +5,8 @@ import org.springframework.stereotype.Repository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
 
 @Repository
-interface NonAssociationsRepository : JpaRepository<NonAssociation, Long>
+interface NonAssociationsRepository : JpaRepository<NonAssociation, Long> {
+  fun findAllByFirstPrisonerNumber(prisonerNumber: String): List<NonAssociation>
+  fun findAllBySecondPrisonerNumber(prisonerNumber: String): List<NonAssociation>
+  fun findByFirstPrisonerNumberAndSecondPrisonerNumber(firstPrisonerNumber: String, secondPrisonerNumber: String): NonAssociation?
+}

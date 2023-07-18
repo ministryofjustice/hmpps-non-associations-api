@@ -115,9 +115,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `for a valid request creates the non-association`() {
       val request: CreateNonAssociationRequest = createNonAssociationRequest(
-        firstPrisonerNumber = "A1234BC",
+        firstPrisonerNumber = "A9234BC",
         firstPrisonerReason = NonAssociationReason.VICTIM,
-        secondPrisonerNumber = "D5678EF",
+        secondPrisonerNumber = "D9678EF",
         secondPrisonerReason = NonAssociationReason.PERPETRATOR,
         restrictionType = NonAssociationRestrictionType.CELL,
         comment = "They keep fighting",
@@ -131,7 +131,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           "firstPrisonerNumber": "${request.firstPrisonerNumber}",
           "firstPrisonerReason": "${request.firstPrisonerReason}",
           "secondPrisonerNumber": "${request.secondPrisonerNumber}",
-          "secondPrisonerReason" = "${request.secondPrisonerReason}",
+          "secondPrisonerReason": "${request.secondPrisonerReason}",
           "restrictionType": "${request.restrictionType}",
           "comment": "${request.comment}",
           "authorisedBy": "$expectedUsername",
@@ -177,7 +177,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `without the correct role responds 403 Forbidden`() {
-      val existingNonAssociation = createNonAssociation()
+      val existingNonAssociation = createNonAssociation("A1235BC", "D5679EG")
 
       // wrong role
       webTestClient.get()
@@ -202,7 +202,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `when the non-association exists returns it`() {
-      val existingNonAssociation = createNonAssociation()
+      val existingNonAssociation = createNonAssociation("A1239BC", "D5679EF")
 
       webTestClient.get()
         .uri("/non-associations/${existingNonAssociation.id}")
@@ -225,11 +225,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .jsonPath("comment").isEqualTo(existingNonAssociation.comment)
     }
 
-    private fun createNonAssociation(): NonAssociation {
+    private fun createNonAssociation(firstNa: String, secondNa: String): NonAssociation {
       val createRequest: CreateNonAssociationRequest = createNonAssociationRequest(
-        firstPrisonerNumber = "A1234BC",
+        firstPrisonerNumber = firstNa,
         firstPrisonerReason = NonAssociationReason.VICTIM,
-        secondPrisonerNumber = "D5678EF",
+        secondPrisonerNumber = secondNa,
         secondPrisonerReason = NonAssociationReason.PERPETRATOR,
         restrictionType = NonAssociationRestrictionType.CELL,
         comment = "They keep fighting",
@@ -249,7 +249,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .expectStatus().isCreated
         .returnResult<NonAssociation>()
         .responseBody
-        .blockFirst()
+        .blockFirst()!!
     }
   }
 

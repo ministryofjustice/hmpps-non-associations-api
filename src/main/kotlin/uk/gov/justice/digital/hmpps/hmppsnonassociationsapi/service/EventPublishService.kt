@@ -21,7 +21,7 @@ class EventPublishService(
       "${event.description} ${nonAssociation.id}",
       occurredAt = LocalDateTime.now(clock),
       AdditionalInformation(
-        nonAssociationId = nonAssociation.id.toString(),
+        id = nonAssociation.id,
         nsPrisonerNumber1 = nonAssociation.firstPrisonerNumber,
         nsPrisonerNumber2 = nonAssociation.secondPrisonerNumber,
       ),
