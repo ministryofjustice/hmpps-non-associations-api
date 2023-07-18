@@ -94,8 +94,8 @@ class HmppsNonAssociationsApiExceptionHandler {
       .body(
         ErrorResponse(
           status = e.statusCode.value(),
-          userMessage = e.message,
-          developerMessage = e.message,
+          userMessage = e.reason,
+          developerMessage = e.reason,
         ),
       )
   }

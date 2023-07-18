@@ -15,10 +15,12 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation a
 class NonAssociationsServiceTest {
 
   private val nonAssociationsRepository: NonAssociationsRepository = mock()
+  private val offenderSearchService: OffenderSearchService = mock()
   private val prisonApiService: PrisonApiService = mock()
   private val authenticationFacade: AuthenticationFacade = mock()
   private val service = NonAssociationsService(
     nonAssociationsRepository,
+    offenderSearchService,
     authenticationFacade,
     prisonApiService,
   )

@@ -2,14 +2,17 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.test.web.reactive.server.returnResult
+import org.springframework.security.test.context.support.WithMockUser
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchPrisoners
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
+@WithMockUser
 class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
   final val prisonerNumber = "A1234BC"
@@ -113,11 +116,63 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `for a valid request creates the non-association`() {
+    fun `when any of the prisoners can't be found in OffenderSearch responds 404 Not Found`() {
+      val foundPrisoner = offenderSearchPrisoners["A1234BC"]!!
+      val notFoundPrisonerNumber = "NOT-FOUND-PRISONER"
+      val prisonerNumbers = listOf(
+        foundPrisoner.prisonerNumber,
+        notFoundPrisonerNumber,
+      )
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers,
+        listOf(foundPrisoner),
+      )
+
       val request: CreateNonAssociationRequest = createNonAssociationRequest(
-        firstPrisonerNumber = "A9234BC",
+        firstPrisonerNumber = foundPrisoner.prisonerNumber,
         firstPrisonerReason = NonAssociationReason.VICTIM,
-        secondPrisonerNumber = "D9678EF",
+        secondPrisonerNumber = notFoundPrisonerNumber,
+        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
+        restrictionType = NonAssociationRestrictionType.CELL,
+        comment = "They keep fighting",
+      )
+
+      webTestClient.post()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            scopes = listOf("write", "read"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isNotFound
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo(
+          "Could not find the following prisoners: [NOT-FOUND-PRISONER]",
+        )
+    }
+
+    @Test
+    fun `for a valid request creates the non-association`() {
+      val firstPrisoner = offenderSearchPrisoners["A1234BC"]!!
+      val secondPrisoner = offenderSearchPrisoners["D5678EF"]!!
+      val prisonerNumbers = listOf(
+        firstPrisoner.prisonerNumber,
+        secondPrisoner.prisonerNumber,
+      )
+      val prisoners = listOf(firstPrisoner, secondPrisoner)
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers,
+        prisoners,
+      )
+
+      val request: CreateNonAssociationRequest = createNonAssociationRequest(
+        firstPrisonerNumber = firstPrisoner.prisonerNumber,
+        firstPrisonerReason = NonAssociationReason.VICTIM,
+        secondPrisonerNumber = secondPrisoner.prisonerNumber,
         secondPrisonerReason = NonAssociationReason.PERPETRATOR,
         restrictionType = NonAssociationRestrictionType.CELL,
         comment = "They keep fighting",
@@ -156,8 +211,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus().isCreated
         .expectBody().json(expectedResponse, false)
-
-      // TODO: Make request to `GET /non-associations/{id}` once it exists
     }
   }
 
@@ -177,7 +230,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `without the correct role responds 403 Forbidden`() {
-      val existingNonAssociation = createNonAssociation("A1235BC", "D5679EG")
+      val existingNonAssociation = createNonAssociation()
 
       // wrong role
       webTestClient.get()
@@ -202,7 +255,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `when the non-association exists returns it`() {
-      val existingNonAssociation = createNonAssociation("A1239BC", "D5679EF")
+      val existingNonAssociation = createNonAssociation()
 
       webTestClient.get()
         .uri("/non-associations/${existingNonAssociation.id}")
@@ -223,33 +276,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .jsonPath("secondPrisonerReason").isEqualTo(existingNonAssociation.secondPrisonerReason.toString())
         .jsonPath("restrictionType").isEqualTo(existingNonAssociation.restrictionType.toString())
         .jsonPath("comment").isEqualTo(existingNonAssociation.comment)
-    }
-
-    private fun createNonAssociation(firstNa: String, secondNa: String): NonAssociation {
-      val createRequest: CreateNonAssociationRequest = createNonAssociationRequest(
-        firstPrisonerNumber = firstNa,
-        firstPrisonerReason = NonAssociationReason.VICTIM,
-        secondPrisonerNumber = secondNa,
-        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
-        restrictionType = NonAssociationRestrictionType.CELL,
-        comment = "They keep fighting",
-      )
-
-      return webTestClient.post()
-        .uri(url)
-        .headers(
-          setAuthorisation(
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
-            scopes = listOf("write", "read"),
-          ),
-        )
-        .header("Content-Type", "application/json")
-        .bodyValue(jsonString(createRequest))
-        .exchange()
-        .expectStatus().isCreated
-        .returnResult<NonAssociation>()
-        .responseBody
-        .blockFirst()!!
     }
   }
 
@@ -278,8 +304,42 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `with a valid token returns the non-association details`() {
-      val expectedResponse = jsonString(mapOf("prisonerNumber" to prisonerNumber))
+    fun `when any of the prisoners can't be found in OffenderSearch responds 404 Not Found`() {
+      val nonAssociation = createNonAssociation()
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        listOf(nonAssociation.firstPrisonerNumber, nonAssociation.secondPrisonerNumber),
+        emptyList(),
+      )
+
+      webTestClient.get()
+        .uri(url)
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus().isNotFound
+        .expectBody()
+        .jsonPath("userMessage").isEqualTo("Could not find the following prisoners: [${nonAssociation.firstPrisonerNumber}, ${nonAssociation.secondPrisonerNumber}]")
+    }
+
+    @Test
+    fun `when there a no non-associations for the given prison, returns the prisoner details`() {
+      val prisoner = offenderSearchPrisoners[prisonerNumber]!!
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        listOf(prisonerNumber),
+        listOf(prisoner),
+      )
+
+      val expectedResponse = jsonString(
+        PrisonerNonAssociations(
+          prisonerNumber = prisoner.prisonerNumber,
+          firstName = prisoner.firstName,
+          lastName = prisoner.lastName,
+          prisonId = prisoner.prisonId,
+          prisonName = prisoner.prisonName,
+          cellLocation = prisoner.cellLocation,
+          nonAssociations = emptyList(),
+        ),
+      )
+
       webTestClient.get()
         .uri(url)
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
@@ -290,5 +350,79 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           true,
         )
     }
+
+    @Test
+    fun `with a valid token returns the non-association details`() {
+      val nonAssociation = createNonAssociation()
+      val firstPrisoner = offenderSearchPrisoners[nonAssociation.firstPrisonerNumber]!!
+      val secondPrisoner = offenderSearchPrisoners[nonAssociation.secondPrisonerNumber]!!
+
+      val prisonerNumbers = listOf(firstPrisoner.prisonerNumber, secondPrisoner.prisonerNumber)
+      val prisoners = listOf(firstPrisoner, secondPrisoner)
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers,
+        prisoners,
+      )
+
+      // NOTE: Non-associations for the 2nd prisoner
+      val url = "/prisoner/${secondPrisoner.prisonerNumber}/non-associations"
+      webTestClient.get()
+        .uri(url)
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+            {
+              "prisonerNumber": "${secondPrisoner.prisonerNumber}",
+              "firstName": "${secondPrisoner.firstName}",
+              "lastName": "${secondPrisoner.lastName}",
+              "prisonId": "${secondPrisoner.prisonId}",
+              "prisonName": "${secondPrisoner.prisonName}",
+              "cellLocation": "${secondPrisoner.cellLocation}",
+              "nonAssociations": [
+                {
+                  "reasonCode": "${nonAssociation.secondPrisonerReason}",
+                  "reasonDescription": "${nonAssociation.secondPrisonerReason.description}",
+                  "restrictionTypeCode": "${nonAssociation.restrictionType}",
+                  "restrictionTypeDescription": "${nonAssociation.restrictionType.description}",
+                  "comment": "${nonAssociation.comment}",
+                  "authorisedBy": "${nonAssociation.authorisedBy}",
+                  "isClosed": false,
+                  "closedReason": null,
+                  "closedBy": null,
+                  "closedAt": null,
+                  "otherPrisonerDetails": {
+                    "prisonerNumber": "${firstPrisoner.prisonerNumber}",
+                    "reasonCode": "${nonAssociation.firstPrisonerReason}",
+                    "reasonDescription": "${nonAssociation.firstPrisonerReason.description}",
+                    "firstName": "${firstPrisoner.firstName}",
+                    "lastName": "${firstPrisoner.lastName}",
+                    "prisonId": "${firstPrisoner.prisonId}",
+                    "prisonName": "${firstPrisoner.prisonName}",
+                    "cellLocation": "${firstPrisoner.cellLocation}"
+                  }
+                }
+              ]
+            }
+          """,
+          false,
+        )
+    }
+  }
+
+  private fun createNonAssociation(): NonAssociationJPA {
+    return repository.save(
+      NonAssociationJPA(
+        firstPrisonerNumber = "A1234BC",
+        firstPrisonerReason = NonAssociationReason.VICTIM,
+        secondPrisonerNumber = "D5678EF",
+        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
+        restrictionType = NonAssociationRestrictionType.CELL,
+        comment = "They keep fighting",
+        authorisedBy = "USER_1",
+      ),
+    )
   }
 }

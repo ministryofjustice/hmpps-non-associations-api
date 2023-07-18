@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
 
 /**
  * Returns a test CreateNonAssociationRequest
@@ -27,3 +28,22 @@ fun createNonAssociationRequest(
     restrictionType = restrictionType,
   )
 }
+
+val offenderSearchPrisoners = mapOf(
+  "A1234BC" to OffenderSearchPrisoner(
+    prisonerNumber = "A1234BC",
+    firstName = "John",
+    lastName = "Doe",
+    prisonId = "MDI",
+    prisonName = "Moorland",
+    cellLocation = "MDI-A-1",
+  ),
+  "D5678EF" to OffenderSearchPrisoner(
+    prisonerNumber = "D5678EF",
+    firstName = "Merlin",
+    lastName = "Somerplumbs",
+    prisonId = "MDI",
+    prisonName = "Moorland",
+    cellLocation = "MDI-A-2",
+  ),
+)
