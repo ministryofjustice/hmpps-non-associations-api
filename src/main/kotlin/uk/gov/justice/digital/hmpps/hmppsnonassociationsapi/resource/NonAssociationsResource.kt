@@ -79,7 +79,7 @@ class NonAssociationsResource(
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(
     summary = "Creates a non-association between two prisoners.",
-    description = "Requires ROLE_NON_ASSOCIATIONS role with write scope. Also requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role.",
+    description = "Requires ROLE_NON_ASSOCIATIONS role with write scope.",
     responses = [
       ApiResponse(
         responseCode = "201",

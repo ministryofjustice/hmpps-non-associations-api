@@ -26,7 +26,7 @@ class OffenderSearchService(
    */
   fun searchByPrisonerNumbers(
     prisonerNumbers: List<String>,
-    useClientCredentials: Boolean = false,
+    useClientCredentials: Boolean = true,
   ): Map<String, OffenderSearchPrisoner> {
     val requestBody = objectMapper.writeValueAsString("prisonerNumbers" to prisonerNumbers)
 
