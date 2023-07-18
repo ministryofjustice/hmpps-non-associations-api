@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
+import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
 /**
@@ -22,10 +23,12 @@ data class NonAssociation(
   @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "CELL")
   val restrictionType: NonAssociationRestrictionType,
 
-  @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "John and Luke always end up fighting")
+  @Schema(description = "Explanation of why prisoners are non-associated", required = true, example = "John and Luke always end up fighting")
   val comment: String,
   @Schema(description = "User ID of the person who created the non-association. NOTE: For records migrated from NOMIS/Prison API this is free text and may not be a valid User ID", required = true, example = "OFF3_GEN")
   val authorisedBy: String,
+  @Schema(description = "When the non-association was created", required = true, example = "2021-12-31T12:34:56.789012")
+  val whenCreated: LocalDateTime,
 
   @Schema(description = "Whether the non-association is closed or is in effect", required = true, example = "false")
   val isClosed: Boolean = false,

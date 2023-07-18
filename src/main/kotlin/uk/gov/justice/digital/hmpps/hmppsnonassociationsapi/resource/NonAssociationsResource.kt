@@ -20,7 +20,8 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationDetails
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationListOptions
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociationDomainEventType
 
@@ -54,7 +55,7 @@ class NonAssociationsResource(
       ),
       ApiResponse(
         responseCode = "404",
-        description = "Prisoner number not found",
+        description = "Any of the prisoners could not be found.",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],
@@ -63,8 +64,14 @@ class NonAssociationsResource(
     @Schema(description = "The offender prisoner number", example = "A1234BC", required = true)
     @PathVariable
     prisonerNumber: String,
-  ): NonAssociationDetails {
-    return NonAssociationDetails(prisonerNumber)
+  ): PrisonerNonAssociations {
+    return nonAssociationsService.getPrisonerNonAssociations(
+      prisonerNumber,
+      NonAssociationListOptions(
+        onlySamePrison = true,
+        includeClosed = false,
+      ),
+    )
   }
 
   @PostMapping("/non-associations")
@@ -91,6 +98,11 @@ class NonAssociationsResource(
       ApiResponse(
         responseCode = "403",
         description = "Missing required privileges. Requires the NON_ASSOCIATIONS role with write scope",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Any of the prisoners could not be found.",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],

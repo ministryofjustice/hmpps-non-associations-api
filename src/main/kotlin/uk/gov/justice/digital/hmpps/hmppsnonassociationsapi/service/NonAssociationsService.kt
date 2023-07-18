@@ -6,7 +6,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociationDetails
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.toPrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import kotlin.jvm.optionals.getOrNull
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation as NonAssociationDTO
@@ -16,6 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation a
 @Transactional
 class NonAssociationsService(
   private val nonAssociationsRepository: NonAssociationsRepository,
+  private val offenderSearch: OffenderSearchService,
   private val authenticationFacade: AuthenticationFacade,
   private val prisonApiService: PrisonApiService,
 ) {
@@ -25,6 +28,13 @@ class NonAssociationsService(
   }
 
   fun createNonAssociation(createNonAssociationRequest: CreateNonAssociationRequest): NonAssociationDTO {
+    offenderSearch.searchByPrisonerNumbers(
+      listOf(
+        createNonAssociationRequest.firstPrisonerNumber,
+        createNonAssociationRequest.secondPrisonerNumber,
+      ),
+    )
+
     val nonAssociationJpa = createNonAssociationRequest.toNewEntity(
       authorisedBy = authenticationFacade.currentUsername
         ?: throw Exception("Could not determine current user's username'"),
@@ -36,7 +46,37 @@ class NonAssociationsService(
     return nonAssociationsRepository.findById(id).getOrNull()?.toDto()
   }
 
-  fun getDetails(prisonerNumber: String): LegacyNonAssociationDetails {
+  fun getPrisonerNonAssociations(prisonerNumber: String, options: NonAssociationListOptions): PrisonerNonAssociations {
+    val nonAssociations = nonAssociationsRepository.findAllByFirstPrisonerNumber(prisonerNumber) +
+      nonAssociationsRepository.findAllBySecondPrisonerNumber(prisonerNumber)
+
+    val prisonerNumbers = (
+      listOf(prisonerNumber) +
+        nonAssociations.map(NonAssociationJPA::firstPrisonerNumber) +
+        nonAssociations.map(NonAssociationJPA::secondPrisonerNumber)
+      ).distinct()
+    val prisoners = offenderSearch.searchByPrisonerNumbers(prisonerNumbers)
+
+    var nonAssociationsFiltered = nonAssociations
+    // filter out non-associations in other prisons
+    if (options.onlySamePrison) {
+      val prisonId = prisoners[prisonerNumber]!!.prisonId
+      nonAssociationsFiltered = nonAssociationsFiltered.filter { nonna ->
+        prisoners[nonna.firstPrisonerNumber]!!.prisonId == prisonId &&
+          prisoners[nonna.secondPrisonerNumber]!!.prisonId == prisonId
+      }
+    }
+    // filter out closed non-associations
+    if (!options.includeClosed) {
+      nonAssociationsFiltered = nonAssociationsFiltered.filter { nonna ->
+        !nonna.isClosed
+      }
+    }
+
+    return nonAssociationsFiltered.toPrisonerNonAssociations(prisonerNumber, prisoners)
+  }
+
+  fun getLegacyDetails(prisonerNumber: String): LegacyNonAssociationDetails {
     return prisonApiService.getNonAssociationDetails(prisonerNumber)
   }
 
@@ -44,3 +84,8 @@ class NonAssociationsService(
     return nonAssociationsRepository.save(nonAssociation)
   }
 }
+
+data class NonAssociationListOptions(
+  val onlySamePrison: Boolean = true,
+  val includeClosed: Boolean = false,
+)
