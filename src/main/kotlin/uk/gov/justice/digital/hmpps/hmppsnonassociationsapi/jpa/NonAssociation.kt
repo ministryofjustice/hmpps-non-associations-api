@@ -8,6 +8,7 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import org.hibernate.Hibernate
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -23,12 +24,12 @@ class NonAssociation(
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   val id: Long? = null,
 
-  val firstPrisonerNumber: String,
+  var firstPrisonerNumber: String,
   @Enumerated(value = EnumType.STRING)
   @Column(name = "first_prisoner_reason_code")
   var firstPrisonerReason: NonAssociationReason,
 
-  val secondPrisonerNumber: String,
+  var secondPrisonerNumber: String,
   @Enumerated(value = EnumType.STRING)
   @Column(name = "second_prisoner_reason_code")
   var secondPrisonerReason: NonAssociationReason,
@@ -59,6 +60,8 @@ class NonAssociation(
     this.closedAt = closedAt
   }
 
+  fun isOpen() = !isClosed
+
   fun toDto(): NonAssociationDTO {
     return NonAssociationDTO(
       id = id!!,
@@ -73,5 +76,34 @@ class NonAssociation(
       //       It may be one of the things we make mandatory after migration?
       authorisedBy = authorisedBy ?: "",
     )
+  }
+
+  fun updatePrisonerNumber(prisonerNumber: String, primary: Boolean): NonAssociation {
+    if (primary) {
+      firstPrisonerNumber = prisonerNumber
+    } else {
+      secondPrisonerNumber = prisonerNumber
+    }
+    return this
+  }
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
+
+    other as NonAssociation
+
+    if (firstPrisonerNumber != other.firstPrisonerNumber) return false
+    return secondPrisonerNumber == other.secondPrisonerNumber
+  }
+
+  override fun hashCode(): Int {
+    var result = firstPrisonerNumber.hashCode()
+    result = 31 * result + secondPrisonerNumber.hashCode()
+    return result
+  }
+
+  override fun toString(): String {
+    return "NonAssociation(id=$id, firstPrisonerNumber='$firstPrisonerNumber', secondPrisonerNumber='$secondPrisonerNumber', isClosed=$isClosed)"
   }
 }
