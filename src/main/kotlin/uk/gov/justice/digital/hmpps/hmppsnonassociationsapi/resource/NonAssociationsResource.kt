@@ -21,7 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationOptions
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationListOptions
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociationDomainEventType
 
@@ -67,7 +67,7 @@ class NonAssociationsResource(
   ): PrisonerNonAssociations {
     return nonAssociationsService.getPrisonerNonAssociations(
       prisonerNumber,
-      NonAssociationOptions(
+      NonAssociationListOptions(
         onlySamePrison = true,
         includeClosed = false,
       ),

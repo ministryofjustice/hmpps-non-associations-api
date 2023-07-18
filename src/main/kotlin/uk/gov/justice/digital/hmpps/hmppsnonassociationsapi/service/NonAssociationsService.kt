@@ -46,7 +46,7 @@ class NonAssociationsService(
     return nonAssociationsRepository.findById(id).getOrNull()?.toDto()
   }
 
-  fun getPrisonerNonAssociations(prisonerNumber: String, options: NonAssociationOptions): PrisonerNonAssociations {
+  fun getPrisonerNonAssociations(prisonerNumber: String, options: NonAssociationListOptions): PrisonerNonAssociations {
     val nonAssociations = nonAssociationsRepository.findAllByFirstPrisonerNumber(prisonerNumber) +
       nonAssociationsRepository.findAllBySecondPrisonerNumber(prisonerNumber)
 
@@ -85,7 +85,7 @@ class NonAssociationsService(
   }
 }
 
-data class NonAssociationOptions(
+data class NonAssociationListOptions(
   val onlySamePrison: Boolean = true,
   val includeClosed: Boolean = false,
 )
