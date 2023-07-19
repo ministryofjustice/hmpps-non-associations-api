@@ -56,7 +56,7 @@ data class NonAssociationDetails(
   @Schema(description = "Reason why the non-association was closed. Only present when the non-association is closed, null for open non-associations", required = false, example = "null")
   val closedReason: String? = null,
   @Schema(description = "Date and time of when the non-association was closed. Only present when the non-association is closed, null for open non-associations", required = false, example = "null")
-  val closedAt: String? = null,
+  val closedAt: LocalDateTime? = null,
 
   @Schema(description = "Details about the other person in the non-association.", required = true)
   val otherPrisonerDetails: OtherPrisonerDetails,
@@ -147,6 +147,12 @@ private fun List<NonAssociationJPA>.toNonAssociationsDetails(
       comment = nonna.comment,
       authorisedBy = nonna.authorisedBy ?: "",
       whenCreated = nonna.whenCreated,
+
+      isClosed = nonna.isClosed,
+      closedBy = nonna.closedBy,
+      closedReason = nonna.closedReason,
+      closedAt = nonna.closedAt,
+
       otherPrisonerDetails = OtherPrisonerDetails(
         prisonerNumber = otherPrisoner.prisonerNumber,
         reasonCode = otherReason,
