@@ -74,12 +74,21 @@ class NonAssociationsResource(
     )
     @RequestParam(required = false)
     includeClosed: Boolean,
+
+    @Schema(
+      description = "Whether to include non-associations with prisoners in other prisons",
+      required = false,
+      defaultValue = "false",
+      example = "true",
+    )
+    @RequestParam(required = false)
+    includeOtherPrisons: Boolean,
   ): PrisonerNonAssociations {
     return nonAssociationsService.getPrisonerNonAssociations(
       prisonerNumber,
       NonAssociationListOptions(
         includeClosed = includeClosed,
-        includeOtherPrisons = false,
+        includeOtherPrisons = includeOtherPrisons,
       ),
     )
   }
