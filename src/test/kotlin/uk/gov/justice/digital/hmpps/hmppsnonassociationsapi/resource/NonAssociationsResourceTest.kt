@@ -431,6 +431,109 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           false,
         )
     }
+
+    @Test
+    fun `optionally returns closed non-associations`() {
+      // prisoners in MDI
+      val firstPrisoner = offenderSearchPrisoners["A1234BC"]!!
+      val secondPrisoner = offenderSearchPrisoners["D5678EF"]!!
+      val thirdPrisoner = offenderSearchPrisoners["G9012HI"]!!
+      // prisoner in another prison
+      val fourthPrisoner = offenderSearchPrisoners["L3456MN"]!!
+
+      // open non-association, same prison
+      val openNonAssociation = createNonAssociation(
+        firstPrisoner.prisonerNumber,
+        secondPrisoner.prisonerNumber,
+        isClosed = false,
+      )
+
+      // closed non-association, same prison, not returned
+      val closedNonAssociation = createNonAssociation(
+        firstPrisonerNumber = secondPrisoner.prisonerNumber,
+        secondPrisonerNumber = thirdPrisoner.prisonerNumber,
+        isClosed = true,
+      )
+
+      // non-association with someone in a different prison, not returned
+      val otherPrisonNonAssociation = createNonAssociation(
+        firstPrisonerNumber = fourthPrisoner.prisonerNumber,
+        secondPrisonerNumber = secondPrisoner.prisonerNumber,
+      )
+
+      val prisoners = listOf(firstPrisoner, secondPrisoner, thirdPrisoner, fourthPrisoner)
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
+        prisoners,
+      )
+
+      // NOTE: Non-associations for the 2nd prisoner
+      val url = "/prisoner/${secondPrisoner.prisonerNumber}/non-associations?includeClosed=true"
+      webTestClient.get()
+        .uri(url)
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+            {
+              "prisonerNumber": "${secondPrisoner.prisonerNumber}",
+              "firstName": "${secondPrisoner.firstName}",
+              "lastName": "${secondPrisoner.lastName}",
+              "prisonId": "${secondPrisoner.prisonId}",
+              "prisonName": "${secondPrisoner.prisonName}",
+              "cellLocation": "${secondPrisoner.cellLocation}",
+              "nonAssociations": [
+                {
+                  "reasonCode": "${openNonAssociation.secondPrisonerReason}",
+                  "reasonDescription": "${openNonAssociation.secondPrisonerReason.description}",
+                  "restrictionTypeCode": "${openNonAssociation.restrictionType}",
+                  "restrictionTypeDescription": "${openNonAssociation.restrictionType.description}",
+                  "comment": "${openNonAssociation.comment}",
+                  "authorisedBy": "${openNonAssociation.authorisedBy}",
+                  "isClosed": false,
+                  "closedReason": null,
+                  "closedBy": null,
+                  "closedAt": null,
+                  "otherPrisonerDetails": {
+                    "prisonerNumber": "${firstPrisoner.prisonerNumber}",
+                    "reasonCode": "${openNonAssociation.firstPrisonerReason}",
+                    "reasonDescription": "${openNonAssociation.firstPrisonerReason.description}",
+                    "firstName": "${firstPrisoner.firstName}",
+                    "lastName": "${firstPrisoner.lastName}",
+                    "prisonId": "${firstPrisoner.prisonId}",
+                    "prisonName": "${firstPrisoner.prisonName}",
+                    "cellLocation": "${firstPrisoner.cellLocation}"
+                  }
+                },
+                {
+                  "reasonCode": "${closedNonAssociation.firstPrisonerReason}",
+                  "reasonDescription": "${closedNonAssociation.firstPrisonerReason.description}",
+                  "restrictionTypeCode": "${closedNonAssociation.restrictionType}",
+                  "restrictionTypeDescription": "${closedNonAssociation.restrictionType.description}",
+                  "comment": "${closedNonAssociation.comment}",
+                  "authorisedBy": "${closedNonAssociation.authorisedBy}",
+                  "isClosed": true,
+                  "closedReason": "They're friends now",
+                  "closedBy": "CLOSE_USER",
+                  "otherPrisonerDetails": {
+                    "prisonerNumber": "${thirdPrisoner.prisonerNumber}",
+                    "reasonCode": "${closedNonAssociation.secondPrisonerReason}",
+                    "reasonDescription": "${closedNonAssociation.secondPrisonerReason.description}",
+                    "firstName": "${thirdPrisoner.firstName}",
+                    "lastName": "${thirdPrisoner.lastName}",
+                    "prisonId": "${thirdPrisoner.prisonId}",
+                    "prisonName": "${thirdPrisoner.prisonName}",
+                    "cellLocation": "${thirdPrisoner.cellLocation}"
+                  }
+                }
+              ]
+            }
+          """,
+          false,
+        )
+    }
   }
 
   private fun createNonAssociation(
