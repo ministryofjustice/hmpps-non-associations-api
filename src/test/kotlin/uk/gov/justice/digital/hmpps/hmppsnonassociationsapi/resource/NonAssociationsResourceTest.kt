@@ -7,15 +7,15 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssocia
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchPrisoners
+import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
 @WithMockUser
 class NonAssociationsResourceTest : SqsIntegrationTestBase() {
-
-  final val prisonerNumber = "A1234BC"
 
   @Nested
   inner class `Create a non-association` {
@@ -217,8 +217,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   @Nested
   inner class `Get a non-association` {
 
-    private val url = "/non-associations"
-
     @Test
     fun `without a valid token responds 401 Unauthorized`() {
       webTestClient.get()
@@ -282,12 +280,13 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   @Nested
   inner class `GET non associations for a prisoner` {
 
-    private val url = "/prisoner/$prisonerNumber/non-associations"
+    val prisonerNumber = "A1234BC"
 
     @Test
     fun `without a valid token responds 401 Unauthorized`() {
+      ""
       webTestClient.get()
-        .uri(url)
+        .uri("/prisoner/$prisonerNumber/non-associations")
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -296,7 +295,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `without the correct role responds 403 Forbidden`() {
       webTestClient.get()
-        .uri(url)
+        .uri("/prisoner/$prisonerNumber/non-associations")
         .headers(setAuthorisation(roles = listOf("WRONG_ROLE")))
         .exchange()
         .expectStatus()
@@ -312,7 +311,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       )
 
       webTestClient.get()
-        .uri(url)
+        .uri("/prisoner/$prisonerNumber/non-associations")
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus().isNotFound
@@ -341,7 +340,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       )
 
       webTestClient.get()
-        .uri(url)
+        .uri("/prisoner/$prisonerNumber/non-associations")
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus().isOk
@@ -352,15 +351,37 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `with a valid token returns the non-association details`() {
-      val nonAssociation = createNonAssociation()
-      val firstPrisoner = offenderSearchPrisoners[nonAssociation.firstPrisonerNumber]!!
-      val secondPrisoner = offenderSearchPrisoners[nonAssociation.secondPrisonerNumber]!!
+    fun `by default returns only open non-associations in same prison the given prisoner is in`() {
+      // prisoners in MDI
+      val firstPrisoner = offenderSearchPrisoners["A1234BC"]!!
+      val secondPrisoner = offenderSearchPrisoners["D5678EF"]!!
+      val thirdPrisoner = offenderSearchPrisoners["G9012HI"]!!
+      // prisoner in another prison
+      val fourthPrisoner = offenderSearchPrisoners["L3456MN"]!!
 
-      val prisonerNumbers = listOf(firstPrisoner.prisonerNumber, secondPrisoner.prisonerNumber)
-      val prisoners = listOf(firstPrisoner, secondPrisoner)
+      // open non-association, same prison
+      val openNonAssociation = createNonAssociation(
+        firstPrisoner.prisonerNumber,
+        secondPrisoner.prisonerNumber,
+        isClosed = false,
+      )
+
+      // closed non-association, same prison, not returned
+      val closedNonAssociation = createNonAssociation(
+        firstPrisonerNumber = secondPrisoner.prisonerNumber,
+        secondPrisonerNumber = thirdPrisoner.prisonerNumber,
+        isClosed = true,
+      )
+
+      // non-association with someone in a different prison, not returned
+      val otherPrisonNonAssociation = createNonAssociation(
+        firstPrisonerNumber = fourthPrisoner.prisonerNumber,
+        secondPrisonerNumber = secondPrisoner.prisonerNumber,
+      )
+
+      val prisoners = listOf(firstPrisoner, secondPrisoner, thirdPrisoner, fourthPrisoner)
       offenderSearchMockServer.stubSearchByPrisonerNumbers(
-        prisonerNumbers,
+        prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
         prisoners,
       )
 
@@ -383,20 +404,20 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "cellLocation": "${secondPrisoner.cellLocation}",
               "nonAssociations": [
                 {
-                  "reasonCode": "${nonAssociation.secondPrisonerReason}",
-                  "reasonDescription": "${nonAssociation.secondPrisonerReason.description}",
-                  "restrictionTypeCode": "${nonAssociation.restrictionType}",
-                  "restrictionTypeDescription": "${nonAssociation.restrictionType.description}",
-                  "comment": "${nonAssociation.comment}",
-                  "authorisedBy": "${nonAssociation.authorisedBy}",
+                  "reasonCode": "${openNonAssociation.secondPrisonerReason}",
+                  "reasonDescription": "${openNonAssociation.secondPrisonerReason.description}",
+                  "restrictionTypeCode": "${openNonAssociation.restrictionType}",
+                  "restrictionTypeDescription": "${openNonAssociation.restrictionType.description}",
+                  "comment": "${openNonAssociation.comment}",
+                  "authorisedBy": "${openNonAssociation.authorisedBy}",
                   "isClosed": false,
                   "closedReason": null,
                   "closedBy": null,
                   "closedAt": null,
                   "otherPrisonerDetails": {
                     "prisonerNumber": "${firstPrisoner.prisonerNumber}",
-                    "reasonCode": "${nonAssociation.firstPrisonerReason}",
-                    "reasonDescription": "${nonAssociation.firstPrisonerReason.description}",
+                    "reasonCode": "${openNonAssociation.firstPrisonerReason}",
+                    "reasonDescription": "${openNonAssociation.firstPrisonerReason.description}",
                     "firstName": "${firstPrisoner.firstName}",
                     "lastName": "${firstPrisoner.lastName}",
                     "prisonId": "${firstPrisoner.prisonId}",
@@ -412,17 +433,28 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
   }
 
-  private fun createNonAssociation(): NonAssociationJPA {
-    return repository.save(
-      NonAssociationJPA(
-        firstPrisonerNumber = "A1234BC",
-        firstPrisonerReason = NonAssociationReason.VICTIM,
-        secondPrisonerNumber = "D5678EF",
-        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
-        restrictionType = NonAssociationRestrictionType.CELL,
-        comment = "They keep fighting",
-        authorisedBy = "USER_1",
-      ),
+  private fun createNonAssociation(
+    firstPrisonerNumber: String = "A1234BC",
+    secondPrisonerNumber: String = "D5678EF",
+    isClosed: Boolean = false,
+  ): NonAssociationJPA {
+    val nonna = NonAssociationJPA(
+      firstPrisonerNumber = firstPrisonerNumber,
+      firstPrisonerReason = NonAssociationReason.VICTIM,
+      secondPrisonerNumber = secondPrisonerNumber,
+      secondPrisonerReason = NonAssociationReason.PERPETRATOR,
+      restrictionType = NonAssociationRestrictionType.CELL,
+      comment = "They keep fighting",
+      authorisedBy = "USER_1",
     )
+
+    if (isClosed) {
+      nonna.isClosed = true
+      nonna.closedReason = "They're friends now"
+      nonna.closedBy = "CLOSE_USER"
+      nonna.closedAt = LocalDateTime.now()
+    }
+
+    return repository.save(nonna)
   }
 }
