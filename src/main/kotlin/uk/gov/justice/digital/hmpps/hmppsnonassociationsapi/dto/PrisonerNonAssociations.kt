@@ -33,6 +33,9 @@ data class PrisonerNonAssociations(
  * Details about a single non-association and link to the other prisoner involved
  */
 data class NonAssociationDetails(
+  @Schema(description = "ID of the non-association", required = true, example = "42")
+  val id: Long,
+
   @Schema(description = "Reason code for the non-association", required = true, example = "VICTIM")
   val reasonCode: NonAssociationReason,
   @Schema(description = "Reason description for the non-association", required = true, example = "Victim")
@@ -140,6 +143,7 @@ private fun List<NonAssociationJPA>.toNonAssociationsDetails(
     val (_, otherPrisoner, reason, otherReason) = prisonersInfo
 
     NonAssociationDetails(
+      id = nonna.id ?: throw Exception("Only persisted non-associations can used to build a PrisonerNonAssociations instance"),
       reasonCode = reason,
       reasonDescription = reason.description,
       restrictionTypeCode = nonna.restrictionType,

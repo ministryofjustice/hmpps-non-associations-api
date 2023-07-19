@@ -404,6 +404,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "cellLocation": "${prisonerMerlin.cellLocation}",
               "nonAssociations": [
                 {
+                  "id": ${openNonAssociation.id},
                   "reasonCode": "${openNonAssociation.secondPrisonerReason}",
                   "reasonDescription": "${openNonAssociation.secondPrisonerReason.description}",
                   "restrictionTypeCode": "${openNonAssociation.restrictionType}",
@@ -486,6 +487,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "cellLocation": "${prisonerMerlin.cellLocation}",
               "nonAssociations": [
                 {
+                  "id": ${openNonAssociation.id},
                   "reasonCode": "${openNonAssociation.secondPrisonerReason}",
                   "reasonDescription": "${openNonAssociation.secondPrisonerReason.description}",
                   "restrictionTypeCode": "${openNonAssociation.restrictionType}",
@@ -508,6 +510,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   }
                 },
                 {
+                  "id": ${closedNonAssociation.id},
                   "reasonCode": "${closedNonAssociation.firstPrisonerReason}",
                   "reasonDescription": "${closedNonAssociation.firstPrisonerReason.description}",
                   "restrictionTypeCode": "${closedNonAssociation.restrictionType}",
@@ -589,6 +592,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "cellLocation": "${prisonerMerlin.cellLocation}",
               "nonAssociations": [
                 {
+                  "id": ${openNonAssociation.id},
                   "reasonCode": "${openNonAssociation.secondPrisonerReason}",
                   "reasonDescription": "${openNonAssociation.secondPrisonerReason.description}",
                   "restrictionTypeCode": "${openNonAssociation.restrictionType}",
@@ -611,6 +615,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   }
                 },
                 {
+                  "id": ${otherPrisonNonAssociation.id},
                   "reasonCode": "${otherPrisonNonAssociation.secondPrisonerReason}",
                   "reasonDescription": "${otherPrisonNonAssociation.secondPrisonerReason.description}",
                   "restrictionTypeCode": "${closedNonAssociation.restrictionType}",
