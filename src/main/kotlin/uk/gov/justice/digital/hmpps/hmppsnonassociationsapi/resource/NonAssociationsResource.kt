@@ -68,8 +68,8 @@ class NonAssociationsResource(
     return nonAssociationsService.getPrisonerNonAssociations(
       prisonerNumber,
       NonAssociationListOptions(
-        onlySamePrison = true,
         includeClosed = false,
+        includeOtherPrisons = false,
       ),
     )
   }
