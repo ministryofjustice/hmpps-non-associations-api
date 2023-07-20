@@ -1,8 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.test.web.reactive.server.returnResult
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
@@ -442,14 +444,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       // prisoner in another prison
       val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
 
-      // open non-association, same prison
+      // open non-association, same prison, returned
       val openNonAssociation = createNonAssociation(
         prisonerJohn.prisonerNumber,
         prisonerMerlin.prisonerNumber,
         isClosed = false,
       )
 
-      // closed non-association, same prison, not returned
+      // closed non-association, same prison, returned
       val closedNonAssociation = createNonAssociation(
         firstPrisonerNumber = prisonerMerlin.prisonerNumber,
         secondPrisonerNumber = prisonerJosh.prisonerNumber,
@@ -561,7 +563,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         isClosed = true,
       )
 
-      // non-association with someone in a different prison, not returned
+      // non-association with someone in a different prison
       val otherPrisonNonAssociation = createNonAssociation(
         firstPrisonerNumber = prisonerEdward.prisonerNumber,
         secondPrisonerNumber = prisonerMerlin.prisonerNumber,
@@ -652,6 +654,64 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun `non-associations can be sorted`() {
+      // prisoners in MDI
+      val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
+      val prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
+      val prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
+      // prisoner in another prison
+      val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
+
+      // open non-association, same prison
+      val openNonAssociation = createNonAssociation(
+        prisonerJohn.prisonerNumber,
+        prisonerMerlin.prisonerNumber,
+        isClosed = false,
+      )
+
+      // closed non-association, same prison
+      val closedNonAssociation = createNonAssociation(
+        firstPrisonerNumber = prisonerMerlin.prisonerNumber,
+        secondPrisonerNumber = prisonerJosh.prisonerNumber,
+        isClosed = true,
+      )
+
+      // non-association with someone in a different prison
+      val otherPrisonNonAssociation = createNonAssociation(
+        firstPrisonerNumber = prisonerEdward.prisonerNumber,
+        secondPrisonerNumber = prisonerMerlin.prisonerNumber,
+      )
+
+      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
+        prisoners,
+      )
+
+      // NOTE: Non-associations for Merlin
+      val url = "/prisoner/${prisonerMerlin.prisonerNumber}/non-associations?includeOtherPrisons=true&includeClosed=true&sortBy=LAST_NAME&sortDirection=DESC"
+      val prisonerNonAssociations: PrisonerNonAssociations = webTestClient.get()
+        .uri(url)
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus().isOk
+        .returnResult<PrisonerNonAssociations>()
+        .responseBody
+        .blockFirst()
+
+      val lastNames = prisonerNonAssociations.nonAssociations.map { nonna ->
+        nonna.otherPrisonerDetails.lastName
+      }
+      assertThat(lastNames).isEqualTo(
+        listOf(
+          "Plimburkson",
+          "Lillibluprs",
+          "Doe",
+        ),
+      )
     }
   }
 
