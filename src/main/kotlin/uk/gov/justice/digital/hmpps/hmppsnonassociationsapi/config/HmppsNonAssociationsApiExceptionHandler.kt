@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config
 
 import jakarta.validation.ValidationException
+import org.apache.commons.lang3.StringUtils
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
@@ -11,6 +12,7 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.reactive.function.client.WebClientResponseException.NotFound
 import org.springframework.web.server.ResponseStatusException
 
@@ -53,6 +55,27 @@ class HmppsNonAssociationsApiExceptionHandler {
         ErrorResponse(
           status = BAD_REQUEST,
           userMessage = "Validation failure: Couldn't read request body: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException::class)
+  fun handleMethodArgumentTypeMismatchException(e: MethodArgumentTypeMismatchException): ResponseEntity<ErrorResponse> {
+    val type = e.requiredType
+    val message = if (type.isEnum) {
+      "Parameter ${e.name} must be one of the following ${StringUtils.join(type.enumConstants, ", ")}"
+    } else {
+      "Parameter ${e.name} must be of type ${type.typeName}"
+    }
+
+    log.info("Validation exception: {}", message)
+    return ResponseEntity
+      .status(BAD_REQUEST)
+      .body(
+        ErrorResponse(
+          status = BAD_REQUEST,
+          userMessage = "Validation failure: $message",
           developerMessage = e.message,
         ),
       )

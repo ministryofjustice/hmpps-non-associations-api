@@ -643,6 +643,16 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           false,
         )
     }
+
+    @Test
+    fun `when invalid sort values are provided responds 400 Bad Request`() {
+      val url = "/prisoner/$prisonerNumber/non-associations?sortBy=InvalidField"
+      webTestClient.get()
+        .uri(url)
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus().isBadRequest
+    }
   }
 
   private fun createNonAssociation(
