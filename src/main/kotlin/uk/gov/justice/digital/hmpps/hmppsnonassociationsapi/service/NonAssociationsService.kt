@@ -3,9 +3,11 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.toPrisonerNonAssociations
@@ -73,7 +75,11 @@ class NonAssociationsService(
       }
     }
 
-    return nonAssociationsFiltered.toPrisonerNonAssociations(prisonerNumber, prisoners)
+    return nonAssociationsFiltered.toPrisonerNonAssociations(
+      prisonerNumber,
+      prisoners,
+      options,
+    )
   }
 
   fun getLegacyDetails(prisonerNumber: String): LegacyNonAssociationDetails {
@@ -88,4 +94,37 @@ class NonAssociationsService(
 data class NonAssociationListOptions(
   val includeOtherPrisons: Boolean = false,
   val includeClosed: Boolean = false,
+  val sortBy: NonAssociationsSort = NonAssociationsSort.WHEN_CREATED,
+  val sortDirection: Sort.Direction = Sort.Direction.DESC,
 )
+
+enum class NonAssociationsSort {
+  WHEN_CREATED,
+  LAST_NAME,
+  ;
+
+  fun comparator(direction: Sort.Direction): Comparator<NonAssociationDetails> {
+    var result = when (this) {
+      WHEN_CREATED -> CompareByWhenCreated()
+      LAST_NAME -> CompareByLastName()
+    }
+
+    if (direction == Sort.Direction.DESC) {
+      result = result.reversed()
+    }
+
+    return result
+  }
+}
+
+class CompareByWhenCreated : Comparator<NonAssociationDetails> {
+  override fun compare(a: NonAssociationDetails, b: NonAssociationDetails): Int {
+    return a.whenCreated.compareTo(b.whenCreated)
+  }
+}
+
+class CompareByLastName : Comparator<NonAssociationDetails> {
+  override fun compare(a: NonAssociationDetails, b: NonAssociationDetails): Int {
+    return a.otherPrisonerDetails.lastName.compareTo(b.otherPrisonerDetails.lastName)
+  }
+}
