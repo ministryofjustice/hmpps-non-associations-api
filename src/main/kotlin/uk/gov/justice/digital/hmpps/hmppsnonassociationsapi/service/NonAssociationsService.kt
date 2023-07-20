@@ -104,27 +104,11 @@ enum class NonAssociationsSort {
   ;
 
   fun comparator(direction: Sort.Direction): Comparator<NonAssociationDetails> {
-    var result = when (this) {
-      WHEN_CREATED -> CompareByWhenCreated()
-      LAST_NAME -> CompareByLastName()
+    return when (this) {
+      WHEN_CREATED -> Comparator.comparing(NonAssociationDetails::whenCreated)
+      LAST_NAME -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.lastName }
+    }.run {
+      if (direction == Sort.Direction.DESC) this.reversed() else this
     }
-
-    if (direction == Sort.Direction.DESC) {
-      result = result.reversed()
-    }
-
-    return result
-  }
-}
-
-class CompareByWhenCreated : Comparator<NonAssociationDetails> {
-  override fun compare(a: NonAssociationDetails, b: NonAssociationDetails): Int {
-    return a.whenCreated.compareTo(b.whenCreated)
-  }
-}
-
-class CompareByLastName : Comparator<NonAssociationDetails> {
-  override fun compare(a: NonAssociationDetails, b: NonAssociationDetails): Int {
-    return a.otherPrisonerDetails.lastName.compareTo(b.otherPrisonerDetails.lastName)
   }
 }
