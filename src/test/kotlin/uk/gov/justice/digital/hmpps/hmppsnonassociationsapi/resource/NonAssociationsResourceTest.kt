@@ -7,15 +7,15 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssocia
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchPrisoners
+import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
 @WithMockUser
 class NonAssociationsResourceTest : SqsIntegrationTestBase() {
-
-  final val prisonerNumber = "A1234BC"
 
   @Nested
   inner class `Create a non-association` {
@@ -217,8 +217,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   @Nested
   inner class `Get a non-association` {
 
-    private val url = "/non-associations"
-
     @Test
     fun `without a valid token responds 401 Unauthorized`() {
       webTestClient.get()
@@ -282,12 +280,13 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   @Nested
   inner class `GET non associations for a prisoner` {
 
-    private val url = "/prisoner/$prisonerNumber/non-associations"
+    val prisonerNumber = "A1234BC"
 
     @Test
     fun `without a valid token responds 401 Unauthorized`() {
+      ""
       webTestClient.get()
-        .uri(url)
+        .uri("/prisoner/$prisonerNumber/non-associations")
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -296,7 +295,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `without the correct role responds 403 Forbidden`() {
       webTestClient.get()
-        .uri(url)
+        .uri("/prisoner/$prisonerNumber/non-associations")
         .headers(setAuthorisation(roles = listOf("WRONG_ROLE")))
         .exchange()
         .expectStatus()
@@ -312,7 +311,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       )
 
       webTestClient.get()
-        .uri(url)
+        .uri("/prisoner/$prisonerNumber/non-associations")
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus().isNotFound
@@ -341,7 +340,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       )
 
       webTestClient.get()
-        .uri(url)
+        .uri("/prisoner/$prisonerNumber/non-associations")
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus().isOk
@@ -352,20 +351,42 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `with a valid token returns the non-association details`() {
-      val nonAssociation = createNonAssociation()
-      val firstPrisoner = offenderSearchPrisoners[nonAssociation.firstPrisonerNumber]!!
-      val secondPrisoner = offenderSearchPrisoners[nonAssociation.secondPrisonerNumber]!!
+    fun `by default returns only open non-associations in same prison the given prisoner is in`() {
+      // prisoners in MDI
+      val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
+      val prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
+      val prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
+      // prisoner in another prison
+      val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
 
-      val prisonerNumbers = listOf(firstPrisoner.prisonerNumber, secondPrisoner.prisonerNumber)
-      val prisoners = listOf(firstPrisoner, secondPrisoner)
+      // open non-association, same prison
+      val openNonAssociation = createNonAssociation(
+        prisonerJohn.prisonerNumber,
+        prisonerMerlin.prisonerNumber,
+        isClosed = false,
+      )
+
+      // closed non-association, same prison, not returned
+      val closedNonAssociation = createNonAssociation(
+        firstPrisonerNumber = prisonerMerlin.prisonerNumber,
+        secondPrisonerNumber = prisonerJosh.prisonerNumber,
+        isClosed = true,
+      )
+
+      // non-association with someone in a different prison, not returned
+      val otherPrisonNonAssociation = createNonAssociation(
+        firstPrisonerNumber = prisonerEdward.prisonerNumber,
+        secondPrisonerNumber = prisonerMerlin.prisonerNumber,
+      )
+
+      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
       offenderSearchMockServer.stubSearchByPrisonerNumbers(
-        prisonerNumbers,
+        prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
         prisoners,
       )
 
-      // NOTE: Non-associations for the 2nd prisoner
-      val url = "/prisoner/${secondPrisoner.prisonerNumber}/non-associations"
+      // NOTE: Non-associations for Merlin
+      val url = "/prisoner/${prisonerMerlin.prisonerNumber}/non-associations"
       webTestClient.get()
         .uri(url)
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
@@ -375,33 +396,245 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           // language=json
           """
             {
-              "prisonerNumber": "${secondPrisoner.prisonerNumber}",
-              "firstName": "${secondPrisoner.firstName}",
-              "lastName": "${secondPrisoner.lastName}",
-              "prisonId": "${secondPrisoner.prisonId}",
-              "prisonName": "${secondPrisoner.prisonName}",
-              "cellLocation": "${secondPrisoner.cellLocation}",
+              "prisonerNumber": "${prisonerMerlin.prisonerNumber}",
+              "firstName": "${prisonerMerlin.firstName}",
+              "lastName": "${prisonerMerlin.lastName}",
+              "prisonId": "${prisonerMerlin.prisonId}",
+              "prisonName": "${prisonerMerlin.prisonName}",
+              "cellLocation": "${prisonerMerlin.cellLocation}",
               "nonAssociations": [
                 {
-                  "reasonCode": "${nonAssociation.secondPrisonerReason}",
-                  "reasonDescription": "${nonAssociation.secondPrisonerReason.description}",
-                  "restrictionTypeCode": "${nonAssociation.restrictionType}",
-                  "restrictionTypeDescription": "${nonAssociation.restrictionType.description}",
-                  "comment": "${nonAssociation.comment}",
-                  "authorisedBy": "${nonAssociation.authorisedBy}",
+                  "id": ${openNonAssociation.id},
+                  "reasonCode": "${openNonAssociation.secondPrisonerReason}",
+                  "reasonDescription": "${openNonAssociation.secondPrisonerReason.description}",
+                  "restrictionTypeCode": "${openNonAssociation.restrictionType}",
+                  "restrictionTypeDescription": "${openNonAssociation.restrictionType.description}",
+                  "comment": "${openNonAssociation.comment}",
+                  "authorisedBy": "${openNonAssociation.authorisedBy}",
                   "isClosed": false,
                   "closedReason": null,
                   "closedBy": null,
                   "closedAt": null,
                   "otherPrisonerDetails": {
-                    "prisonerNumber": "${firstPrisoner.prisonerNumber}",
-                    "reasonCode": "${nonAssociation.firstPrisonerReason}",
-                    "reasonDescription": "${nonAssociation.firstPrisonerReason.description}",
-                    "firstName": "${firstPrisoner.firstName}",
-                    "lastName": "${firstPrisoner.lastName}",
-                    "prisonId": "${firstPrisoner.prisonId}",
-                    "prisonName": "${firstPrisoner.prisonName}",
-                    "cellLocation": "${firstPrisoner.cellLocation}"
+                    "prisonerNumber": "${prisonerJohn.prisonerNumber}",
+                    "reasonCode": "${openNonAssociation.firstPrisonerReason}",
+                    "reasonDescription": "${openNonAssociation.firstPrisonerReason.description}",
+                    "firstName": "${prisonerJohn.firstName}",
+                    "lastName": "${prisonerJohn.lastName}",
+                    "prisonId": "${prisonerJohn.prisonId}",
+                    "prisonName": "${prisonerJohn.prisonName}",
+                    "cellLocation": "${prisonerJohn.cellLocation}"
+                  }
+                }
+              ]
+            }
+          """,
+          false,
+        )
+    }
+
+    @Test
+    fun `optionally returns closed non-associations`() {
+      // prisoners in MDI
+      val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
+      val prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
+      val prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
+      // prisoner in another prison
+      val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
+
+      // open non-association, same prison
+      val openNonAssociation = createNonAssociation(
+        prisonerJohn.prisonerNumber,
+        prisonerMerlin.prisonerNumber,
+        isClosed = false,
+      )
+
+      // closed non-association, same prison, not returned
+      val closedNonAssociation = createNonAssociation(
+        firstPrisonerNumber = prisonerMerlin.prisonerNumber,
+        secondPrisonerNumber = prisonerJosh.prisonerNumber,
+        isClosed = true,
+      )
+
+      // non-association with someone in a different prison, not returned
+      val otherPrisonNonAssociation = createNonAssociation(
+        firstPrisonerNumber = prisonerEdward.prisonerNumber,
+        secondPrisonerNumber = prisonerMerlin.prisonerNumber,
+      )
+
+      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
+        prisoners,
+      )
+
+      // NOTE: Non-associations for Merlin
+      val url = "/prisoner/${prisonerMerlin.prisonerNumber}/non-associations?includeClosed=true"
+      webTestClient.get()
+        .uri(url)
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+            {
+              "prisonerNumber": "${prisonerMerlin.prisonerNumber}",
+              "firstName": "${prisonerMerlin.firstName}",
+              "lastName": "${prisonerMerlin.lastName}",
+              "prisonId": "${prisonerMerlin.prisonId}",
+              "prisonName": "${prisonerMerlin.prisonName}",
+              "cellLocation": "${prisonerMerlin.cellLocation}",
+              "nonAssociations": [
+                {
+                  "id": ${openNonAssociation.id},
+                  "reasonCode": "${openNonAssociation.secondPrisonerReason}",
+                  "reasonDescription": "${openNonAssociation.secondPrisonerReason.description}",
+                  "restrictionTypeCode": "${openNonAssociation.restrictionType}",
+                  "restrictionTypeDescription": "${openNonAssociation.restrictionType.description}",
+                  "comment": "${openNonAssociation.comment}",
+                  "authorisedBy": "${openNonAssociation.authorisedBy}",
+                  "isClosed": false,
+                  "closedReason": null,
+                  "closedBy": null,
+                  "closedAt": null,
+                  "otherPrisonerDetails": {
+                    "prisonerNumber": "${prisonerJohn.prisonerNumber}",
+                    "reasonCode": "${openNonAssociation.firstPrisonerReason}",
+                    "reasonDescription": "${openNonAssociation.firstPrisonerReason.description}",
+                    "firstName": "${prisonerJohn.firstName}",
+                    "lastName": "${prisonerJohn.lastName}",
+                    "prisonId": "${prisonerJohn.prisonId}",
+                    "prisonName": "${prisonerJohn.prisonName}",
+                    "cellLocation": "${prisonerJohn.cellLocation}"
+                  }
+                },
+                {
+                  "id": ${closedNonAssociation.id},
+                  "reasonCode": "${closedNonAssociation.firstPrisonerReason}",
+                  "reasonDescription": "${closedNonAssociation.firstPrisonerReason.description}",
+                  "restrictionTypeCode": "${closedNonAssociation.restrictionType}",
+                  "restrictionTypeDescription": "${closedNonAssociation.restrictionType.description}",
+                  "comment": "${closedNonAssociation.comment}",
+                  "authorisedBy": "${closedNonAssociation.authorisedBy}",
+                  "isClosed": true,
+                  "closedReason": "They're friends now",
+                  "closedBy": "CLOSE_USER",
+                  "otherPrisonerDetails": {
+                    "prisonerNumber": "${prisonerJosh.prisonerNumber}",
+                    "reasonCode": "${closedNonAssociation.secondPrisonerReason}",
+                    "reasonDescription": "${closedNonAssociation.secondPrisonerReason.description}",
+                    "firstName": "${prisonerJosh.firstName}",
+                    "lastName": "${prisonerJosh.lastName}",
+                    "prisonId": "${prisonerJosh.prisonId}",
+                    "prisonName": "${prisonerJosh.prisonName}",
+                    "cellLocation": "${prisonerJosh.cellLocation}"
+                  }
+                }
+              ]
+            }
+          """,
+          false,
+        )
+    }
+
+    @Test
+    fun `optionally returns non-associations in other prisons`() {
+      // prisoners in MDI
+      val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
+      val prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
+      val prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
+      // prisoner in another prison
+      val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
+
+      // open non-association, same prison
+      val openNonAssociation = createNonAssociation(
+        prisonerJohn.prisonerNumber,
+        prisonerMerlin.prisonerNumber,
+        isClosed = false,
+      )
+
+      // closed non-association, same prison, not returned
+      val closedNonAssociation = createNonAssociation(
+        firstPrisonerNumber = prisonerMerlin.prisonerNumber,
+        secondPrisonerNumber = prisonerJosh.prisonerNumber,
+        isClosed = true,
+      )
+
+      // non-association with someone in a different prison, not returned
+      val otherPrisonNonAssociation = createNonAssociation(
+        firstPrisonerNumber = prisonerEdward.prisonerNumber,
+        secondPrisonerNumber = prisonerMerlin.prisonerNumber,
+      )
+
+      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
+        prisoners,
+      )
+
+      // NOTE: Non-associations for Merlin
+      val url = "/prisoner/${prisonerMerlin.prisonerNumber}/non-associations?includeOtherPrisons=true"
+      webTestClient.get()
+        .uri(url)
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+            {
+              "prisonerNumber": "${prisonerMerlin.prisonerNumber}",
+              "firstName": "${prisonerMerlin.firstName}",
+              "lastName": "${prisonerMerlin.lastName}",
+              "prisonId": "${prisonerMerlin.prisonId}",
+              "prisonName": "${prisonerMerlin.prisonName}",
+              "cellLocation": "${prisonerMerlin.cellLocation}",
+              "nonAssociations": [
+                {
+                  "id": ${openNonAssociation.id},
+                  "reasonCode": "${openNonAssociation.secondPrisonerReason}",
+                  "reasonDescription": "${openNonAssociation.secondPrisonerReason.description}",
+                  "restrictionTypeCode": "${openNonAssociation.restrictionType}",
+                  "restrictionTypeDescription": "${openNonAssociation.restrictionType.description}",
+                  "comment": "${openNonAssociation.comment}",
+                  "authorisedBy": "${openNonAssociation.authorisedBy}",
+                  "isClosed": false,
+                  "closedReason": null,
+                  "closedBy": null,
+                  "closedAt": null,
+                  "otherPrisonerDetails": {
+                    "prisonerNumber": "${prisonerJohn.prisonerNumber}",
+                    "reasonCode": "${openNonAssociation.firstPrisonerReason}",
+                    "reasonDescription": "${openNonAssociation.firstPrisonerReason.description}",
+                    "firstName": "${prisonerJohn.firstName}",
+                    "lastName": "${prisonerJohn.lastName}",
+                    "prisonId": "${prisonerJohn.prisonId}",
+                    "prisonName": "${prisonerJohn.prisonName}",
+                    "cellLocation": "${prisonerJohn.cellLocation}"
+                  }
+                },
+                {
+                  "id": ${otherPrisonNonAssociation.id},
+                  "reasonCode": "${otherPrisonNonAssociation.secondPrisonerReason}",
+                  "reasonDescription": "${otherPrisonNonAssociation.secondPrisonerReason.description}",
+                  "restrictionTypeCode": "${closedNonAssociation.restrictionType}",
+                  "restrictionTypeDescription": "${closedNonAssociation.restrictionType.description}",
+                  "comment": "${closedNonAssociation.comment}",
+                  "authorisedBy": "${closedNonAssociation.authorisedBy}",
+                  "isClosed": false,
+                  "closedReason": null,
+                  "closedBy": null,
+                  "closedAt": null,
+                  "otherPrisonerDetails": {
+                    "prisonerNumber": "${prisonerEdward.prisonerNumber}",
+                    "reasonCode": "${otherPrisonNonAssociation.firstPrisonerReason}",
+                    "reasonDescription": "${otherPrisonNonAssociation.firstPrisonerReason.description}",
+                    "firstName": "${prisonerEdward.firstName}",
+                    "lastName": "${prisonerEdward.lastName}",
+                    "prisonId": "${prisonerEdward.prisonId}",
+                    "prisonName": "${prisonerEdward.prisonName}",
+                    "cellLocation": "${prisonerEdward.cellLocation}"
                   }
                 }
               ]
@@ -412,17 +645,28 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
   }
 
-  private fun createNonAssociation(): NonAssociationJPA {
-    return repository.save(
-      NonAssociationJPA(
-        firstPrisonerNumber = "A1234BC",
-        firstPrisonerReason = NonAssociationReason.VICTIM,
-        secondPrisonerNumber = "D5678EF",
-        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
-        restrictionType = NonAssociationRestrictionType.CELL,
-        comment = "They keep fighting",
-        authorisedBy = "USER_1",
-      ),
+  private fun createNonAssociation(
+    firstPrisonerNumber: String = "A1234BC",
+    secondPrisonerNumber: String = "D5678EF",
+    isClosed: Boolean = false,
+  ): NonAssociationJPA {
+    val nonna = NonAssociationJPA(
+      firstPrisonerNumber = firstPrisonerNumber,
+      firstPrisonerReason = NonAssociationReason.VICTIM,
+      secondPrisonerNumber = secondPrisonerNumber,
+      secondPrisonerReason = NonAssociationReason.PERPETRATOR,
+      restrictionType = NonAssociationRestrictionType.CELL,
+      comment = "They keep fighting",
+      authorisedBy = "USER_1",
     )
+
+    if (isClosed) {
+      nonna.isClosed = true
+      nonna.closedReason = "They're friends now"
+      nonna.closedBy = "CLOSE_USER"
+      nonna.closedAt = LocalDateTime.now()
+    }
+
+    return repository.save(nonna)
   }
 }

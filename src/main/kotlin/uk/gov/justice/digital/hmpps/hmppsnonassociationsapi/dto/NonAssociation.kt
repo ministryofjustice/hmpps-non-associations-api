@@ -8,7 +8,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation a
  * Non-association between two prisoners
  */
 data class NonAssociation(
-  @Schema(description = "ID of the non-association", required = false, example = "42")
+  @Schema(description = "ID of the non-association", required = true, example = "42")
   val id: Long,
 
   @Schema(description = "Prisoner number to not associate", required = true, example = "A1234BC")
