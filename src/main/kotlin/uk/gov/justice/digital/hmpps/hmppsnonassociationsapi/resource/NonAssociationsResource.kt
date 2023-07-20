@@ -94,6 +94,7 @@ class NonAssociationsResource(
       allowableValues = [
         "WHEN_CREATED",
         "LAST_NAME",
+        "FIRST_NAME",
       ],
     )
     @RequestParam(required = false)

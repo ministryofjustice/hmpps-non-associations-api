@@ -101,12 +101,14 @@ data class NonAssociationListOptions(
 enum class NonAssociationsSort {
   WHEN_CREATED,
   LAST_NAME,
+  FIRST_NAME,
   ;
 
   fun comparator(direction: Sort.Direction): Comparator<NonAssociationDetails> {
     return when (this) {
       WHEN_CREATED -> Comparator.comparing(NonAssociationDetails::whenCreated)
       LAST_NAME -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.lastName }
+      FIRST_NAME -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.firstName }
     }.run {
       if (direction == Sort.Direction.DESC) this.reversed() else this
     }
