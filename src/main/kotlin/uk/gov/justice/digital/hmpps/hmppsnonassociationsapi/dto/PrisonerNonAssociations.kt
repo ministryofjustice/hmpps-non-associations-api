@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationListOptions
 import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
@@ -99,7 +100,11 @@ data class OtherPrisonerDetails(
 fun List<NonAssociationJPA>.toPrisonerNonAssociations(
   prisonerNumber: String,
   prisoners: Map<String, OffenderSearchPrisoner>,
+  options: NonAssociationListOptions,
 ): PrisonerNonAssociations {
+  val sortComparator = options.sortBy.comparator(options.sortDirection)
+  val nonAssociations = this.toNonAssociationsDetails(prisonerNumber, prisoners)
+    .sortedWith(sortComparator)
   return PrisonerNonAssociations(
     prisonerNumber = prisonerNumber,
     firstName = prisoners[prisonerNumber]!!.firstName,
@@ -107,7 +112,7 @@ fun List<NonAssociationJPA>.toPrisonerNonAssociations(
     prisonId = prisoners[prisonerNumber]!!.prisonId,
     prisonName = prisoners[prisonerNumber]!!.prisonName,
     cellLocation = prisoners[prisonerNumber]!!.cellLocation,
-    nonAssociations = this.toNonAssociationsDetails(prisonerNumber, prisoners),
+    nonAssociations = nonAssociations,
   )
 }
 
