@@ -3,9 +3,11 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.toPrisonerNonAssociations
@@ -73,7 +75,11 @@ class NonAssociationsService(
       }
     }
 
-    return nonAssociationsFiltered.toPrisonerNonAssociations(prisonerNumber, prisoners)
+    return nonAssociationsFiltered.toPrisonerNonAssociations(
+      prisonerNumber,
+      prisoners,
+      options,
+    )
   }
 
   fun getLegacyDetails(prisonerNumber: String): LegacyNonAssociationDetails {
@@ -88,4 +94,25 @@ class NonAssociationsService(
 data class NonAssociationListOptions(
   val includeOtherPrisons: Boolean = false,
   val includeClosed: Boolean = false,
+  val sortBy: NonAssociationsSort = NonAssociationsSort.WHEN_CREATED,
+  val sortDirection: Sort.Direction = Sort.Direction.DESC,
 )
+
+enum class NonAssociationsSort {
+  WHEN_CREATED,
+  LAST_NAME,
+  FIRST_NAME,
+  PRISONER_NUMBER,
+  ;
+
+  fun comparator(direction: Sort.Direction): Comparator<NonAssociationDetails> {
+    return when (this) {
+      WHEN_CREATED -> Comparator.comparing(NonAssociationDetails::whenCreated)
+      LAST_NAME -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.lastName }
+      FIRST_NAME -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.firstName }
+      PRISONER_NUMBER -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.prisonerNumber }
+    }.run {
+      if (direction == Sort.Direction.DESC) this.reversed() else this
+    }
+  }
+}
