@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -24,6 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationListOptions
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsSort
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociationDomainEventType
 
 @RestController
@@ -83,12 +85,33 @@ class NonAssociationsResource(
     )
     @RequestParam(required = false)
     includeOtherPrisons: Boolean,
+
+    @Schema(
+      description = "Sort non-associations by",
+      required = false,
+      defaultValue = "WHEN_CREATED",
+      example = "LAST_NAME",
+      allowableValues = [
+        "WHEN_CREATED",
+        "LAST_NAME",
+        "FIRST_NAME",
+        "PRISONER_NUMBER",
+      ],
+    )
+    @RequestParam(required = false)
+    sortBy: NonAssociationsSort?,
+
+    @Schema(description = "Sort direction", required = false, defaultValue = "DESC", example = "DESC", allowableValues = ["ASC", "DESC"])
+    @RequestParam(required = false)
+    sortDirection: Sort.Direction?,
   ): PrisonerNonAssociations {
     return nonAssociationsService.getPrisonerNonAssociations(
       prisonerNumber,
       NonAssociationListOptions(
         includeClosed = includeClosed,
         includeOtherPrisons = includeOtherPrisons,
+        sortBy = sortBy ?: NonAssociationsSort.WHEN_CREATED,
+        sortDirection = sortDirection ?: Sort.Direction.DESC,
       ),
     )
   }
