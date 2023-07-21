@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
@@ -64,12 +65,30 @@ class NonAssociationsResource(
     @Schema(description = "The offender prisoner number", example = "A1234BC", required = true)
     @PathVariable
     prisonerNumber: String,
+
+    @Schema(
+      description = "Whether to include closed non-associations or not",
+      required = false,
+      defaultValue = "false",
+      example = "true",
+    )
+    @RequestParam(required = false)
+    includeClosed: Boolean,
+
+    @Schema(
+      description = "Whether to include non-associations with prisoners in other prisons",
+      required = false,
+      defaultValue = "false",
+      example = "true",
+    )
+    @RequestParam(required = false)
+    includeOtherPrisons: Boolean,
   ): PrisonerNonAssociations {
     return nonAssociationsService.getPrisonerNonAssociations(
       prisonerNumber,
       NonAssociationListOptions(
-        onlySamePrison = true,
-        includeClosed = false,
+        includeClosed = includeClosed,
+        includeOtherPrisons = includeOtherPrisons,
       ),
     )
   }
