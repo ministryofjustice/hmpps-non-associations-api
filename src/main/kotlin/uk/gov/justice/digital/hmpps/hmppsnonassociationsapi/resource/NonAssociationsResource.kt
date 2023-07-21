@@ -95,6 +95,7 @@ class NonAssociationsResource(
         "WHEN_CREATED",
         "LAST_NAME",
         "FIRST_NAME",
+        "PRISONER_NUMBER",
       ],
     )
     @RequestParam(required = false)

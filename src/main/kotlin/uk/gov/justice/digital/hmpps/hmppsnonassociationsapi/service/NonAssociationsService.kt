@@ -102,6 +102,7 @@ enum class NonAssociationsSort {
   WHEN_CREATED,
   LAST_NAME,
   FIRST_NAME,
+  PRISONER_NUMBER,
   ;
 
   fun comparator(direction: Sort.Direction): Comparator<NonAssociationDetails> {
@@ -109,6 +110,7 @@ enum class NonAssociationsSort {
       WHEN_CREATED -> Comparator.comparing(NonAssociationDetails::whenCreated)
       LAST_NAME -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.lastName }
       FIRST_NAME -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.firstName }
+      PRISONER_NUMBER -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.prisonerNumber }
     }.run {
       if (direction == Sort.Direction.DESC) this.reversed() else this
     }
