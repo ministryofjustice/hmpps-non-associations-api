@@ -76,6 +76,11 @@ class NonAssociation(
       //       It may be one of the things we make mandatory after migration?
       authorisedBy = authorisedBy ?: "",
       whenCreated = whenCreated,
+      isClosed = isClosed,
+      closedReason = closedReason,
+      closedBy = closedBy,
+      closedAt = closedAt,
+
     )
   }
 

@@ -37,7 +37,7 @@ data class NonAssociation(
   @Schema(description = "Reason why the non-association was closed. Only present when the non-association is closed, null for open non-associations", required = false, example = "null")
   val closedReason: String? = null,
   @Schema(description = "Date and time of when the non-association was closed. Only present when the non-association is closed, null for open non-associations", required = false, example = "null")
-  val closedAt: String? = null,
+  val closedAt: LocalDateTime? = null,
 )
 
 /**
@@ -56,7 +56,7 @@ data class CreateNonAssociationRequest(
   @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "CELL")
   val restrictionType: NonAssociationRestrictionType,
 
-  @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "John and Luke always end up fighting")
+  @Schema(description = "Explanation of why prisoners are non-associated", required = true, example = "John and Luke always end up fighting")
   val comment: String,
 ) {
   fun toNewEntity(authorisedBy: String): NonAssociationJPA {

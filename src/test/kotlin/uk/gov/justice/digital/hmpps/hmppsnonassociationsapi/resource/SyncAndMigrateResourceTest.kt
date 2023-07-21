@@ -4,11 +4,13 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.security.test.context.support.WithMockUser
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateSyncRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.MigrateRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.SyncRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @WithMockUser
 class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
@@ -37,6 +39,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         restrictionType = NonAssociationRestrictionType.CELL,
         comment = "They keep fighting",
         authorisedBy = "Me",
+        active = true,
       )
 
       // correct role, missing write scope
@@ -103,6 +106,8 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         secondPrisonerReason = NonAssociationReason.PERPETRATOR,
         restrictionType = NonAssociationRestrictionType.CELL,
         comment = "This is a comment",
+        authorisedBy = "Test",
+        active = true,
       )
 
       val expectedResponse =
@@ -115,7 +120,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "secondPrisonerReason": "${request.secondPrisonerReason}",
           "restrictionType": "${request.restrictionType}",
           "comment": "${request.comment}",
-          "authorisedBy": "$SYSTEM_USERNAME",
+          "authorisedBy": "${request.authorisedBy}",
           "isClosed": false,
           "closedReason": null,
           "closedBy": null,
@@ -154,7 +159,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `without the correct role and scope responds 403 Forbidden`() {
-      val request = SyncRequest(
+      val request = CreateSyncRequest(
         firstPrisonerNumber = "A7777XX",
         firstPrisonerReason = NonAssociationReason.VICTIM,
         secondPrisonerNumber = "B7777XX",
@@ -221,14 +226,17 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `for a valid request sync's the non-association`() {
-      val request = SyncRequest(
+      val request = CreateSyncRequest(
         firstPrisonerNumber = "A7777XX",
         firstPrisonerReason = NonAssociationReason.VICTIM,
         secondPrisonerNumber = "B7777XX",
         secondPrisonerReason = NonAssociationReason.PERPETRATOR,
         restrictionType = NonAssociationRestrictionType.CELL,
+        expiryDate = LocalDate.now().minusDays(4),
+        active = false,
       )
 
+      val dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
       val expectedResponse =
         // language=json
         """
@@ -238,12 +246,12 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "secondPrisonerNumber": "${request.secondPrisonerNumber}",
           "secondPrisonerReason": "${request.secondPrisonerReason}",
           "restrictionType": "${request.restrictionType}",
-          "comment": "NO COMMENT",
-          "authorisedBy": "$SYSTEM_USERNAME",
-          "isClosed": false,
-          "closedReason": null,
-          "closedBy": null,
-          "closedAt": null
+          "comment": "",
+          "authorisedBy": "",
+          "isClosed": true,
+          "closedReason": "UNDEFINED",
+          "closedBy": "$SYSTEM_USERNAME",
+          "closedAt": "${request.expiryDate?.atStartOfDay()?.format(dtFormat)}"
         }
         """
 

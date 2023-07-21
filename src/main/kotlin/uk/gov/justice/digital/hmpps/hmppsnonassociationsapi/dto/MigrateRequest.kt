@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
+import java.time.LocalDate
 
 @Schema(description = "Migrate Request")
 data class MigrateRequest(
@@ -27,7 +28,7 @@ data class MigrateRequest(
   val restrictionType: NonAssociationRestrictionType,
 
   @Schema(
-    description = "Type of restriction, e.g. don't locate in the same cell",
+    description = "Explanation of why prisoners are non-associated",
     required = false,
     example = "John and Luke always end up fighting",
   )
@@ -35,6 +36,15 @@ data class MigrateRequest(
 
   @Schema(description = "Who authorised the non-association", required = false, example = "John Smith")
   val authorisedBy: String? = null,
+
+  @Schema(description = "Indicates that the NA is active", required = true, example = "false")
+  val active: Boolean,
+
+  @Schema(description = "The date that the NA became active", required = false, example = "2023-05-09", defaultValue = "today")
+  val effectiveFromDate: LocalDate? = null,
+
+  @Schema(description = "The date that the NA became inactive", required = false, example = "2026-05-09")
+  val expiryDate: LocalDate? = null,
 ) {
   fun toNewEntity(): NonAssociation {
     return NonAssociation(
@@ -44,8 +54,12 @@ data class MigrateRequest(
       secondPrisonerNumber = secondPrisonerNumber,
       secondPrisonerReason = secondPrisonerReason,
       restrictionType = restrictionType,
-      comment = comment ?: "NO COMMENT",
-      authorisedBy = authorisedBy ?: SYSTEM_USERNAME,
+      comment = comment ?: "",
+      authorisedBy = authorisedBy,
+      isClosed = !active,
+      closedAt = if (active) { null } else { expiryDate?.atStartOfDay() },
+      closedBy = if (active) { null } else { SYSTEM_USERNAME },
+      closedReason = if (active) { null } else { "MIGRATION" },
     )
   }
 
