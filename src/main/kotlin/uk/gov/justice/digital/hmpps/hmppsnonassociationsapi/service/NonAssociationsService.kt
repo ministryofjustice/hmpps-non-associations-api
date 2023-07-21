@@ -59,7 +59,7 @@ class NonAssociationsService(
 
     var nonAssociationsFiltered = nonAssociations
     // filter out non-associations in other prisons
-    if (options.onlySamePrison) {
+    if (!options.includeOtherPrisons) {
       val prisonId = prisoners[prisonerNumber]!!.prisonId
       nonAssociationsFiltered = nonAssociationsFiltered.filter { nonna ->
         prisoners[nonna.firstPrisonerNumber]!!.prisonId == prisonId &&
@@ -86,6 +86,6 @@ class NonAssociationsService(
 }
 
 data class NonAssociationListOptions(
-  val onlySamePrison: Boolean = true,
+  val includeOtherPrisons: Boolean = false,
   val includeClosed: Boolean = false,
 )

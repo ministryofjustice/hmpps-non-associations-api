@@ -46,4 +46,21 @@ val offenderSearchPrisoners = mapOf(
     prisonName = "Moorland",
     cellLocation = "MDI-A-2",
   ),
+  "G9012HI" to OffenderSearchPrisoner(
+    prisonerNumber = "G9012HI",
+    firstName = "Josh",
+    lastName = "Plimburkson",
+    prisonId = "MDI",
+    prisonName = "Moorland",
+    cellLocation = "MDI-A-3",
+  ),
+  // Different prison
+  "L3456MN" to OffenderSearchPrisoner(
+    prisonerNumber = "L3456MN",
+    firstName = "Edward",
+    lastName = "Lillibluprs",
+    prisonId = "FBI",
+    prisonName = "Forest Bank",
+    cellLocation = "FBI-C-2",
+  ),
 )
