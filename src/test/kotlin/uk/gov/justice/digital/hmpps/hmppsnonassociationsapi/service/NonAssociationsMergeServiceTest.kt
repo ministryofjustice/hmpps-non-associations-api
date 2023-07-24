@@ -67,7 +67,7 @@ fun genNonAssociation(
   closedReason: String? = "Ok Now",
   authBy: String? = "TEST",
 
-  ) = NonAssociation(
+) = NonAssociation(
   id = id,
   firstPrisonerNumber = firstPrisonerNumber,
   firstPrisonerReason = NonAssociationReason.BULLYING,

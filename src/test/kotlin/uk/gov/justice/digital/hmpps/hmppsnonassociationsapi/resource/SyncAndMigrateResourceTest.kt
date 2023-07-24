@@ -275,13 +275,13 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `closing a non-association`() {
-
       val naUpdate = repository.save(
         genNonAssociation(
           firstPrisonerNumber = "C1234AA",
           secondPrisonerNumber = "D1234AA",
           createTime = LocalDateTime.now(),
-        ))
+        ),
+      )
 
       val request = UpdateSyncRequest(
         id = naUpdate.id!!,
@@ -291,7 +291,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         expiryDate = LocalDate.now(),
         active = false,
         comment = "Its ok now",
-        authorisedBy = "TEST"
+        authorisedBy = "TEST",
       )
 
       val dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
@@ -332,7 +332,6 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `re-opening a non-association`() {
-
       val naUpdate = repository.save(
         genNonAssociation(
           firstPrisonerNumber = "C1234AA",
@@ -340,7 +339,8 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           createTime = LocalDateTime.now(),
           closed = true,
           closedReason = "All fine now",
-        ))
+        ),
+      )
 
       val request = UpdateSyncRequest(
         id = naUpdate.id!!,
@@ -350,7 +350,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         expiryDate = LocalDate.now(),
         active = true,
         comment = "Its kicked off again",
-        authorisedBy = "STAFF1"
+        authorisedBy = "STAFF1",
       )
 
       val dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
@@ -391,7 +391,6 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `deleting a non-association`() {
-
       val naDelete = repository.save(
         genNonAssociation(
           firstPrisonerNumber = "C1234AA",
@@ -399,8 +398,8 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           createTime = LocalDateTime.now(),
           closedReason = "OK now",
           authBy = "TEST",
-        ))
-
+        ),
+      )
 
       webTestClient.delete()
         .uri("$url/${naDelete.id}")
