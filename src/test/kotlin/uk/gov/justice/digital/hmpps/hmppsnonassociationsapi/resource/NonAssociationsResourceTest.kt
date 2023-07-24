@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.security.test.context.support.WithMockUser
@@ -8,6 +9,7 @@ import org.springframework.test.web.reactive.server.returnResult
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
@@ -212,6 +214,150 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(jsonString(request))
         .exchange()
         .expectStatus().isCreated
+        .expectBody().json(expectedResponse, false)
+    }
+  }
+
+  @Nested
+  inner class `PATCH a non-association` {
+
+    lateinit var nonAssociation: NonAssociationJPA
+    lateinit var url: String
+
+    @BeforeEach
+    fun setUp() {
+      nonAssociation = createNonAssociation()
+      url = "/non-associations/${nonAssociation.id}"
+    }
+
+    @Test
+    fun `without a valid token responds 401 Unauthorized`() {
+      webTestClient.patch()
+        .uri(url)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `without the correct role and scope responds 403 Forbidden`() {
+      val request = PatchNonAssociationRequest(
+        restrictionType = NonAssociationRestrictionType.EXERCISE,
+      )
+
+      // correct role, missing write scope
+      webTestClient.patch()
+        .uri(url)
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+
+      // correct role, missing write scope
+      webTestClient.patch()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            scopes = listOf("read"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `without a valid request body responds 400 Bad Request`() {
+      // TODO: How do we check the request body is not empty if all fields optional?
+      // no request body
+      webTestClient.patch()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            scopes = listOf("write"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+
+      // unsupported Content-Type
+      webTestClient.patch()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            scopes = listOf("write"),
+          ),
+        )
+        .header("Content-Type", "text/plain")
+        .bodyValue("{}")
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+
+      // request body has invalid fields
+      webTestClient.patch()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            scopes = listOf("write"),
+          ),
+        )
+        .header("Content-Type", "text/plain")
+        .bodyValue(jsonString("firstPrisonerNumber" to "A1234BC"))
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+    }
+
+    @Test
+    fun `for a valid request updates the non-association`() {
+      val updatedComment = "UPDATED comment"
+      val request = mapOf(
+        "comment" to updatedComment,
+      )
+
+      val expectedUsername = "A_TEST_USER"
+      val expectedResponse =
+        // language=json
+        """
+        {
+          "firstPrisonerNumber": "${nonAssociation.firstPrisonerNumber}",
+          "firstPrisonerReason": "${nonAssociation.firstPrisonerReason}",
+          "secondPrisonerNumber": "${nonAssociation.secondPrisonerNumber}",
+          "secondPrisonerReason": "${nonAssociation.secondPrisonerReason}",
+          "restrictionType": "${nonAssociation.restrictionType}",
+          "comment": "$updatedComment",
+          "authorisedBy": "${nonAssociation.authorisedBy}",
+          "isClosed": false,
+          "closedReason": null,
+          "closedBy": null,
+          "closedAt": null
+        }
+        """
+
+      webTestClient.patch()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            user = expectedUsername,
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            scopes = listOf("write", "read"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isOk
         .expectBody().json(expectedResponse, false)
     }
   }
