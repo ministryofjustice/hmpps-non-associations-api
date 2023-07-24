@@ -46,6 +46,7 @@ class NonAssociationsServiceTest {
       closedBy = null,
       closedReason = null,
       closedAt = null,
+      updatedBy = "A_USER",
     )
 
     whenever(nonAssociationsRepository.save(any()))

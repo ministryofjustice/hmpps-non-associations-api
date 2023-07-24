@@ -136,6 +136,7 @@ class NonAssociationsRepositoryTest : TestBase() {
       secondPrisonerReason = NonAssociationReason.PERPETRATOR,
       restrictionType = NonAssociationRestrictionType.CELL,
       comment = "John attacked Bob",
+      updatedBy = "A_USER",
     )
   }
 }

@@ -69,6 +69,7 @@ data class CreateNonAssociationRequest(
       restrictionType = restrictionType,
       comment = comment,
       authorisedBy = authorisedBy,
+      updatedBy = authorisedBy,
     )
   }
 }

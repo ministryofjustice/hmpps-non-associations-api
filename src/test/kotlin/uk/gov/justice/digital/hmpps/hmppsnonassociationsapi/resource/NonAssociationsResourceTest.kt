@@ -874,6 +874,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       restrictionType = NonAssociationRestrictionType.CELL,
       comment = "They keep fighting",
       authorisedBy = "USER_1",
+      updatedBy = "A_USER",
     )
 
     if (isClosed) {

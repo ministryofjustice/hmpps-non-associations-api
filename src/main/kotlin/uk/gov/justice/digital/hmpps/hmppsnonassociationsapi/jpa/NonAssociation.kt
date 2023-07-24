@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import org.hibernate.Hibernate
 import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
@@ -52,6 +53,8 @@ class NonAssociation(
   var whenCreated: LocalDateTime = LocalDateTime.now(),
   @LastModifiedDate
   var whenUpdated: LocalDateTime = LocalDateTime.now(),
+  @LastModifiedBy
+  var updatedBy: String,
 ) {
   fun close(closedBy: String, closedReason: String, closedAt: LocalDateTime) {
     this.isClosed = true

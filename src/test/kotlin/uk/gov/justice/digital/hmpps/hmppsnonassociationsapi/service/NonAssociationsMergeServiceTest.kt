@@ -74,4 +74,5 @@ fun genNonAssociation(
   authorisedBy = "TEST",
   whenUpdated = createTime,
   whenCreated = createTime,
+  updatedBy = "A_USER",
 )
