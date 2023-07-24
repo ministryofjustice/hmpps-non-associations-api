@@ -50,8 +50,14 @@ class SyncAndMigrateService(
       closedAt = if (!updateSyncRequest.active) { updateSyncRequest.expiryDate?.atStartOfDay() } else { null }
       if (updateSyncRequest.active) {
         closedReason = null
-      } else if (closedReason == null) {
-        closedReason = "UNDEFINED"
+        closedBy = null
+      } else {
+        if (closedReason == null) {
+          closedReason = "UNDEFINED"
+        }
+        if (closedBy == null) {
+          closedBy = updateSyncRequest.authorisedBy
+        }
       }
       toDto()
     }

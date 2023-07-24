@@ -63,7 +63,11 @@ fun genNonAssociation(
   firstPrisonerNumber: String,
   secondPrisonerNumber: String,
   createTime: LocalDateTime = LocalDateTime.now(),
-) = NonAssociation(
+  closed: Boolean = false,
+  closedReason: String? = "Ok Now",
+  authBy: String? = "TEST",
+
+  ) = NonAssociation(
   id = id,
   firstPrisonerNumber = firstPrisonerNumber,
   firstPrisonerReason = NonAssociationReason.BULLYING,
@@ -71,7 +75,23 @@ fun genNonAssociation(
   secondPrisonerReason = NonAssociationReason.VICTIM,
   comment = "Comment",
   restrictionType = NonAssociationRestrictionType.WING,
-  authorisedBy = "TEST",
+  authorisedBy = authBy,
   whenUpdated = createTime,
   whenCreated = createTime,
+  isClosed = closed,
+  closedAt = if (closed) {
+    LocalDateTime.now()
+  } else {
+    null
+  },
+  closedBy = if (closed) {
+    "A USER"
+  } else {
+    null
+  },
+  closedReason = if (closed) {
+    closedReason
+  } else {
+    null
+  },
 )

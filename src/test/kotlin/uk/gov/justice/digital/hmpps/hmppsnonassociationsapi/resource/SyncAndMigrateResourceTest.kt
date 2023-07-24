@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.security.test.context.support.WithMockUser
@@ -8,8 +9,11 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateSyncReques
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.MigrateRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.UpdateSyncRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.genNonAssociation
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @WithMockUser
@@ -225,7 +229,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `for a valid request sync's the non-association`() {
+    fun `creating an non-association`() {
       val request = CreateSyncRequest(
         firstPrisonerNumber = "A7777XX",
         firstPrisonerReason = NonAssociationReason.VICTIM,
@@ -267,6 +271,149 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus().isCreated
         .expectBody().json(expectedResponse, false)
+    }
+
+    @Test
+    fun `closing a non-association`() {
+
+      val naUpdate = repository.save(
+        genNonAssociation(
+          firstPrisonerNumber = "C1234AA",
+          secondPrisonerNumber = "D1234AA",
+          createTime = LocalDateTime.now(),
+        ))
+
+      val request = UpdateSyncRequest(
+        id = naUpdate.id!!,
+        firstPrisonerReason = NonAssociationReason.PERPETRATOR,
+        secondPrisonerReason = NonAssociationReason.VICTIM,
+        restrictionType = NonAssociationRestrictionType.WING,
+        expiryDate = LocalDate.now(),
+        active = false,
+        comment = "Its ok now",
+        authorisedBy = "TEST"
+      )
+
+      val dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+      val expectedResponse =
+        // language=json
+        """
+        {
+          "id": ${request.id},
+          "firstPrisonerNumber": "C1234AA",
+          "firstPrisonerReason": "${request.firstPrisonerReason}",
+          "secondPrisonerNumber": "D1234AA",
+          "secondPrisonerReason": "${request.secondPrisonerReason}",
+          "restrictionType": "${request.restrictionType}",
+          "comment": "${request.comment}",
+          "authorisedBy": "${request.authorisedBy}",
+          "isClosed": true,
+          "closedReason": "UNDEFINED",
+          "closedBy": "TEST",
+          "closedAt": "${request.expiryDate?.atStartOfDay()?.format(dtFormat)}"
+        }
+        """
+
+      webTestClient.put()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(expectedResponse, false)
+
+      repository.deleteById(request.id)
+    }
+
+    @Test
+    fun `re-opening a non-association`() {
+
+      val naUpdate = repository.save(
+        genNonAssociation(
+          firstPrisonerNumber = "C1234AA",
+          secondPrisonerNumber = "D1234AA",
+          createTime = LocalDateTime.now(),
+          closed = true,
+          closedReason = "All fine now",
+        ))
+
+      val request = UpdateSyncRequest(
+        id = naUpdate.id!!,
+        firstPrisonerReason = NonAssociationReason.PERPETRATOR,
+        secondPrisonerReason = NonAssociationReason.VICTIM,
+        restrictionType = NonAssociationRestrictionType.WING,
+        expiryDate = LocalDate.now(),
+        active = true,
+        comment = "Its kicked off again",
+        authorisedBy = "STAFF1"
+      )
+
+      val dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+      val expectedResponse =
+        // language=json
+        """
+        {
+          "id": ${request.id},
+          "firstPrisonerNumber": "C1234AA",
+          "firstPrisonerReason": "${request.firstPrisonerReason}",
+          "secondPrisonerNumber": "D1234AA",
+          "secondPrisonerReason": "${request.secondPrisonerReason}",
+          "restrictionType": "${request.restrictionType}",
+          "comment": "${request.comment}",
+          "authorisedBy": "${request.authorisedBy}",
+          "isClosed": false,
+          "closedReason": null,
+          "closedBy": null,
+          "closedAt": null
+        }
+        """
+
+      webTestClient.put()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(expectedResponse, false)
+
+      repository.deleteById(request.id)
+    }
+
+    @Test
+    fun `deleting a non-association`() {
+
+      val naDelete = repository.save(
+        genNonAssociation(
+          firstPrisonerNumber = "C1234AA",
+          secondPrisonerNumber = "D1234AA",
+          createTime = LocalDateTime.now(),
+          closedReason = "OK now",
+          authBy = "TEST",
+        ))
+
+
+      webTestClient.delete()
+        .uri("$url/${naDelete.id}")
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isNoContent
+
+      Assertions.assertThat(repository.findById(naDelete.id!!)).isNotPresent
     }
   }
 }
