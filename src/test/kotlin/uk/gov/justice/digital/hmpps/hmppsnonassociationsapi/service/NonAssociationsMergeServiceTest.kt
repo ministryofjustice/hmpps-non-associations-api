@@ -78,6 +78,7 @@ fun genNonAssociation(
   authorisedBy = authBy,
   whenUpdated = createTime,
   whenCreated = createTime,
+  updatedBy = "A_USER",
   isClosed = closed,
   closedAt = if (closed) {
     LocalDateTime.now()

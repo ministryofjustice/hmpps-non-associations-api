@@ -60,6 +60,7 @@ data class CreateSyncRequest(
       closedAt = if (active) { null } else { expiryDate?.atStartOfDay() }, // TODO: can this be in the future?
       closedBy = if (active) { null } else { SYSTEM_USERNAME },
       closedReason = if (active) { null } else { "UNDEFINED" },
+      updatedBy = SYSTEM_USERNAME,
     )
   }
 

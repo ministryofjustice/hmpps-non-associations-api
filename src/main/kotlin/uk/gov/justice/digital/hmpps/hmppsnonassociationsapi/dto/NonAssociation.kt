@@ -69,6 +69,32 @@ data class CreateNonAssociationRequest(
       restrictionType = restrictionType,
       comment = comment,
       authorisedBy = authorisedBy,
+      updatedBy = authorisedBy,
     )
   }
+}
+
+/**
+ * Request format for updating a non-association between two prisoners
+ */
+data class PatchNonAssociationRequest(
+  @Schema(description = "Reason why this prisoner should be kept apart from the other", required = true, example = "VICTIM")
+  val firstPrisonerReason: NonAssociationReason? = null,
+  @Schema(description = "Reason why this prisoner should be kept apart from the other", required = true, example = "PERPETRATOR")
+  val secondPrisonerReason: NonAssociationReason? = null,
+
+  @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "CELL")
+  val restrictionType: NonAssociationRestrictionType? = null,
+
+  @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "John and Luke always end up fighting")
+  val comment: String? = null,
+)
+
+fun NonAssociationJPA.updateWith(patch: PatchNonAssociationRequest): NonAssociationJPA {
+  this.firstPrisonerReason = patch.firstPrisonerReason ?: this.firstPrisonerReason
+  this.secondPrisonerReason = patch.secondPrisonerReason ?: this.secondPrisonerReason
+  this.restrictionType = patch.restrictionType ?: this.restrictionType
+  this.comment = patch.comment ?: this.comment
+
+  return this
 }

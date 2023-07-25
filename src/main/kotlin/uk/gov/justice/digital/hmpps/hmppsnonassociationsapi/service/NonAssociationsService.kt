@@ -1,16 +1,21 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
+import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationDetails
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.toPrisonerNonAssociations
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.updateWith
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import kotlin.jvm.optionals.getOrNull
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation as NonAssociationDTO
@@ -23,6 +28,7 @@ class NonAssociationsService(
   private val offenderSearch: OffenderSearchService,
   private val authenticationFacade: AuthenticationFacade,
   private val prisonApiService: PrisonApiService,
+  private val telemetryClient: TelemetryClient,
 ) {
 
   companion object {
@@ -41,11 +47,47 @@ class NonAssociationsService(
       authorisedBy = authenticationFacade.currentUsername
         ?: throw Exception("Could not determine current user's username'"),
     )
-    return persistNonAssociation(nonAssociationJpa).toDto()
+    val nonAssociation = persistNonAssociation(nonAssociationJpa).toDto()
+    log.info("Created Non-association [${nonAssociation.id}]")
+    telemetryClient.trackEvent(
+      "Created Non-Association",
+      mapOf(
+        "id" to nonAssociation.id.toString(),
+        "1stPrisoner" to nonAssociation.firstPrisonerNumber,
+        "2ndPrisoner" to nonAssociation.secondPrisonerNumber,
+      ),
+      null,
+    )
+
+    return nonAssociation
   }
 
   fun getById(id: Long): NonAssociationDTO? {
     return nonAssociationsRepository.findById(id).getOrNull()?.toDto()
+  }
+
+  fun updateNonAssociation(id: Long, update: PatchNonAssociationRequest): NonAssociationDTO {
+    val nonAssociation = nonAssociationsRepository.findById(id).getOrNull() ?: throw ResponseStatusException(
+      HttpStatus.NOT_FOUND,
+      "Non-association with ID $id not found",
+    )
+
+    val updatedNonAssociation = nonAssociationsRepository.save(
+      nonAssociation.updateWith(update),
+    )
+
+    log.info("Updated Non-association [$id]")
+    telemetryClient.trackEvent(
+      "Updated Non-Association",
+      mapOf(
+        "id" to updatedNonAssociation.id.toString(),
+        "1stPrisoner" to updatedNonAssociation.firstPrisonerNumber,
+        "2ndPrisoner" to updatedNonAssociation.secondPrisonerNumber,
+      ),
+      null,
+    )
+
+    return updatedNonAssociation.toDto()
   }
 
   fun getPrisonerNonAssociations(prisonerNumber: String, options: NonAssociationListOptions): PrisonerNonAssociations {
