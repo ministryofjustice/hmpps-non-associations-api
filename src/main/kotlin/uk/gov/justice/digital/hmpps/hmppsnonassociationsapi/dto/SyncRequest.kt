@@ -14,7 +14,7 @@ data class CreateSyncRequest(
     required = true,
     example = "VICTIM",
   )
-  val firstPrisonerReason: NonAssociationReason,
+  val firstPrisonerReason: LegacyReason,
   @Schema(description = "Prisoner number to not associate", required = true, example = "D5678EF")
   val secondPrisonerNumber: String,
   @Schema(
@@ -22,10 +22,10 @@ data class CreateSyncRequest(
     required = true,
     example = "PERPETRATOR",
   )
-  val secondPrisonerReason: NonAssociationReason,
+  val secondPrisonerReason: LegacyReason,
 
   @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "CELL")
-  val restrictionType: NonAssociationRestrictionType,
+  val restrictionType: LegacyRestrictionType,
 
   @Schema(
     description = "Explanation of why prisoners are non-associated",
@@ -50,16 +50,17 @@ data class CreateSyncRequest(
     return NonAssociation(
       id = null,
       firstPrisonerNumber = firstPrisonerNumber,
-      firstPrisonerReason = firstPrisonerReason,
+      firstPrisonerRole = firstPrisonerReason.toRole(),
       secondPrisonerNumber = secondPrisonerNumber,
-      secondPrisonerReason = secondPrisonerReason,
-      restrictionType = restrictionType,
-      comment = comment ?: "",
+      secondPrisonerRole = secondPrisonerReason.toRole(),
+      reason = Reason.OTHER, // TODO: what's the "default" reason?
+      restrictionType = restrictionType.toRestrictionType(),
+      comment = comment ?: "No comment provided", // TODO: can we have a better message?
       authorisedBy = authorisedBy,
       isClosed = !active,
       closedAt = if (active) { null } else { expiryDate?.atStartOfDay() }, // TODO: can this be in the future?
       closedBy = if (active) { null } else { SYSTEM_USERNAME },
-      closedReason = if (active) { null } else { "UNDEFINED" },
+      closedReason = if (active) { null } else { "UNDEFINED" }, // TODO: can we have a better message?
       updatedBy = SYSTEM_USERNAME,
     )
   }
@@ -80,17 +81,17 @@ data class UpdateSyncRequest(
     required = true,
     example = "VICTIM",
   )
-  val firstPrisonerReason: NonAssociationReason,
+  val firstPrisonerReason: LegacyReason,
 
   @Schema(
     description = "Reason why this prisoner should be kept apart from the other",
     required = true,
     example = "PERPETRATOR",
   )
-  val secondPrisonerReason: NonAssociationReason,
+  val secondPrisonerReason: LegacyReason,
 
   @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "CELL")
-  val restrictionType: NonAssociationRestrictionType,
+  val restrictionType: LegacyRestrictionType,
 
   @Schema(
     description = "Explanation of why prisoners are non-associated",

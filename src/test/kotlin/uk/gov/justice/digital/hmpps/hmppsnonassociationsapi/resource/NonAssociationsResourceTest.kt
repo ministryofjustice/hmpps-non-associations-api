@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.reactive.server.returnResult
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
@@ -39,10 +39,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     fun `without the correct role and scope responds 403 Forbidden`() {
       val request = createNonAssociationRequest(
         firstPrisonerNumber = "A1234BC",
-        firstPrisonerReason = NonAssociationReason.VICTIM,
+        firstPrisonerRole = Role.VICTIM,
         secondPrisonerNumber = "D5678EF",
-        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
-        restrictionType = NonAssociationRestrictionType.CELL,
+        secondPrisonerRole = Role.PERPETRATOR,
+        reason = Reason.VIOLENCE,
+        restrictionType = RestrictionType.CELL,
         comment = "They keep fighting",
       )
 
@@ -132,12 +133,13 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         listOf(foundPrisoner),
       )
 
-      val request: CreateNonAssociationRequest = createNonAssociationRequest(
+      val request = createNonAssociationRequest(
         firstPrisonerNumber = foundPrisoner.prisonerNumber,
-        firstPrisonerReason = NonAssociationReason.VICTIM,
+        firstPrisonerRole = Role.VICTIM,
         secondPrisonerNumber = notFoundPrisonerNumber,
-        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
-        restrictionType = NonAssociationRestrictionType.CELL,
+        secondPrisonerRole = Role.PERPETRATOR,
+        reason = Reason.VIOLENCE,
+        restrictionType = RestrictionType.CELL,
         comment = "They keep fighting",
       )
 
@@ -173,24 +175,27 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         prisoners,
       )
 
-      val request: CreateNonAssociationRequest = createNonAssociationRequest(
+      val request = createNonAssociationRequest(
         firstPrisonerNumber = firstPrisoner.prisonerNumber,
-        firstPrisonerReason = NonAssociationReason.VICTIM,
+        firstPrisonerRole = Role.VICTIM,
         secondPrisonerNumber = secondPrisoner.prisonerNumber,
-        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
-        restrictionType = NonAssociationRestrictionType.CELL,
+        secondPrisonerRole = Role.PERPETRATOR,
+        reason = Reason.VIOLENCE,
+        restrictionType = RestrictionType.CELL,
         comment = "They keep fighting",
       )
 
+      // language=text
       val expectedUsername = "A_TEST_USER"
       val expectedResponse =
         // language=json
         """
         {
           "firstPrisonerNumber": "${request.firstPrisonerNumber}",
-          "firstPrisonerReason": "${request.firstPrisonerReason}",
+          "firstPrisonerRole": "${request.firstPrisonerRole}",
           "secondPrisonerNumber": "${request.secondPrisonerNumber}",
-          "secondPrisonerReason": "${request.secondPrisonerReason}",
+          "secondPrisonerRole": "${request.secondPrisonerRole}",
+          "reason": "${request.reason}",
           "restrictionType": "${request.restrictionType}",
           "comment": "${request.comment}",
           "authorisedBy": "$expectedUsername",
@@ -221,8 +226,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   @Nested
   inner class `PATCH a non-association` {
 
-    lateinit var nonAssociation: NonAssociationJPA
-    lateinit var url: String
+    private lateinit var nonAssociation: NonAssociationJPA
+    private lateinit var url: String
 
     @BeforeEach
     fun setUp() {
@@ -242,7 +247,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `without the correct role and scope responds 403 Forbidden`() {
       val request = PatchNonAssociationRequest(
-        restrictionType = NonAssociationRestrictionType.EXERCISE,
+        restrictionType = RestrictionType.LANDING,
       )
 
       // correct role, missing write scope
@@ -321,20 +326,23 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `for a valid request updates the non-association`() {
+      // language=text
       val updatedComment = "UPDATED comment"
       val request = mapOf(
         "comment" to updatedComment,
       )
 
+      // language=text
       val expectedUsername = "A_TEST_USER"
       val expectedResponse =
         // language=json
         """
         {
           "firstPrisonerNumber": "${nonAssociation.firstPrisonerNumber}",
-          "firstPrisonerReason": "${nonAssociation.firstPrisonerReason}",
+          "firstPrisonerRole": "${nonAssociation.firstPrisonerRole}",
           "secondPrisonerNumber": "${nonAssociation.secondPrisonerNumber}",
-          "secondPrisonerReason": "${nonAssociation.secondPrisonerReason}",
+          "secondPrisonerRole": "${nonAssociation.secondPrisonerRole}",
+          "reason": "${nonAssociation.reason}",
           "restrictionType": "${nonAssociation.restrictionType}",
           "comment": "$updatedComment",
           "authorisedBy": "${nonAssociation.authorisedBy}",
@@ -415,11 +423,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .expectStatus()
         .isOk
         .expectBody()
-        .jsonPath("id").isEqualTo(existingNonAssociation.id)
+        .jsonPath("id").isEqualTo(existingNonAssociation.id!!)
         .jsonPath("firstPrisonerNumber").isEqualTo(existingNonAssociation.firstPrisonerNumber)
-        .jsonPath("firstPrisonerReason").isEqualTo(existingNonAssociation.firstPrisonerReason.toString())
+        .jsonPath("firstPrisonerRole").isEqualTo(existingNonAssociation.firstPrisonerRole.toString())
         .jsonPath("secondPrisonerNumber").isEqualTo(existingNonAssociation.secondPrisonerNumber)
-        .jsonPath("secondPrisonerReason").isEqualTo(existingNonAssociation.secondPrisonerReason.toString())
+        .jsonPath("secondPrisonerRole").isEqualTo(existingNonAssociation.secondPrisonerRole.toString())
         .jsonPath("restrictionType").isEqualTo(existingNonAssociation.restrictionType.toString())
         .jsonPath("comment").isEqualTo(existingNonAssociation.comment)
     }
@@ -428,11 +436,10 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   @Nested
   inner class `GET non associations for a prisoner` {
 
-    val prisonerNumber = "A1234BC"
+    private val prisonerNumber = "A1234BC"
 
     @Test
     fun `without a valid token responds 401 Unauthorized`() {
-      ""
       webTestClient.get()
         .uri("/prisoner/$prisonerNumber/non-associations")
         .exchange()
@@ -464,7 +471,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus().isNotFound
         .expectBody()
-        .jsonPath("userMessage").isEqualTo("Could not find the following prisoners: [${nonAssociation.firstPrisonerNumber}, ${nonAssociation.secondPrisonerNumber}]")
+        .jsonPath("userMessage")
+        .isEqualTo("Could not find the following prisoners: [${nonAssociation.firstPrisonerNumber}, ${nonAssociation.secondPrisonerNumber}]")
     }
 
     @Test
@@ -515,14 +523,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       )
 
       // closed non-association, same prison, not returned
-      val closedNonAssociation = createNonAssociation(
+      createNonAssociation(
         firstPrisonerNumber = prisonerMerlin.prisonerNumber,
         secondPrisonerNumber = prisonerJosh.prisonerNumber,
         isClosed = true,
       )
 
       // non-association with someone in a different prison, not returned
-      val otherPrisonNonAssociation = createNonAssociation(
+      createNonAssociation(
         firstPrisonerNumber = prisonerEdward.prisonerNumber,
         secondPrisonerNumber = prisonerMerlin.prisonerNumber,
       )
@@ -553,8 +561,10 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "nonAssociations": [
                 {
                   "id": ${openNonAssociation.id},
-                  "reasonCode": "${openNonAssociation.secondPrisonerReason}",
-                  "reasonDescription": "${openNonAssociation.secondPrisonerReason.description}",
+                  "roleCode": "${openNonAssociation.secondPrisonerRole}",
+                  "roleDescription": "${openNonAssociation.secondPrisonerRole.description}",
+                  "reasonCode": "${openNonAssociation.reason}",
+                  "reasonDescription": "${openNonAssociation.reason.description}",
                   "restrictionTypeCode": "${openNonAssociation.restrictionType}",
                   "restrictionTypeDescription": "${openNonAssociation.restrictionType.description}",
                   "comment": "${openNonAssociation.comment}",
@@ -565,8 +575,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "closedAt": null,
                   "otherPrisonerDetails": {
                     "prisonerNumber": "${prisonerJohn.prisonerNumber}",
-                    "reasonCode": "${openNonAssociation.firstPrisonerReason}",
-                    "reasonDescription": "${openNonAssociation.firstPrisonerReason.description}",
+                    "roleCode": "${openNonAssociation.firstPrisonerRole}",
+                    "roleDescription": "${openNonAssociation.firstPrisonerRole.description}",
                     "firstName": "${prisonerJohn.firstName}",
                     "lastName": "${prisonerJohn.lastName}",
                     "prisonId": "${prisonerJohn.prisonId}",
@@ -605,7 +615,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       )
 
       // non-association with someone in a different prison, not returned
-      val otherPrisonNonAssociation = createNonAssociation(
+      createNonAssociation(
         firstPrisonerNumber = prisonerEdward.prisonerNumber,
         secondPrisonerNumber = prisonerMerlin.prisonerNumber,
       )
@@ -636,8 +646,10 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "nonAssociations": [
                 {
                   "id": ${openNonAssociation.id},
-                  "reasonCode": "${openNonAssociation.secondPrisonerReason}",
-                  "reasonDescription": "${openNonAssociation.secondPrisonerReason.description}",
+                  "roleCode": "${openNonAssociation.secondPrisonerRole}",
+                  "roleDescription": "${openNonAssociation.secondPrisonerRole.description}",
+                  "reasonCode": "${openNonAssociation.reason}",
+                  "reasonDescription": "${openNonAssociation.reason.description}",
                   "restrictionTypeCode": "${openNonAssociation.restrictionType}",
                   "restrictionTypeDescription": "${openNonAssociation.restrictionType.description}",
                   "comment": "${openNonAssociation.comment}",
@@ -648,8 +660,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "closedAt": null,
                   "otherPrisonerDetails": {
                     "prisonerNumber": "${prisonerJohn.prisonerNumber}",
-                    "reasonCode": "${openNonAssociation.firstPrisonerReason}",
-                    "reasonDescription": "${openNonAssociation.firstPrisonerReason.description}",
+                    "roleCode": "${openNonAssociation.firstPrisonerRole}",
+                    "roleDescription": "${openNonAssociation.firstPrisonerRole.description}",
                     "firstName": "${prisonerJohn.firstName}",
                     "lastName": "${prisonerJohn.lastName}",
                     "prisonId": "${prisonerJohn.prisonId}",
@@ -659,8 +671,10 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                 },
                 {
                   "id": ${closedNonAssociation.id},
-                  "reasonCode": "${closedNonAssociation.firstPrisonerReason}",
-                  "reasonDescription": "${closedNonAssociation.firstPrisonerReason.description}",
+                  "roleCode": "${closedNonAssociation.firstPrisonerRole}",
+                  "roleDescription": "${closedNonAssociation.firstPrisonerRole.description}",
+                  "reasonCode": "${closedNonAssociation.reason}",
+                  "reasonDescription": "${closedNonAssociation.reason.description}",
                   "restrictionTypeCode": "${closedNonAssociation.restrictionType}",
                   "restrictionTypeDescription": "${closedNonAssociation.restrictionType.description}",
                   "comment": "${closedNonAssociation.comment}",
@@ -670,8 +684,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "closedBy": "CLOSE_USER",
                   "otherPrisonerDetails": {
                     "prisonerNumber": "${prisonerJosh.prisonerNumber}",
-                    "reasonCode": "${closedNonAssociation.secondPrisonerReason}",
-                    "reasonDescription": "${closedNonAssociation.secondPrisonerReason.description}",
+                    "roleCode": "${closedNonAssociation.secondPrisonerRole}",
+                    "roleDescription": "${closedNonAssociation.secondPrisonerRole.description}",
                     "firstName": "${prisonerJosh.firstName}",
                     "lastName": "${prisonerJosh.lastName}",
                     "prisonId": "${prisonerJosh.prisonId}",
@@ -703,7 +717,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       )
 
       // closed non-association, same prison, not returned
-      val closedNonAssociation = createNonAssociation(
+      createNonAssociation(
         firstPrisonerNumber = prisonerMerlin.prisonerNumber,
         secondPrisonerNumber = prisonerJosh.prisonerNumber,
         isClosed = true,
@@ -741,8 +755,10 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "nonAssociations": [
                 {
                   "id": ${openNonAssociation.id},
-                  "reasonCode": "${openNonAssociation.secondPrisonerReason}",
-                  "reasonDescription": "${openNonAssociation.secondPrisonerReason.description}",
+                  "roleCode": "${openNonAssociation.secondPrisonerRole}",
+                  "roleDescription": "${openNonAssociation.secondPrisonerRole.description}",
+                  "reasonCode": "${openNonAssociation.reason}",
+                  "reasonDescription": "${openNonAssociation.reason.description}",
                   "restrictionTypeCode": "${openNonAssociation.restrictionType}",
                   "restrictionTypeDescription": "${openNonAssociation.restrictionType.description}",
                   "comment": "${openNonAssociation.comment}",
@@ -753,8 +769,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "closedAt": null,
                   "otherPrisonerDetails": {
                     "prisonerNumber": "${prisonerJohn.prisonerNumber}",
-                    "reasonCode": "${openNonAssociation.firstPrisonerReason}",
-                    "reasonDescription": "${openNonAssociation.firstPrisonerReason.description}",
+                    "roleCode": "${openNonAssociation.firstPrisonerRole}",
+                    "roleDescription": "${openNonAssociation.firstPrisonerRole.description}",
                     "firstName": "${prisonerJohn.firstName}",
                     "lastName": "${prisonerJohn.lastName}",
                     "prisonId": "${prisonerJohn.prisonId}",
@@ -764,20 +780,22 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                 },
                 {
                   "id": ${otherPrisonNonAssociation.id},
-                  "reasonCode": "${otherPrisonNonAssociation.secondPrisonerReason}",
-                  "reasonDescription": "${otherPrisonNonAssociation.secondPrisonerReason.description}",
-                  "restrictionTypeCode": "${closedNonAssociation.restrictionType}",
-                  "restrictionTypeDescription": "${closedNonAssociation.restrictionType.description}",
-                  "comment": "${closedNonAssociation.comment}",
-                  "authorisedBy": "${closedNonAssociation.authorisedBy}",
+                  "roleCode": "${otherPrisonNonAssociation.secondPrisonerRole}",
+                  "roleDescription": "${otherPrisonNonAssociation.secondPrisonerRole.description}",
+                  "reasonCode": "${otherPrisonNonAssociation.reason}",
+                  "reasonDescription": "${otherPrisonNonAssociation.reason.description}",
+                  "restrictionTypeCode": "${otherPrisonNonAssociation.restrictionType}",
+                  "restrictionTypeDescription": "${otherPrisonNonAssociation.restrictionType.description}",
+                  "comment": "${otherPrisonNonAssociation.comment}",
+                  "authorisedBy": "${otherPrisonNonAssociation.authorisedBy}",
                   "isClosed": false,
                   "closedReason": null,
                   "closedBy": null,
                   "closedAt": null,
                   "otherPrisonerDetails": {
                     "prisonerNumber": "${prisonerEdward.prisonerNumber}",
-                    "reasonCode": "${otherPrisonNonAssociation.firstPrisonerReason}",
-                    "reasonDescription": "${otherPrisonNonAssociation.firstPrisonerReason.description}",
+                    "roleCode": "${otherPrisonNonAssociation.firstPrisonerRole}",
+                    "roleDescription": "${otherPrisonNonAssociation.firstPrisonerRole.description}",
                     "firstName": "${prisonerEdward.firstName}",
                     "lastName": "${prisonerEdward.lastName}",
                     "prisonId": "${prisonerEdward.prisonId}",
@@ -812,21 +830,21 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
 
       // open non-association, same prison
-      val openNonAssociation = createNonAssociation(
+      createNonAssociation(
         prisonerJohn.prisonerNumber,
         prisonerMerlin.prisonerNumber,
         isClosed = false,
       )
 
       // closed non-association, same prison
-      val closedNonAssociation = createNonAssociation(
+      createNonAssociation(
         firstPrisonerNumber = prisonerMerlin.prisonerNumber,
         secondPrisonerNumber = prisonerJosh.prisonerNumber,
         isClosed = true,
       )
 
       // non-association with someone in a different prison
-      val otherPrisonNonAssociation = createNonAssociation(
+      createNonAssociation(
         firstPrisonerNumber = prisonerEdward.prisonerNumber,
         secondPrisonerNumber = prisonerMerlin.prisonerNumber,
       )
@@ -839,14 +857,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
       // NOTE: Non-associations for Merlin
       val url = "/prisoner/${prisonerMerlin.prisonerNumber}/non-associations?includeOtherPrisons=true&includeClosed=true&sortBy=LAST_NAME&sortDirection=DESC"
-      val prisonerNonAssociations: PrisonerNonAssociations = webTestClient.get()
+      val prisonerNonAssociations = webTestClient.get()
         .uri(url)
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus().isOk
         .returnResult<PrisonerNonAssociations>()
         .responseBody
-        .blockFirst()
+        .blockFirst()!!
 
       val lastNames = prisonerNonAssociations.nonAssociations.map { nonna ->
         nonna.otherPrisonerDetails.lastName
@@ -868,10 +886,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   ): NonAssociationJPA {
     val nonna = NonAssociationJPA(
       firstPrisonerNumber = firstPrisonerNumber,
-      firstPrisonerReason = NonAssociationReason.VICTIM,
+      firstPrisonerRole = Role.VICTIM,
       secondPrisonerNumber = secondPrisonerNumber,
-      secondPrisonerReason = NonAssociationReason.PERPETRATOR,
-      restrictionType = NonAssociationRestrictionType.CELL,
+      secondPrisonerRole = Role.PERPETRATOR,
+      reason = Reason.BULLYING,
+      restrictionType = RestrictionType.CELL,
       comment = "They keep fighting",
       authorisedBy = "USER_1",
       updatedBy = "A_USER",

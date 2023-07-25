@@ -37,12 +37,16 @@ data class NonAssociationDetails(
   @Schema(description = "ID of the non-association", required = true, example = "42")
   val id: Long,
 
-  @Schema(description = "Reason code for the non-association", required = true, example = "VICTIM")
-  val reasonCode: NonAssociationReason,
-  @Schema(description = "Reason description for the non-association", required = true, example = "Victim")
+  @Schema(description = "This prisoner’s role code in the non-association", required = true, example = "VICTIM")
+  val roleCode: Role,
+  @Schema(description = "This prisoner’s role description in the non-association", required = true, example = "Victim")
+  val roleDescription: String,
+  @Schema(description = "Reason why these prisoners should be kept apart", required = true, example = "BULLYING")
+  val reasonCode: Reason,
+  @Schema(description = "Reason why these prisoners should be kept apart", required = true, example = "BULLYING")
   val reasonDescription: String,
   @Schema(description = "The non-association restriction type code", required = true, example = "CELL")
-  val restrictionTypeCode: NonAssociationRestrictionType,
+  val restrictionTypeCode: RestrictionType,
   @Schema(description = "The non-association restriction description", required = true, example = "Do Not Locate in Same Cell")
   val restrictionTypeDescription: String,
 
@@ -72,10 +76,10 @@ data class NonAssociationDetails(
 data class OtherPrisonerDetails(
   @Schema(description = "Prisoner number", required = true, example = "D5678EF")
   val prisonerNumber: String,
-  @Schema(description = "Reason code for the non-association", required = true, example = "PERPETRATOR")
-  val reasonCode: NonAssociationReason,
-  @Schema(description = "Reason description for the non-association", required = true, example = "Perpetrator")
-  val reasonDescription: String,
+  @Schema(description = "Other prisoner’s role code in the non-association", required = true, example = "PERPETRATOR")
+  val roleCode: Role,
+  @Schema(description = "Other prisoner’s role description in the non-association", required = true, example = "Perpetrator")
+  val roleDescription: String,
   @Schema(description = "First name", required = true, example = "Joseph")
   val firstName: String,
   @Schema(description = "Last name", required = true, example = "Bloggs")
@@ -123,8 +127,8 @@ private fun List<NonAssociationJPA>.toNonAssociationsDetails(
   data class PrisonersInfo(
     val prisoner: OffenderSearchPrisoner,
     val otherPrisoner: OffenderSearchPrisoner,
-    val reason: NonAssociationReason,
-    val otherReason: NonAssociationReason,
+    val role: Role,
+    val otherRole: Role,
   )
 
   return this.map { nonna ->
@@ -132,25 +136,27 @@ private fun List<NonAssociationJPA>.toNonAssociationsDetails(
       PrisonersInfo(
         prisoners[nonna.firstPrisonerNumber]!!,
         prisoners[nonna.secondPrisonerNumber]!!,
-        nonna.firstPrisonerReason,
-        nonna.secondPrisonerReason,
+        nonna.firstPrisonerRole,
+        nonna.secondPrisonerRole,
       )
     } else if (nonna.secondPrisonerNumber == prisonerNumber) {
       PrisonersInfo(
         prisoners[nonna.secondPrisonerNumber]!!,
         prisoners[nonna.firstPrisonerNumber]!!,
-        nonna.secondPrisonerReason,
-        nonna.firstPrisonerReason,
+        nonna.secondPrisonerRole,
+        nonna.firstPrisonerRole,
       )
     } else {
       throw Exception("One of the non-association is not for the desired prisoner $prisonerNumber")
     }
-    val (_, otherPrisoner, reason, otherReason) = prisonersInfo
+    val (_, otherPrisoner, role, otherRole) = prisonersInfo
 
     NonAssociationDetails(
       id = nonna.id ?: throw Exception("Only persisted non-associations can used to build a PrisonerNonAssociations instance"),
-      reasonCode = reason,
-      reasonDescription = reason.description,
+      roleCode = role,
+      roleDescription = role.description,
+      reasonCode = nonna.reason,
+      reasonDescription = nonna.reason.description,
       restrictionTypeCode = nonna.restrictionType,
       restrictionTypeDescription = nonna.restrictionType.description,
       comment = nonna.comment,
@@ -164,8 +170,8 @@ private fun List<NonAssociationJPA>.toNonAssociationsDetails(
 
       otherPrisonerDetails = OtherPrisonerDetails(
         prisonerNumber = otherPrisoner.prisonerNumber,
-        reasonCode = otherReason,
-        reasonDescription = otherReason.description,
+        roleCode = otherRole,
+        roleDescription = otherRole.description,
         firstName = otherPrisoner.firstName,
         lastName = otherPrisoner.lastName,
         prisonId = otherPrisoner.prisonId,

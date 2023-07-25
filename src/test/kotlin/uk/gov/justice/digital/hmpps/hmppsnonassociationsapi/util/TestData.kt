@@ -1,9 +1,42 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util
 
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
+import java.time.LocalDateTime
+
+/**
+ * Creates a new non-association entity
+ */
+fun genNonAssociation(
+  id: Long? = null,
+  firstPrisonerNumber: String,
+  secondPrisonerNumber: String,
+  createTime: LocalDateTime = LocalDateTime.now(),
+  closed: Boolean = false,
+  closedReason: String? = "Ok Now",
+  authBy: String? = "TEST",
+) = NonAssociation(
+  id = id,
+  firstPrisonerNumber = firstPrisonerNumber,
+  firstPrisonerRole = Role.PERPETRATOR,
+  secondPrisonerNumber = secondPrisonerNumber,
+  secondPrisonerRole = Role.VICTIM,
+  comment = "Comment",
+  reason = Reason.BULLYING,
+  restrictionType = RestrictionType.WING,
+  authorisedBy = authBy,
+  whenUpdated = createTime,
+  whenCreated = createTime,
+  updatedBy = "A_USER",
+  isClosed = closed,
+  closedAt = if (closed) { LocalDateTime.now() } else { null },
+  closedBy = if (closed) { "A USER" } else { null },
+  closedReason = if (closed) { closedReason } else { null },
+)
 
 /**
  * Returns a test CreateNonAssociationRequest
@@ -13,18 +46,20 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.O
  */
 fun createNonAssociationRequest(
   firstPrisonerNumber: String = "A1234BC",
-  firstPrisonerReason: NonAssociationReason = NonAssociationReason.VICTIM,
+  firstPrisonerRole: Role = Role.VICTIM,
   secondPrisonerNumber: String = "D5678EF",
-  secondPrisonerReason: NonAssociationReason = NonAssociationReason.PERPETRATOR,
+  secondPrisonerRole: Role = Role.PERPETRATOR,
   comment: String = "test comment",
-  restrictionType: NonAssociationRestrictionType = NonAssociationRestrictionType.CELL,
+  reason: Reason = Reason.THREAT,
+  restrictionType: RestrictionType = RestrictionType.CELL,
 ): CreateNonAssociationRequest {
   return CreateNonAssociationRequest(
     firstPrisonerNumber = firstPrisonerNumber,
-    firstPrisonerReason = firstPrisonerReason,
+    firstPrisonerRole = firstPrisonerRole,
     secondPrisonerNumber = secondPrisonerNumber,
-    secondPrisonerReason = secondPrisonerReason,
+    secondPrisonerRole = secondPrisonerRole,
     comment = comment,
+    reason = reason,
     restrictionType = restrictionType,
   )
 }

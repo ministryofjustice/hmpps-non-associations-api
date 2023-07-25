@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuditorAwareI
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
 import java.time.LocalDateTime
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -88,7 +89,7 @@ class NonAssociationMergeServiceIntTest : TestBase() {
 
     val mergedAssociations = service.mergePrisonerNumbers("A1234AA", "B1234AA")
 
-    Assertions.assertThat(mergedAssociations.toSet()).isEqualTo(
+    assertThat(mergedAssociations.toSet()).isEqualTo(
       setOf(
         genNonAssociation(firstPrisonerNumber = "B1234AA", secondPrisonerNumber = "X1234AA", createTime = createTime),
         genNonAssociation(firstPrisonerNumber = "X1234AB", secondPrisonerNumber = "B1234AA", createTime = createTime),

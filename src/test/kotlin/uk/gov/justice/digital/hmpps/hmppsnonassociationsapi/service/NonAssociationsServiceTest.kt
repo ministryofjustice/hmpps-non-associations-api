@@ -39,10 +39,11 @@ class NonAssociationsServiceTest {
     val createdNonAssociationJPA = NonAssociationJPA(
       id = expectedId,
       firstPrisonerNumber = createNonAssociationRequest.firstPrisonerNumber,
-      firstPrisonerReason = createNonAssociationRequest.firstPrisonerReason,
+      firstPrisonerRole = createNonAssociationRequest.firstPrisonerRole,
       secondPrisonerNumber = createNonAssociationRequest.secondPrisonerNumber,
-      secondPrisonerReason = createNonAssociationRequest.secondPrisonerReason,
+      secondPrisonerRole = createNonAssociationRequest.secondPrisonerRole,
       comment = createNonAssociationRequest.comment,
+      reason = createNonAssociationRequest.reason,
       restrictionType = createNonAssociationRequest.restrictionType,
       authorisedBy = authorisedBy,
       isClosed = false,
