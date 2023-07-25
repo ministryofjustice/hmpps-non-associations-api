@@ -41,9 +41,9 @@ data class NonAssociationDetails(
   val roleCode: Role,
   @Schema(description = "This prisoner’s role description in the non-association", required = true, example = "Victim")
   val roleDescription: String,
-  @Schema(description = "Reason why these prisoners should be kept apart", required = true, example = "BULLYING")
+  @Schema(description = "Reason code why these prisoners should be kept apart", required = true, example = "BULLYING")
   val reasonCode: Reason,
-  @Schema(description = "Reason why these prisoners should be kept apart", required = true, example = "BULLYING")
+  @Schema(description = "Reason description why these prisoners should be kept apart", required = true, example = "Bullying")
   val reasonDescription: String,
   @Schema(description = "The non-association restriction type code", required = true, example = "CELL")
   val restrictionTypeCode: RestrictionType,
