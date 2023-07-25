@@ -231,12 +231,11 @@ class NonAssociationsResource(
     @Schema(description = "The non-association ID", example = "42", required = true)
     @PathVariable
     id: Long,
-
     @RequestBody
     @Validated
     nonAssociationPatch: PatchNonAssociationRequest,
-  ): NonAssociation {
-    // TODO: Publish domain event
-    return nonAssociationsService.updateNonAssociation(id, nonAssociationPatch)
-  }
+  ): NonAssociation =
+    eventPublishWrapper(NonAssociationDomainEventType.NON_ASSOCIATION_CREATED) {
+      nonAssociationsService.updateNonAssociation(id, nonAssociationPatch)
+    }
 }

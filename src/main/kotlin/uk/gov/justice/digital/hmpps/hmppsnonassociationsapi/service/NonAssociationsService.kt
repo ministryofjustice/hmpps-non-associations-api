@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
+import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -27,6 +28,7 @@ class NonAssociationsService(
   private val offenderSearch: OffenderSearchService,
   private val authenticationFacade: AuthenticationFacade,
   private val prisonApiService: PrisonApiService,
+  private val telemetryClient: TelemetryClient,
 ) {
 
   companion object {
@@ -45,7 +47,19 @@ class NonAssociationsService(
       authorisedBy = authenticationFacade.currentUsername
         ?: throw Exception("Could not determine current user's username'"),
     )
-    return persistNonAssociation(nonAssociationJpa).toDto()
+    val nonAssociation = persistNonAssociation(nonAssociationJpa).toDto()
+    log.info("Created Non-association [${nonAssociation.id}]")
+    telemetryClient.trackEvent(
+      "Created Non-Association",
+      mapOf(
+        "id" to nonAssociation.id.toString(),
+        "1stPrisoner" to nonAssociation.firstPrisonerNumber,
+        "2ndPrisoner" to nonAssociation.secondPrisonerNumber,
+      ),
+      null,
+    )
+
+    return nonAssociation
   }
 
   fun getById(id: Long): NonAssociationDTO? {
@@ -60,6 +74,17 @@ class NonAssociationsService(
 
     val updatedNonAssociation = nonAssociationsRepository.save(
       nonAssociation.updateWith(update),
+    )
+
+    log.info("Updated Non-association [$id]")
+    telemetryClient.trackEvent(
+      "Updated Non-Association",
+      mapOf(
+        "id" to updatedNonAssociation.id.toString(),
+        "1stPrisoner" to updatedNonAssociation.firstPrisonerNumber,
+        "2ndPrisoner" to updatedNonAssociation.secondPrisonerNumber,
+      ),
+      null,
     )
 
     return updatedNonAssociation.toDto()

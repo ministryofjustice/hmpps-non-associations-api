@@ -60,6 +60,7 @@ data class MigrateRequest(
       closedAt = if (active) { null } else { expiryDate?.atStartOfDay() },
       closedBy = if (active) { null } else { SYSTEM_USERNAME },
       closedReason = if (active) { null } else { "MIGRATION" },
+      updatedBy = SYSTEM_USERNAME,
     )
   }
 

@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
+import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -18,11 +19,13 @@ class NonAssociationsServiceTest {
   private val offenderSearchService: OffenderSearchService = mock()
   private val prisonApiService: PrisonApiService = mock()
   private val authenticationFacade: AuthenticationFacade = mock()
+  private val telemetryClient: TelemetryClient = mock()
   private val service = NonAssociationsService(
     nonAssociationsRepository,
     offenderSearchService,
     authenticationFacade,
     prisonApiService,
+    telemetryClient,
   )
 
   @Test
