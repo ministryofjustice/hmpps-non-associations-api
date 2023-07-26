@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
@@ -12,7 +11,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.O
 class OffenderSearchService(
   private val offenderSearchWebClient: WebClient,
   private val offenderSearchClientCredentials: WebClient,
-  private val objectMapper: ObjectMapper,
 ) {
 
   private fun getClient(useClientCredentials: Boolean = false): WebClient {
@@ -28,7 +26,7 @@ class OffenderSearchService(
     prisonerNumbers: List<String>,
     useClientCredentials: Boolean = true,
   ): Map<String, OffenderSearchPrisoner> {
-    val requestBody = objectMapper.writeValueAsString("prisonerNumbers" to prisonerNumbers)
+    val requestBody = mapOf("prisonerNumbers" to prisonerNumbers)
 
     val foundPrisoners = getClient(useClientCredentials)
       .post()
