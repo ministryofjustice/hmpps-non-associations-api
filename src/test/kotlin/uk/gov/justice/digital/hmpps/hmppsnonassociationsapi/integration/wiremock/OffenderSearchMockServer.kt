@@ -30,7 +30,7 @@ class OffenderSearchMockServer : WireMockServer(WIREMOCK_PORT) {
     prisonerNumbers: List<String>,
     prisoners: List<OffenderSearchPrisoner>,
   ) {
-    val requestBody = mapper.writeValueAsString("prisonerNumbers" to prisonerNumbers)
+    val requestBody = mapper.writeValueAsString(mapOf("prisonerNumbers" to prisonerNumbers))
 
     stubFor(
       post("/prisoner-search/prisoner-numbers")
