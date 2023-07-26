@@ -35,16 +35,14 @@ class SyncAndMigrateService(
 
   fun syncUpdate(updateSyncRequest: UpdateSyncRequest): NonAssociation {
     val nonAssociation = nonAssociationsRepository.findById(updateSyncRequest.id)
+      .orElseThrow { EntityNotFoundException(updateSyncRequest.id.toString()) }
 
-    if (nonAssociation.isEmpty) {
-      throw EntityNotFoundException(updateSyncRequest.id.toString())
-    }
-
-    val na = with(nonAssociation.get()) {
-      restrictionType = updateSyncRequest.restrictionType
-      firstPrisonerReason = updateSyncRequest.firstPrisonerReason
-      secondPrisonerReason = updateSyncRequest.secondPrisonerReason
-      comment = updateSyncRequest.comment ?: ""
+    val na = with(nonAssociation) {
+      restrictionType = updateSyncRequest.restrictionType.toRestrictionType()
+      firstPrisonerRole = updateSyncRequest.firstPrisonerReason.toRole()
+      secondPrisonerRole = updateSyncRequest.secondPrisonerReason.toRole()
+      // TODO: can we have a better fall back message?
+      comment = updateSyncRequest.comment ?: "No comment provided"
       authorisedBy = updateSyncRequest.authorisedBy
       isClosed = !updateSyncRequest.active
       closedAt = if (!updateSyncRequest.active) { updateSyncRequest.expiryDate?.atStartOfDay() } else { null }
@@ -53,9 +51,11 @@ class SyncAndMigrateService(
         closedBy = null
       } else {
         if (closedReason == null) {
+          // TODO: can we have a better message?
           closedReason = "UNDEFINED"
         }
         if (closedBy == null) {
+          // TODO: perhaps system user would be more appropriate here
           closedBy = updateSyncRequest.authorisedBy
         }
       }

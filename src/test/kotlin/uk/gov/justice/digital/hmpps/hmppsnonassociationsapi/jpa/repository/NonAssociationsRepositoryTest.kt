@@ -13,8 +13,9 @@ import org.springframework.test.context.transaction.TestTransaction
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuditorAwareImpl
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
 import java.time.LocalDateTime
@@ -41,15 +42,16 @@ class NonAssociationsRepositoryTest : TestBase() {
     }!!
 
     assertThat(savedNonna.firstPrisonerNumber).isEqualTo(nonna.firstPrisonerNumber)
-    assertThat(savedNonna.firstPrisonerReason).isEqualTo(nonna.firstPrisonerReason)
-    assertThat(savedNonna.firstPrisonerReason.description).isEqualTo("Victim")
+    assertThat(savedNonna.firstPrisonerRole).isEqualTo(nonna.firstPrisonerRole)
+    assertThat(savedNonna.firstPrisonerRole.description).isEqualTo("Victim")
     assertThat(savedNonna.secondPrisonerNumber).isEqualTo(nonna.secondPrisonerNumber)
-    assertThat(savedNonna.secondPrisonerReason).isEqualTo(nonna.secondPrisonerReason)
-    assertThat(savedNonna.secondPrisonerReason.description).isEqualTo("Perpetrator")
+    assertThat(savedNonna.secondPrisonerRole).isEqualTo(nonna.secondPrisonerRole)
+    assertThat(savedNonna.secondPrisonerRole.description).isEqualTo("Perpetrator")
+    assertThat(savedNonna.reason).isEqualTo(nonna.reason)
+    assertThat(savedNonna.reason.description).isEqualTo("Bullying")
     assertThat(savedNonna.restrictionType).isEqualTo(nonna.restrictionType)
-    assertThat(savedNonna.restrictionType.description).isEqualTo("Do Not Locate in Same Cell")
+    assertThat(savedNonna.restrictionType.description).isEqualTo("Cell only")
     assertThat(savedNonna.comment).isEqualTo(nonna.comment)
-    assertThat(savedNonna.incidentReportNumber).isNull()
 
     // By default non-associations are open
     assertThat(savedNonna.isClosed).isFalse
@@ -91,7 +93,7 @@ class NonAssociationsRepositoryTest : TestBase() {
     TestTransaction.end()
     TestTransaction.start()
 
-    createdNonna = repository.findById(createdNonna.id).orElseThrow {
+    createdNonna = repository.findById(createdNonna.id!!).orElseThrow {
       Exception("NonAssociation with id=${createdNonna.id} couldn't be found")
     }
 
@@ -117,13 +119,13 @@ class NonAssociationsRepositoryTest : TestBase() {
     TestTransaction.end()
     TestTransaction.start()
 
-    created.incidentReportNumber = "test-report-id"
+    created.comment = "John attacked Bob after being provoked"
     val updated = repository.save(created)
     TestTransaction.flagForCommit()
     TestTransaction.end()
     TestTransaction.start()
 
-    assertThat(updated.incidentReportNumber).isEqualTo("test-report-id")
+    assertThat(updated.comment).isEqualTo("John attacked Bob after being provoked")
     assertThat(updated.whenCreated).isEqualTo(created.whenCreated)
     assertThat(updated.whenUpdated).isAfter(updated.whenCreated)
   }
@@ -131,10 +133,11 @@ class NonAssociationsRepositoryTest : TestBase() {
   fun nonAssociation(firstPrisonerNumber: String, secondPrisonerNumber: String): NonAssociation {
     return NonAssociation(
       firstPrisonerNumber = firstPrisonerNumber,
-      firstPrisonerReason = NonAssociationReason.VICTIM,
+      firstPrisonerRole = Role.VICTIM,
       secondPrisonerNumber = secondPrisonerNumber,
-      secondPrisonerReason = NonAssociationReason.PERPETRATOR,
-      restrictionType = NonAssociationRestrictionType.CELL,
+      secondPrisonerRole = Role.PERPETRATOR,
+      reason = Reason.BULLYING,
+      restrictionType = RestrictionType.CELL,
       comment = "John attacked Bob",
       updatedBy = "A_USER",
     )

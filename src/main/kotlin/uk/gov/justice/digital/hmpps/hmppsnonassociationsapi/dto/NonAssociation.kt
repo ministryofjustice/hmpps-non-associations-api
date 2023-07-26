@@ -13,15 +13,17 @@ data class NonAssociation(
 
   @Schema(description = "Prisoner number to not associate", required = true, example = "A1234BC")
   val firstPrisonerNumber: String,
-  @Schema(description = "Reason why this prisoner should be kept apart from the other", required = true, example = "VICTIM")
-  val firstPrisonerReason: NonAssociationReason,
+  @Schema(description = "This prisoner’s role in the non-association", required = true, example = "VICTIM")
+  val firstPrisonerRole: Role,
   @Schema(description = "Prisoner number to not associate", required = true, example = "D5678EF")
   val secondPrisonerNumber: String,
-  @Schema(description = "Reason why this prisoner should be kept apart from the other", required = true, example = "PERPETRATOR")
-  val secondPrisonerReason: NonAssociationReason,
+  @Schema(description = "Other prisoner’s role in the non-association", required = true, example = "PERPETRATOR")
+  val secondPrisonerRole: Role,
 
+  @Schema(description = "Reason why these prisoners should be kept apart", required = true, example = "BULLYING")
+  val reason: Reason,
   @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "CELL")
-  val restrictionType: NonAssociationRestrictionType,
+  val restrictionType: RestrictionType,
 
   @Schema(description = "Explanation of why prisoners are non-associated", required = true, example = "John and Luke always end up fighting")
   val comment: String,
@@ -46,15 +48,17 @@ data class NonAssociation(
 data class CreateNonAssociationRequest(
   @Schema(description = "Prisoner number to not associate", required = true, example = "A1234BC")
   val firstPrisonerNumber: String,
-  @Schema(description = "Reason why this prisoner should be kept apart from the other", required = true, example = "VICTIM")
-  val firstPrisonerReason: NonAssociationReason,
+  @Schema(description = "This prisoner’s role in the non-association", required = true, example = "VICTIM")
+  val firstPrisonerRole: Role,
   @Schema(description = "Prisoner number to not associate", required = true, example = "D5678EF")
   val secondPrisonerNumber: String,
-  @Schema(description = "Reason why this prisoner should be kept apart from the other", required = true, example = "PERPETRATOR")
-  val secondPrisonerReason: NonAssociationReason,
+  @Schema(description = "Other prisoner’s role in the non-association", required = true, example = "PERPETRATOR")
+  val secondPrisonerRole: Role,
 
+  @Schema(description = "Reason why these prisoners should be kept apart", required = true, example = "BULLYING")
+  val reason: Reason,
   @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "CELL")
-  val restrictionType: NonAssociationRestrictionType,
+  val restrictionType: RestrictionType,
 
   @Schema(description = "Explanation of why prisoners are non-associated", required = true, example = "John and Luke always end up fighting")
   val comment: String,
@@ -63,9 +67,10 @@ data class CreateNonAssociationRequest(
     return NonAssociationJPA(
       id = null,
       firstPrisonerNumber = firstPrisonerNumber,
-      firstPrisonerReason = firstPrisonerReason,
+      firstPrisonerRole = firstPrisonerRole,
       secondPrisonerNumber = secondPrisonerNumber,
-      secondPrisonerReason = secondPrisonerReason,
+      secondPrisonerRole = secondPrisonerRole,
+      reason = reason,
       restrictionType = restrictionType,
       comment = comment,
       authorisedBy = authorisedBy,
@@ -78,21 +83,24 @@ data class CreateNonAssociationRequest(
  * Request format for updating a non-association between two prisoners
  */
 data class PatchNonAssociationRequest(
-  @Schema(description = "Reason why this prisoner should be kept apart from the other", required = true, example = "VICTIM")
-  val firstPrisonerReason: NonAssociationReason? = null,
-  @Schema(description = "Reason why this prisoner should be kept apart from the other", required = true, example = "PERPETRATOR")
-  val secondPrisonerReason: NonAssociationReason? = null,
+  @Schema(description = "This prisoner’s role in the non-association", required = true, example = "VICTIM")
+  val firstPrisonerRole: Role? = null,
+  @Schema(description = "Other prisoner’s role in the non-association", required = true, example = "PERPETRATOR")
+  val secondPrisonerRole: Role? = null,
 
+  @Schema(description = "Reason why these prisoners should be kept apart", required = true, example = "BULLYING")
+  val reason: Reason? = null,
   @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "CELL")
-  val restrictionType: NonAssociationRestrictionType? = null,
+  val restrictionType: RestrictionType? = null,
 
   @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "John and Luke always end up fighting")
   val comment: String? = null,
 )
 
 fun NonAssociationJPA.updateWith(patch: PatchNonAssociationRequest): NonAssociationJPA {
-  this.firstPrisonerReason = patch.firstPrisonerReason ?: this.firstPrisonerReason
-  this.secondPrisonerReason = patch.secondPrisonerReason ?: this.secondPrisonerReason
+  this.firstPrisonerRole = patch.firstPrisonerRole ?: this.firstPrisonerRole
+  this.secondPrisonerRole = patch.secondPrisonerRole ?: this.secondPrisonerRole
+  this.reason = patch.reason ?: this.reason
   this.restrictionType = patch.restrictionType ?: this.restrictionType
   this.comment = patch.comment ?: this.comment
 

@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa
 
-import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.EnumType
@@ -13,8 +12,9 @@ import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
 import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation as NonAssociationDTO
 
@@ -27,21 +27,20 @@ class NonAssociation(
 
   var firstPrisonerNumber: String,
   @Enumerated(value = EnumType.STRING)
-  @Column(name = "first_prisoner_reason_code")
-  var firstPrisonerReason: NonAssociationReason,
+  var firstPrisonerRole: Role,
 
   var secondPrisonerNumber: String,
   @Enumerated(value = EnumType.STRING)
-  @Column(name = "second_prisoner_reason_code")
-  var secondPrisonerReason: NonAssociationReason,
+  var secondPrisonerRole: Role,
 
   // Details and restrictions
   @Enumerated(value = EnumType.STRING)
-  @Column(name = "restriction_type_code")
-  var restrictionType: NonAssociationRestrictionType,
+  var reason: Reason,
+  @Enumerated(value = EnumType.STRING)
+  var restrictionType: RestrictionType,
   var comment: String,
+
   var authorisedBy: String? = null,
-  var incidentReportNumber: String? = null,
 
   // Non-associations can be closed (with details of who/why/when)
   var isClosed: Boolean = false,
@@ -69,9 +68,10 @@ class NonAssociation(
     return NonAssociationDTO(
       id = id!!,
       firstPrisonerNumber = firstPrisonerNumber,
-      firstPrisonerReason = firstPrisonerReason,
+      firstPrisonerRole = firstPrisonerRole,
       secondPrisonerNumber = secondPrisonerNumber,
-      secondPrisonerReason = secondPrisonerReason,
+      secondPrisonerRole = secondPrisonerRole,
+      reason = reason,
       restrictionType = restrictionType,
       comment = comment,
       // TODO: Do we need to do anything special with this?
@@ -83,7 +83,6 @@ class NonAssociation(
       closedReason = closedReason,
       closedBy = closedBy,
       closedAt = closedAt,
-
     )
   }
 

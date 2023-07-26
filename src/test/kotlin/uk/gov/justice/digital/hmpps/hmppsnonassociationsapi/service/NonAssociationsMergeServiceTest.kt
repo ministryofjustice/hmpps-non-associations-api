@@ -4,10 +4,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
 import java.time.LocalDateTime
 
 class NonAssociationsMergeServiceTest {
@@ -57,42 +55,3 @@ class NonAssociationsMergeServiceTest {
     assertThat(nonAssociationList).isEqualTo(resultantNonAssociations)
   }
 }
-
-fun genNonAssociation(
-  id: Long? = null,
-  firstPrisonerNumber: String,
-  secondPrisonerNumber: String,
-  createTime: LocalDateTime = LocalDateTime.now(),
-  closed: Boolean = false,
-  closedReason: String? = "Ok Now",
-  authBy: String? = "TEST",
-
-) = NonAssociation(
-  id = id,
-  firstPrisonerNumber = firstPrisonerNumber,
-  firstPrisonerReason = NonAssociationReason.BULLYING,
-  secondPrisonerNumber = secondPrisonerNumber,
-  secondPrisonerReason = NonAssociationReason.VICTIM,
-  comment = "Comment",
-  restrictionType = NonAssociationRestrictionType.WING,
-  authorisedBy = authBy,
-  whenUpdated = createTime,
-  whenCreated = createTime,
-  updatedBy = "A_USER",
-  isClosed = closed,
-  closedAt = if (closed) {
-    LocalDateTime.now()
-  } else {
-    null
-  },
-  closedBy = if (closed) {
-    "A USER"
-  } else {
-    null
-  },
-  closedReason = if (closed) {
-    closedReason
-  } else {
-    null
-  },
-)

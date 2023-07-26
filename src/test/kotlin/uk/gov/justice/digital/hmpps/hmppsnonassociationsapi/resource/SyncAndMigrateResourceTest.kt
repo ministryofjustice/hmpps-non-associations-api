@@ -1,17 +1,17 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.security.test.context.support.WithMockUser
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateSyncRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyReason
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyRestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.MigrateRequest
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationReason
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationRestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.UpdateSyncRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.genNonAssociation
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -37,10 +37,10 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
     fun `without the correct role and scope responds 403 Forbidden`() {
       val request = MigrateRequest(
         firstPrisonerNumber = "C7777XX",
-        firstPrisonerReason = NonAssociationReason.VICTIM,
+        firstPrisonerReason = LegacyReason.VICTIM,
         secondPrisonerNumber = "D7777XX",
-        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
-        restrictionType = NonAssociationRestrictionType.CELL,
+        secondPrisonerReason = LegacyReason.PERPETRATOR,
+        restrictionType = LegacyRestrictionType.CELL,
         comment = "They keep fighting",
         authorisedBy = "Me",
         active = true,
@@ -105,10 +105,10 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
     fun `for a valid request migrates the non-association`() {
       val request = MigrateRequest(
         firstPrisonerNumber = "C7777XX",
-        firstPrisonerReason = NonAssociationReason.VICTIM,
+        firstPrisonerReason = LegacyReason.VICTIM,
         secondPrisonerNumber = "D7777XX",
-        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
-        restrictionType = NonAssociationRestrictionType.CELL,
+        secondPrisonerReason = LegacyReason.PERPETRATOR,
+        restrictionType = LegacyRestrictionType.CELL,
         comment = "This is a comment",
         authorisedBy = "Test",
         active = true,
@@ -119,9 +119,10 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         """
         {
           "firstPrisonerNumber": "${request.firstPrisonerNumber}",
-          "firstPrisonerReason": "${request.firstPrisonerReason}",
+          "firstPrisonerRole": "${request.firstPrisonerReason}",
           "secondPrisonerNumber": "${request.secondPrisonerNumber}",
-          "secondPrisonerReason": "${request.secondPrisonerReason}",
+          "secondPrisonerRole": "${request.secondPrisonerReason}",
+          "reason": "OTHER",
           "restrictionType": "${request.restrictionType}",
           "comment": "${request.comment}",
           "authorisedBy": "${request.authorisedBy}",
@@ -165,10 +166,10 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
     fun `without the correct role and scope responds 403 Forbidden`() {
       val request = CreateSyncRequest(
         firstPrisonerNumber = "A7777XX",
-        firstPrisonerReason = NonAssociationReason.VICTIM,
+        firstPrisonerReason = LegacyReason.VICTIM,
         secondPrisonerNumber = "B7777XX",
-        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
-        restrictionType = NonAssociationRestrictionType.CELL,
+        secondPrisonerReason = LegacyReason.PERPETRATOR,
+        restrictionType = LegacyRestrictionType.CELL,
         comment = "They keep fighting",
         authorisedBy = "Me",
       )
@@ -232,10 +233,10 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
     fun `creating an non-association`() {
       val request = CreateSyncRequest(
         firstPrisonerNumber = "A7777XX",
-        firstPrisonerReason = NonAssociationReason.VICTIM,
+        firstPrisonerReason = LegacyReason.VICTIM,
         secondPrisonerNumber = "B7777XX",
-        secondPrisonerReason = NonAssociationReason.PERPETRATOR,
-        restrictionType = NonAssociationRestrictionType.CELL,
+        secondPrisonerReason = LegacyReason.PERPETRATOR,
+        restrictionType = LegacyRestrictionType.CELL,
         expiryDate = LocalDate.now().minusDays(4),
         active = false,
       )
@@ -246,11 +247,12 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         """
         {
           "firstPrisonerNumber": "${request.firstPrisonerNumber}",
-          "firstPrisonerReason": "${request.firstPrisonerReason}",
+          "firstPrisonerRole": "${request.firstPrisonerReason}",
           "secondPrisonerNumber": "${request.secondPrisonerNumber}",
-          "secondPrisonerReason": "${request.secondPrisonerReason}",
+          "secondPrisonerRole": "${request.secondPrisonerReason}",
+          "reason": "OTHER",
           "restrictionType": "${request.restrictionType}",
-          "comment": "",
+          "comment": "No comment provided",
           "authorisedBy": "",
           "isClosed": true,
           "closedReason": "UNDEFINED",
@@ -285,9 +287,9 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
 
       val request = UpdateSyncRequest(
         id = naUpdate.id!!,
-        firstPrisonerReason = NonAssociationReason.PERPETRATOR,
-        secondPrisonerReason = NonAssociationReason.VICTIM,
-        restrictionType = NonAssociationRestrictionType.WING,
+        firstPrisonerReason = LegacyReason.PERPETRATOR,
+        secondPrisonerReason = LegacyReason.VICTIM,
+        restrictionType = LegacyRestrictionType.WING,
         expiryDate = LocalDate.now(),
         active = false,
         comment = "Its ok now",
@@ -301,9 +303,10 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         {
           "id": ${request.id},
           "firstPrisonerNumber": "C1234AA",
-          "firstPrisonerReason": "${request.firstPrisonerReason}",
+          "firstPrisonerRole": "${request.firstPrisonerReason}",
           "secondPrisonerNumber": "D1234AA",
-          "secondPrisonerReason": "${request.secondPrisonerReason}",
+          "secondPrisonerRole": "${request.secondPrisonerReason}",
+          "reason": "BULLYING",
           "restrictionType": "${request.restrictionType}",
           "comment": "${request.comment}",
           "authorisedBy": "${request.authorisedBy}",
@@ -344,25 +347,25 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
 
       val request = UpdateSyncRequest(
         id = naUpdate.id!!,
-        firstPrisonerReason = NonAssociationReason.PERPETRATOR,
-        secondPrisonerReason = NonAssociationReason.VICTIM,
-        restrictionType = NonAssociationRestrictionType.WING,
+        firstPrisonerReason = LegacyReason.PERPETRATOR,
+        secondPrisonerReason = LegacyReason.VICTIM,
+        restrictionType = LegacyRestrictionType.WING,
         expiryDate = LocalDate.now(),
         active = true,
         comment = "Its kicked off again",
         authorisedBy = "STAFF1",
       )
 
-      val dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
       val expectedResponse =
         // language=json
         """
         {
           "id": ${request.id},
           "firstPrisonerNumber": "C1234AA",
-          "firstPrisonerReason": "${request.firstPrisonerReason}",
+          "firstPrisonerRole": "${request.firstPrisonerReason}",
           "secondPrisonerNumber": "D1234AA",
-          "secondPrisonerReason": "${request.secondPrisonerReason}",
+          "secondPrisonerRole": "${request.secondPrisonerReason}",
+          "reason": "BULLYING",
           "restrictionType": "${request.restrictionType}",
           "comment": "${request.comment}",
           "authorisedBy": "${request.authorisedBy}",
@@ -412,7 +415,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus().isNoContent
 
-      Assertions.assertThat(repository.findById(naDelete.id!!)).isNotPresent
+      assertThat(repository.findById(naDelete.id!!)).isNotPresent
     }
   }
 }

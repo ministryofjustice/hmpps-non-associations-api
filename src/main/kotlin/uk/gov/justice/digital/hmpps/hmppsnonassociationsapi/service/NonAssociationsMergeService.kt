@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
 @Service
 @Transactional
@@ -18,7 +17,7 @@ class NonAssociationsMergeService(
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun mergePrisonerNumbers(oldPrisonerNumber: String, newPrisonerNumber: String): List<NonAssociationJPA> {
+  fun mergePrisonerNumbers(oldPrisonerNumber: String, newPrisonerNumber: String): List<NonAssociation> {
     log.info("Replacing prisoner number $oldPrisonerNumber to $newPrisonerNumber")
 
     val updatedRecords = mutableListOf<NonAssociation>()
