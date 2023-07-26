@@ -10,6 +10,6 @@ abstract class NonAssociationsBaseResource {
   @Autowired
   private lateinit var eventPublishService: EventPublishService
 
-  fun eventPublishWrapper(event: NonAssociationDomainEventType, function: () -> NonAssociation) =
-    function.invoke().also { eventPublishService.publishEvent(event, it) }
+  protected fun eventPublishWrapper(event: NonAssociationDomainEventType, function: () -> NonAssociation) =
+    function().also { eventPublishService.publishEvent(event, it) }
 }

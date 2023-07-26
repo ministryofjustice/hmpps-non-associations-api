@@ -82,7 +82,7 @@ class NonAssociationsMergeService(
         nonAssociationsRepository.delete(nonAssociation)
         null
       } else {
-        log.info("Merge Non association record $nonAssociation")
+        log.info("Merge non-association record $nonAssociation")
         nonAssociation.updatePrisonerNumber(newPrisonerNumber, primary)
       }
     }

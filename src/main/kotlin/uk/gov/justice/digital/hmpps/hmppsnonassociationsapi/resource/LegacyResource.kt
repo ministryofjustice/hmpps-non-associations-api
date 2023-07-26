@@ -20,15 +20,19 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociati
 @RestController
 @Validated
 @RequestMapping("/legacy/api", produces = [MediaType.APPLICATION_JSON_VALUE])
-@Tag(name = "Legacy non-associations-details", description = "Retrieve non association details from Prison API")
-class PrisonApiResource(
+@Tag(
+  name = "Legacy non-associations-details",
+  description = "Mimics the Prison API interface for retrieving non-associations. " +
+    "Currently this is a façade that calls Prison API, but will in future use the non-associations database and yet maintain the Prison API contract.",
+)
+class LegacyResource(
   val nonAssociationsService: NonAssociationsService,
 ) {
   @GetMapping("/offenders/{prisonerNumber}/non-association-details")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
-    summary = "Get non-associations by Prisoner number",
-    description = "The offender prisoner number",
+    summary = "Get non-associations by prisoner number",
+    description = "Currently this is a façade that calls Prison API, but will in future use the non-associations database and yet maintain the Prison API contract.",
     responses = [
       ApiResponse(
         responseCode = "200",
@@ -41,7 +45,7 @@ class PrisonApiResource(
       ),
       ApiResponse(
         responseCode = "404",
-        description = "Prisoner number not found",
+        description = "Prisoner number not found (and possibly when no non-associations exist)",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],

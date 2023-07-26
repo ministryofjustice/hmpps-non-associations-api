@@ -13,7 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsInteg
 import java.time.LocalDateTime
 
 @ActiveProfiles("test", "nomis")
-class PrisonApiResourceTest : SqsIntegrationTestBase() {
+class LegacyResourceTest : SqsIntegrationTestBase() {
 
   final val prisonerNumber = "A1234BC"
 
@@ -48,7 +48,7 @@ class PrisonApiResourceTest : SqsIntegrationTestBase() {
     )
 
   @Nested
-  inner class `GET non association details by prisoner number` {
+  inner class `GET non-association details by prisoner number` {
 
     @BeforeEach
     fun stubPrisonApi() {
