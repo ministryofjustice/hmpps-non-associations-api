@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.reactive.server.returnResult
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
@@ -220,6 +221,12 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus().isCreated
         .expectBody().json(expectedResponse, false)
+        .consumeWith {
+          val nonAssociation = objectMapper.readValue(it.responseBody, NonAssociation::class.java)
+          assertThat(nonAssociation.id).isGreaterThan(0)
+          assertThat(nonAssociation.whenCreated).isNotNull()
+          assertThat(nonAssociation.whenUpdated).isEqualTo(nonAssociation.whenCreated)
+        }
     }
   }
 
@@ -367,6 +374,12 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody().json(expectedResponse, false)
+        .consumeWith {
+          val nonAssociation = objectMapper.readValue(it.responseBody, NonAssociation::class.java)
+          assertThat(nonAssociation.id).isGreaterThan(0)
+          assertThat(nonAssociation.whenCreated).isNotNull()
+          assertThat(nonAssociation.whenUpdated).isAfterOrEqualTo(nonAssociation.whenCreated)
+        }
     }
   }
 

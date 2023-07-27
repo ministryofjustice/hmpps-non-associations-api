@@ -56,6 +56,8 @@ data class NonAssociationDetails(
   val authorisedBy: String,
   @Schema(description = "When the non-association was created", required = true, example = "2021-12-31T12:34:56.789012")
   val whenCreated: LocalDateTime,
+  @Schema(description = "When the non-association was last updated", required = true, example = "2022-01-03T12:34:56.789012")
+  val whenUpdated: LocalDateTime,
 
   @Schema(description = "Whether the non-association is closed or is in effect", required = true, example = "false")
   val isClosed: Boolean = false,
@@ -162,6 +164,7 @@ private fun List<NonAssociationJPA>.toNonAssociationsDetails(
       comment = nonna.comment,
       authorisedBy = nonna.authorisedBy ?: "",
       whenCreated = nonna.whenCreated,
+      whenUpdated = nonna.whenUpdated,
 
       isClosed = nonna.isClosed,
       closedBy = nonna.closedBy,

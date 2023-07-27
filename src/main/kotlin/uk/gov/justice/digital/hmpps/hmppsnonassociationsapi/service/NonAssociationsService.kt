@@ -142,6 +142,7 @@ data class NonAssociationListOptions(
 
 enum class NonAssociationsSort {
   WHEN_CREATED,
+  WHEN_UPDATED,
   LAST_NAME,
   FIRST_NAME,
   PRISONER_NUMBER,
@@ -150,6 +151,7 @@ enum class NonAssociationsSort {
   fun comparator(direction: Sort.Direction): Comparator<NonAssociationDetails> {
     return when (this) {
       WHEN_CREATED -> Comparator.comparing(NonAssociationDetails::whenCreated)
+      WHEN_UPDATED -> Comparator.comparing(NonAssociationDetails::whenUpdated)
       LAST_NAME -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.lastName }
       FIRST_NAME -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.firstName }
       PRISONER_NUMBER -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.prisonerNumber }
