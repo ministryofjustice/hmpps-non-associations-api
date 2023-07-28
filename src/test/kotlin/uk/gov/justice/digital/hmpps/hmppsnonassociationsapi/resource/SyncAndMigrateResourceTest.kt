@@ -237,7 +237,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         secondPrisonerNumber = "B7777XX",
         secondPrisonerReason = LegacyReason.PERPETRATOR,
         restrictionType = LegacyRestrictionType.CELL,
-        expiryDate = LocalDate.now().minusDays(4),
+        expiryDate = LocalDate.now(clock).minusDays(4),
         active = false,
       )
 
@@ -281,7 +281,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         genNonAssociation(
           firstPrisonerNumber = "C1234AA",
           secondPrisonerNumber = "D1234AA",
-          createTime = LocalDateTime.now(),
+          createTime = LocalDateTime.now(clock),
         ),
       )
 
@@ -290,7 +290,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         firstPrisonerReason = LegacyReason.PERPETRATOR,
         secondPrisonerReason = LegacyReason.VICTIM,
         restrictionType = LegacyRestrictionType.WING,
-        expiryDate = LocalDate.now(),
+        expiryDate = LocalDate.now(clock),
         active = false,
         comment = "Its ok now",
         authorisedBy = "TEST",
@@ -339,7 +339,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         genNonAssociation(
           firstPrisonerNumber = "C1234AA",
           secondPrisonerNumber = "D1234AA",
-          createTime = LocalDateTime.now(),
+          createTime = LocalDateTime.now(clock),
           closed = true,
           closedReason = "All fine now",
         ),
@@ -350,7 +350,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         firstPrisonerReason = LegacyReason.PERPETRATOR,
         secondPrisonerReason = LegacyReason.VICTIM,
         restrictionType = LegacyRestrictionType.WING,
-        expiryDate = LocalDate.now(),
+        expiryDate = LocalDate.now(clock),
         active = true,
         comment = "Its kicked off again",
         authorisedBy = "STAFF1",
@@ -398,7 +398,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         genNonAssociation(
           firstPrisonerNumber = "C1234AA",
           secondPrisonerNumber = "D1234AA",
-          createTime = LocalDateTime.now(),
+          createTime = LocalDateTime.now(clock),
           closedReason = "OK now",
           authBy = "TEST",
         ),

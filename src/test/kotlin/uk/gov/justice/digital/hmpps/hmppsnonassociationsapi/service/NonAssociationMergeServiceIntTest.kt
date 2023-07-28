@@ -29,7 +29,7 @@ class NonAssociationMergeServiceIntTest : TestBase() {
 
   @Test
   fun testMerge() {
-    val createTime = LocalDateTime.now()
+    val createTime = LocalDateTime.now(clock)
     repository.save(
       genNonAssociation(
         firstPrisonerNumber = "A1234AA",
