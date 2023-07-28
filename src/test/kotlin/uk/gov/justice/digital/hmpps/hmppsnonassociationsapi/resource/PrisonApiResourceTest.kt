@@ -3,12 +3,16 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.test.context.ActiveProfiles
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyReason
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyRestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyOffenderNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import java.time.LocalDateTime
 
+@ActiveProfiles("test", "nomis")
 class PrisonApiResourceTest : SqsIntegrationTestBase() {
 
   final val prisonerNumber = "A1234BC"
@@ -20,12 +24,11 @@ class PrisonApiResourceTest : SqsIntegrationTestBase() {
       lastName = "Hall",
       agencyDescription = "Moorland (HMP & YOI)",
       assignedLivingUnitDescription = "MDI-1-1-3",
-      assignedLivingUnitId = 113,
       nonAssociations = listOf(
         LegacyNonAssociation(
-          reasonCode = "VIC",
+          reasonCode = LegacyReason.VIC,
           reasonDescription = "Victim",
-          typeCode = "WING",
+          typeCode = LegacyRestrictionType.WING,
           typeDescription = "Do Not Locate on Same Wing",
           effectiveDate = LocalDateTime.parse("2021-07-05T10:35:17"),
           expiryDate = LocalDateTime.parse("2021-07-05T10:35:17"),
@@ -35,11 +38,10 @@ class PrisonApiResourceTest : SqsIntegrationTestBase() {
             offenderNo = "B1234CD",
             firstName = "Joseph",
             lastName = "Bloggs",
-            reasonCode = "PER",
+            reasonCode = LegacyReason.PER,
             reasonDescription = "Perpetrator",
             agencyDescription = "Moorland (HMP & YOI)",
             assignedLivingUnitDescription = "MDI-2-3-4",
-            assignedLivingUnitId = 234,
           ),
         ),
       ),

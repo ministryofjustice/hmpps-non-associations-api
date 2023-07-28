@@ -96,3 +96,6 @@ management:
     info:
       cache:
         time-to-live: 2000ms
+
+feature:
+  legacy-endpoint-nomis-source-of-truth: ${FEATURE_LEGACY_ENDPOINT_NOMIS_SOURCE_OF_TRUTH:true}

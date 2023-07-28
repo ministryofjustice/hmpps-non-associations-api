@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsInteg
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchPrisoners
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
 @WithMockUser
@@ -380,6 +381,135 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           assertThat(nonAssociation.whenCreated).isNotNull()
           assertThat(nonAssociation.whenUpdated).isAfterOrEqualTo(nonAssociation.whenCreated)
         }
+    }
+  }
+
+  @Nested
+  inner class `Get a legacy non-association` {
+
+    @Test
+    fun `a non-association that exists is returned in the legacy format`() {
+      // prisoners in MDI
+      val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
+      val prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
+      val prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
+      // prisoner in another prison
+      val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
+
+      // open non-association, same prison
+      val openNonAssociation = createNonAssociation(
+        prisonerJohn.prisonerNumber,
+        prisonerMerlin.prisonerNumber,
+        isClosed = false,
+      )
+
+      // closed non-association
+      val closedNa = createNonAssociation(
+        firstPrisonerNumber = prisonerMerlin.prisonerNumber,
+        secondPrisonerNumber = prisonerJosh.prisonerNumber,
+        isClosed = true,
+        restrictionType = RestrictionType.LANDING,
+        firstPrisonerRole = Role.NOT_RELEVANT,
+        secondPrisonerRole = Role.PERPETRATOR,
+      )
+
+      // non-association with someone in a different prison
+      val otherPrisonNa = createNonAssociation(
+        firstPrisonerNumber = prisonerEdward.prisonerNumber,
+        secondPrisonerNumber = prisonerMerlin.prisonerNumber,
+        firstPrisonerRole = Role.VICTIM,
+        secondPrisonerRole = Role.UNKNOWN,
+      )
+
+      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
+        prisoners,
+      )
+
+      val dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+
+      webTestClient.get()
+        .uri("/legacy/api/offenders/${prisonerMerlin.prisonerNumber}/non-association-details")
+        .headers(
+          setAuthorisation(),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody().json(
+          // language=json
+          """
+           {
+            "offenderNo": "${prisonerMerlin.prisonerNumber}",
+            "firstName": "${prisonerMerlin.firstName}",
+            "lastName": "${prisonerMerlin.lastName}",
+            "agencyDescription": "${prisonerMerlin.prisonName}",
+            "assignedLivingUnitDescription": "${prisonerMerlin.cellLocation}",
+            "nonAssociations": [
+              {
+                "reasonCode": "${otherPrisonNa.secondPrisonerRole.toLegacyRole()}",
+                "reasonDescription": "${otherPrisonNa.secondPrisonerRole.toLegacyRole().description}",
+                "typeCode": "${otherPrisonNa.restrictionType.toLegacyRestrictionType()}",
+                "typeDescription": "${otherPrisonNa.restrictionType.toLegacyRestrictionType().description}",
+                "effectiveDate": "${otherPrisonNa.whenCreated.format(dtFormat)}",
+                "expiryDate": null,
+                "authorisedBy": "${otherPrisonNa.authorisedBy}",
+                "comments": "${otherPrisonNa.comment}",
+                "offenderNonAssociation": {
+                  "offenderNo": "${prisonerEdward.prisonerNumber}",
+                  "firstName": "${prisonerEdward.firstName}",
+                  "lastName": "${prisonerEdward.lastName}",
+                  "reasonCode": "${otherPrisonNa.firstPrisonerRole.toLegacyRole()}",
+                  "reasonDescription": "${otherPrisonNa.firstPrisonerRole.toLegacyRole().description}",
+                  "agencyDescription": "${prisonerEdward.prisonName}",
+                  "assignedLivingUnitDescription": "${prisonerEdward.cellLocation}"
+                }
+              },
+              {
+                "reasonCode": "${closedNa.firstPrisonerRole.toLegacyRole()}",
+                "reasonDescription": "${closedNa.firstPrisonerRole.toLegacyRole().description}",
+                "typeCode": "${closedNa.restrictionType.toLegacyRestrictionType()}",
+                "typeDescription": "${closedNa.restrictionType.toLegacyRestrictionType().description}",
+                "effectiveDate": "${closedNa.whenCreated.format(dtFormat)}",
+                "expiryDate": "${closedNa.closedAt?.format(dtFormat)}",
+                "authorisedBy": "${closedNa.authorisedBy}",
+                "comments": "${closedNa.comment}",
+                "offenderNonAssociation": {
+                  "offenderNo": "${prisonerJosh.prisonerNumber}",
+                  "firstName": "${prisonerJosh.firstName}",
+                  "lastName": "${prisonerJosh.lastName}",
+                  "reasonCode": "${closedNa.secondPrisonerRole.toLegacyRole()}",
+                  "reasonDescription": "${closedNa.secondPrisonerRole.toLegacyRole().description}",
+                  "agencyDescription": "${prisonerJosh.prisonName}",
+                  "assignedLivingUnitDescription": "${prisonerJosh.cellLocation}"
+                }
+              },
+              {
+                "reasonCode": "${openNonAssociation.secondPrisonerRole.toLegacyRole()}",
+                "reasonDescription": "${openNonAssociation.secondPrisonerRole.toLegacyRole().description}",
+                "typeCode": "${openNonAssociation.restrictionType.toLegacyRestrictionType()}",
+                "typeDescription": "${openNonAssociation.restrictionType.toLegacyRestrictionType().description}",
+                "effectiveDate": "${openNonAssociation.whenCreated.format(dtFormat)}",
+                "expiryDate": null,
+                "authorisedBy": "${openNonAssociation.authorisedBy}",
+                "comments": "${openNonAssociation.comment}",
+                "offenderNonAssociation": {
+                  "offenderNo": "${prisonerJohn.prisonerNumber}",
+                  "firstName": "${prisonerJohn.firstName}",
+                  "lastName": "${prisonerJohn.lastName}",
+                  "reasonCode": "${openNonAssociation.firstPrisonerRole.toLegacyRole()}",
+                  "reasonDescription": "${openNonAssociation.firstPrisonerRole.toLegacyRole().description}",
+                  "agencyDescription": "${prisonerJohn.prisonName}",
+                  "assignedLivingUnitDescription": "${prisonerJohn.cellLocation}"
+                }
+              }
+            ]
+          }
+          """,
+          false,
+        )
     }
   }
 
@@ -896,14 +1026,17 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     firstPrisonerNumber: String = "A1234BC",
     secondPrisonerNumber: String = "D5678EF",
     isClosed: Boolean = false,
+    restrictionType: RestrictionType = RestrictionType.CELL,
+    firstPrisonerRole: Role = Role.VICTIM,
+    secondPrisonerRole: Role = Role.PERPETRATOR,
   ): NonAssociationJPA {
     val nonna = NonAssociationJPA(
       firstPrisonerNumber = firstPrisonerNumber,
-      firstPrisonerRole = Role.VICTIM,
+      firstPrisonerRole = firstPrisonerRole,
       secondPrisonerNumber = secondPrisonerNumber,
-      secondPrisonerRole = Role.PERPETRATOR,
+      secondPrisonerRole = secondPrisonerRole,
       reason = Reason.BULLYING,
-      restrictionType = RestrictionType.CELL,
+      restrictionType = restrictionType,
       comment = "They keep fighting",
       authorisedBy = "USER_1",
       updatedBy = "A_USER",

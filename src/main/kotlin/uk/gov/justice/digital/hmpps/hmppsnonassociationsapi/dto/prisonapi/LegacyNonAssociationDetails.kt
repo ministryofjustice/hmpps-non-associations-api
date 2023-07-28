@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi
 
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyReason
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyRestrictionType
 import java.time.LocalDateTime
 
 /**
@@ -17,8 +19,6 @@ data class LegacyNonAssociationDetails(
   val agencyDescription: String,
   @Schema(description = "Description of living unit (e.g. cell) the offender is assigned to.", required = false, example = "MDI-1-1-3")
   val assignedLivingUnitDescription: String?,
-  @Schema(description = "ID of living unit (e.g. cell) the offender is assigned to.", required = false, example = "113")
-  val assignedLivingUnitId: Long? = null,
   @Schema(description = "Non-associations with other prisoners", required = true)
   val nonAssociations: List<LegacyNonAssociation>,
 )
@@ -28,11 +28,11 @@ data class LegacyNonAssociationDetails(
  */
 data class LegacyNonAssociation(
   @Schema(description = "Reason code for the non-association", required = true, example = "VIC")
-  val reasonCode: String,
+  val reasonCode: LegacyReason,
   @Schema(description = "Reason for the non-association", required = true, example = "Victim")
   val reasonDescription: String,
   @Schema(description = "The non-association type code", required = true, example = "WING")
-  val typeCode: String,
+  val typeCode: LegacyRestrictionType,
   @Schema(description = "The non-association type description", required = true, example = "Do Not Locate on Same Wing")
   val typeDescription: String,
   @Schema(description = "Date and time the non-association is effective from. In Europe/London (ISO 8601) format without timezone offset e.g. YYYY-MM-DDTHH:MM:SS.", required = true, example = "2021-07-05T10:35:17")
@@ -58,13 +58,11 @@ data class LegacyOffenderNonAssociation(
   @Schema(description = "Last name", required = true, example = "Bloggs")
   val lastName: String,
   @Schema(description = "Reason code for the non-association", required = true, example = "PER")
-  val reasonCode: String,
+  val reasonCode: LegacyReason,
   @Schema(description = "Reason for the non-association", required = true, example = "Perpetrator")
   val reasonDescription: String,
   @Schema(description = "Description of the agency (e.g. prison) the offender is assigned to", required = true, example = "Moorland (HMP & YOI)")
   val agencyDescription: String,
   @Schema(description = "Description of living unit (e.g. cell) the offender is assigned to.", required = false, example = "MDI-2-3-4")
   val assignedLivingUnitDescription: String?,
-  @Schema(description = "ID of living unit (e.g. cell) the offender is assigned to.", required = false, example = "234")
-  val assignedLivingUnitId: Long? = null,
 )
