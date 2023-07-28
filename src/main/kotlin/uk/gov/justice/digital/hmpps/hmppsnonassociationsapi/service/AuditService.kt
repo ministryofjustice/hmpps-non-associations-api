@@ -68,4 +68,5 @@ data class AuditEvent(
 enum class AuditType {
   NON_ASSOCIATION_CREATED,
   NON_ASSOCIATION_UPDATED,
+  NON_ASSOCIATION_CLOSED,
 }

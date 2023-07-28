@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation a
 /**
  * Non-association between two prisoners
  */
+@Schema(description = "Non-association")
 data class NonAssociation(
   @Schema(description = "ID of the non-association", required = true, example = "42")
   val id: Long,
@@ -48,6 +49,7 @@ data class NonAssociation(
 /**
  * Request format for creating a new, open, non-association between two prisoners
  */
+@Schema(description = "Request format for creating a new, open, non-association between two prisoners")
 data class CreateNonAssociationRequest(
   @Schema(description = "Prisoner number to not associate", required = true, example = "A1234BC")
   val firstPrisonerNumber: String,
@@ -85,6 +87,7 @@ data class CreateNonAssociationRequest(
 /**
  * Request format for updating a non-association between two prisoners
  */
+@Schema(description = "Request format for updating a non-association between two prisoners")
 data class PatchNonAssociationRequest(
   @Schema(description = "This prisoner’s role in the non-association", required = true, example = "VICTIM")
   val firstPrisonerRole: Role? = null,
@@ -98,6 +101,19 @@ data class PatchNonAssociationRequest(
 
   @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "John and Luke always end up fighting")
   val comment: String? = null,
+)
+
+/**
+ * Request format to close a non-association between two prisoners
+ */
+@Schema(description = "Request to close a non-association")
+data class CloseNonAssociationRequest(
+  @Schema(description = "Reason for closing the non-association", required = true, example = "They are friends now")
+  val closureReason: String,
+  @Schema(description = "Date and time of the closure, if not provided will default to today's time", required = false, example = "2023-06-07", defaultValue = "now")
+  val dateOfClosure: LocalDateTime? = null,
+  @Schema(description = "The username of the member of staff requesting the closure, if not provided will use the user in the JWT access token", required = false, example = "ASMITH")
+  val staffMemberRequestingClosure: String? = null,
 )
 
 fun NonAssociationJPA.updateWith(patch: PatchNonAssociationRequest): NonAssociationJPA {
