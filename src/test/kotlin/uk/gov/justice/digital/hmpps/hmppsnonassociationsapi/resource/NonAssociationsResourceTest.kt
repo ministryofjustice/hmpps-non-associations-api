@@ -4,8 +4,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Primary
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.reactive.server.returnResult
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
@@ -13,15 +17,24 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchPrisoners
+import java.lang.String.format
+import java.time.Clock
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
 @WithMockUser
 class NonAssociationsResourceTest : SqsIntegrationTestBase() {
+  @TestConfiguration
+  class FixedClockConfig {
+    @Primary
+    @Bean
+    fun fixedClock(): Clock = TestBase.clock
+  }
 
   @Nested
   inner class `Create a non-association` {
@@ -510,6 +523,181 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           """,
           false,
         )
+    }
+  }
+
+  @Nested
+  inner class `Close a non-association` {
+
+    private lateinit var nonAssociation: NonAssociationJPA
+    private lateinit var closedNonAssociation: NonAssociationJPA
+    private lateinit var url: String
+
+    @BeforeEach
+    fun setUp() {
+      nonAssociation = createNonAssociation()
+      closedNonAssociation = createNonAssociation(isClosed = true)
+      url = "/non-associations/%d/close"
+    }
+
+    @Test
+    fun `without a valid token responds 401 Unauthorized`() {
+      webTestClient.put()
+        .uri(format(url, nonAssociation.id))
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `without the correct role and scope responds 403 Forbidden`() {
+      val request = CloseNonAssociationRequest(
+        closureReason = "Ok now",
+      )
+
+      // correct role, missing write scope
+      webTestClient.put()
+        .uri(format(url, nonAssociation.id))
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+
+      // correct role, missing write scope
+      webTestClient.put()
+        .uri(format(url, nonAssociation.id))
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            scopes = listOf("read"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `without a valid request body responds 400 Bad Request`() {
+      // no request body
+      webTestClient.put()
+        .uri(format(url, nonAssociation.id))
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            scopes = listOf("write"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+
+      // unsupported Content-Type
+      webTestClient.put()
+        .uri(format(url, nonAssociation.id))
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            scopes = listOf("write"),
+          ),
+        )
+        .header("Content-Type", "text/plain")
+        .bodyValue("{}")
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+
+      // request body has invalid fields
+      webTestClient.put()
+        .uri(format(url, nonAssociation.id))
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            scopes = listOf("write"),
+          ),
+        )
+        .header("Content-Type", "text/plain")
+        .bodyValue(jsonString("staffMemberRequestingClosure" to "TEST"))
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+    }
+
+    @Test
+    fun `for a valid request closes the non-association`() {
+      // language=text
+      val closureReasonComment = "All fine now"
+      val request = mapOf("closureReason" to closureReasonComment)
+
+      // language=text
+      val expectedUsername = "A_TEST_USER"
+      val expectedResponse =
+        // language=json
+        """
+        {
+          "firstPrisonerNumber": "${nonAssociation.firstPrisonerNumber}",
+          "firstPrisonerRole": "${nonAssociation.firstPrisonerRole}",
+          "secondPrisonerNumber": "${nonAssociation.secondPrisonerNumber}",
+          "secondPrisonerRole": "${nonAssociation.secondPrisonerRole}",
+          "reason": "${nonAssociation.reason}",
+          "restrictionType": "${nonAssociation.restrictionType}",
+          "comment": "${nonAssociation.comment}",
+          "authorisedBy": "${nonAssociation.authorisedBy}",
+          "isClosed": true,
+          "closedReason": "$closureReasonComment",
+          "closedBy": $expectedUsername,
+          "closedAt": "${LocalDateTime.now(clock)}"
+        }
+        """
+
+      webTestClient.put()
+        .uri(format(url, nonAssociation.id))
+        .headers(
+          setAuthorisation(
+            user = expectedUsername,
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            scopes = listOf("write", "read"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(expectedResponse, false)
+        .consumeWith {
+          val nonAssociation = objectMapper.readValue(it.responseBody, NonAssociation::class.java)
+          assertThat(nonAssociation.id).isGreaterThan(0)
+          assertThat(nonAssociation.whenCreated).isNotNull()
+          assertThat(nonAssociation.whenUpdated).isAfterOrEqualTo(nonAssociation.whenCreated)
+        }
+    }
+
+    @Test
+    fun `already closed non-association cannot be re-closed`() {
+      val request = CloseNonAssociationRequest(
+        closureReason = "Please close again",
+        staffMemberRequestingClosure = "MWILLIS",
+        dateOfClosure = LocalDateTime.now(clock),
+      )
+
+      webTestClient.put()
+        .uri(format(url, closedNonAssociation.id))
+        .headers(
+          setAuthorisation(
+            user = "MWILLIS",
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            scopes = listOf("write", "read"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isEqualTo(409)
     }
   }
 
@@ -1046,7 +1234,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       nonna.isClosed = true
       nonna.closedReason = "They're friends now"
       nonna.closedBy = "CLOSE_USER"
-      nonna.closedAt = LocalDateTime.now()
+      nonna.closedAt = LocalDateTime.now(clock)
     }
 
     return repository.save(nonna)

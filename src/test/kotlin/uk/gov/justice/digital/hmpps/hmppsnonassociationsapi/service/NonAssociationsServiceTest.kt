@@ -11,6 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.FeatureFlagsC
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
+import java.time.Clock
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation as NonAssociationDTO
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
@@ -21,6 +22,7 @@ class NonAssociationsServiceTest {
   private val prisonApiService: PrisonApiService = mock()
   private val authenticationFacade: AuthenticationFacade = mock()
   private val telemetryClient: TelemetryClient = mock()
+  private val clock: Clock = mock()
   private val featureFlagsConfig: FeatureFlagsConfig = mock()
   private val service = NonAssociationsService(
     nonAssociationsRepository,
@@ -29,6 +31,7 @@ class NonAssociationsServiceTest {
     prisonApiService,
     telemetryClient,
     featureFlagsConfig,
+    clock,
   )
 
   @Test

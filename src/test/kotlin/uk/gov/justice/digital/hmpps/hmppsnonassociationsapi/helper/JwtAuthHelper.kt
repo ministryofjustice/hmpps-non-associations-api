@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.stereotype.Component
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPublicKey
@@ -15,7 +16,7 @@ import java.util.*
 
 @Component
 class JwtAuthHelper {
-  private val keyPair: KeyPair
+  private lateinit var keyPair: KeyPair
 
   init {
     val gen = KeyPairGenerator.getInstance("RSA")
@@ -27,7 +28,7 @@ class JwtAuthHelper {
   fun jwtDecoder(): JwtDecoder = NimbusJwtDecoder.withPublicKey(keyPair.public as RSAPublicKey).build()
 
   fun setAuthorisation(
-    user: String = "NON_ASSOCIATIONS_ADM",
+    user: String = SYSTEM_USERNAME,
     roles: List<String> = listOf(),
     scopes: List<String> = listOf(),
   ): (HttpHeaders) -> Unit {

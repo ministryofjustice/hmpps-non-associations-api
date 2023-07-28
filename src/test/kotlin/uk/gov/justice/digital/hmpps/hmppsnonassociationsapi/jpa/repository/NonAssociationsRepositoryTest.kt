@@ -72,7 +72,7 @@ class NonAssociationsRepositoryTest : TestBase() {
 
     val closedBy = "Aldo"
     val closedReason = "They're friends now"
-    val closedAt = LocalDateTime.now()
+    val closedAt = LocalDateTime.now(clock)
     createdNonna.close(closedBy, closedReason, closedAt)
     repository.save(createdNonna)
 

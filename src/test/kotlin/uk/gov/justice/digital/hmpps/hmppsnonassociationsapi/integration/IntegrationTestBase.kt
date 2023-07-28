@@ -11,15 +11,13 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDO
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpHeaders
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.HmppsAuthMockServer
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.OffenderSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.PrisonApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
-import java.time.Clock
-import java.time.Instant
-import java.time.ZoneId
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 abstract class IntegrationTestBase : TestBase() {
@@ -41,10 +39,6 @@ abstract class IntegrationTestBase : TestBase() {
   protected lateinit var objectMapper: ObjectMapper
 
   companion object {
-    val clock: Clock = Clock.fixed(
-      Instant.parse("2022-03-15T12:34:56+00:00"),
-      ZoneId.of("Europe/London"),
-    )
 
     @JvmField
     val offenderSearchMockServer = OffenderSearchMockServer()
@@ -85,7 +79,7 @@ abstract class IntegrationTestBase : TestBase() {
   }
 
   protected fun setAuthorisation(
-    user: String = "NON_ASSOCIATIONS_ADM",
+    user: String = SYSTEM_USERNAME,
     roles: List<String> = listOf(),
     scopes: List<String> = listOf(),
   ): (HttpHeaders) -> Unit = jwtAuthHelper.setAuthorisation(user, roles, scopes)

@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.FeatureFlagsConfig
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationAlreadyClosedException
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.UserInContextMissingException
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
@@ -20,6 +23,8 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.Legacy
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.toPrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.updateWith
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
+import java.time.Clock
+import java.time.LocalDateTime
 import kotlin.jvm.optionals.getOrNull
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation as NonAssociationDTO
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
@@ -33,6 +38,7 @@ class NonAssociationsService(
   private val prisonApiService: PrisonApiService,
   private val telemetryClient: TelemetryClient,
   private val featureFlagsConfig: FeatureFlagsConfig,
+  private val clock: Clock,
 ) {
 
   companion object {
@@ -49,7 +55,7 @@ class NonAssociationsService(
 
     val nonAssociationJpa = createNonAssociationRequest.toNewEntity(
       authorisedBy = authenticationFacade.currentUsername
-        ?: throw Exception("Could not determine current user's username'"),
+        ?: throw UserInContextMissingException(),
     )
     val nonAssociation = persistNonAssociation(nonAssociationJpa).toDto()
     log.info("Created Non-association [${nonAssociation.id}]")
@@ -76,22 +82,30 @@ class NonAssociationsService(
       "Non-association with ID $id not found",
     )
 
-    val updatedNonAssociation = nonAssociationsRepository.save(
-      nonAssociation.updateWith(update),
-    )
+    nonAssociation.updateWith(update)
 
     log.info("Updated Non-association [$id]")
-    telemetryClient.trackEvent(
-      "Updated Non-Association",
-      mapOf(
-        "id" to updatedNonAssociation.id.toString(),
-        "1stPrisoner" to updatedNonAssociation.firstPrisonerNumber,
-        "2ndPrisoner" to updatedNonAssociation.secondPrisonerNumber,
-      ),
-      null,
+    return nonAssociation.toDto()
+  }
+
+  fun closeNonAssociation(id: Long, closeRequest: CloseNonAssociationRequest): NonAssociationDTO {
+    val nonAssociation = nonAssociationsRepository.findById(id).getOrNull() ?: throw ResponseStatusException(
+      HttpStatus.NOT_FOUND,
+      "Non-association with ID $id not found",
     )
 
-    return updatedNonAssociation.toDto()
+    if (nonAssociation.isClosed) {
+      throw NonAssociationAlreadyClosedException(id)
+    }
+
+    nonAssociation.close(
+      closedAt = closeRequest.dateOfClosure ?: LocalDateTime.now(clock),
+      closedBy = closeRequest.staffMemberRequestingClosure ?: authenticationFacade.currentUsername ?: throw UserInContextMissingException(),
+      closedReason = closeRequest.closureReason,
+    )
+
+    log.info("Closed Non-association [$id]")
+    return nonAssociation.toDto()
   }
 
   fun getPrisonerNonAssociations(prisonerNumber: String, options: NonAssociationListOptions): PrisonerNonAssociations {
