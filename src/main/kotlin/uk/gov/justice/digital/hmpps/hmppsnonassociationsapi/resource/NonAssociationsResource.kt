@@ -97,6 +97,7 @@ class NonAssociationsResource(
       example = "LAST_NAME",
       allowableValues = [
         "WHEN_CREATED",
+        "WHEN_UPDATED",
         "LAST_NAME",
         "FIRST_NAME",
         "PRISONER_NUMBER",
