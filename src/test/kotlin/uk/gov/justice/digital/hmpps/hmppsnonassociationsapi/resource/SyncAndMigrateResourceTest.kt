@@ -37,9 +37,9 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
     fun `without the correct role and scope responds 403 Forbidden`() {
       val request = MigrateRequest(
         firstPrisonerNumber = "C7777XX",
-        firstPrisonerReason = LegacyReason.VICTIM,
+        firstPrisonerReason = LegacyReason.VIC,
         secondPrisonerNumber = "D7777XX",
-        secondPrisonerReason = LegacyReason.PERPETRATOR,
+        secondPrisonerReason = LegacyReason.PER,
         restrictionType = LegacyRestrictionType.CELL,
         comment = "They keep fighting",
         authorisedBy = "Me",
@@ -105,9 +105,9 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
     fun `for a valid request migrates the non-association`() {
       val request = MigrateRequest(
         firstPrisonerNumber = "C7777XX",
-        firstPrisonerReason = LegacyReason.VICTIM,
+        firstPrisonerReason = LegacyReason.VIC,
         secondPrisonerNumber = "D7777XX",
-        secondPrisonerReason = LegacyReason.PERPETRATOR,
+        secondPrisonerReason = LegacyReason.PER,
         restrictionType = LegacyRestrictionType.CELL,
         comment = "This is a comment",
         authorisedBy = "Test",
@@ -119,11 +119,11 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         """
         {
           "firstPrisonerNumber": "${request.firstPrisonerNumber}",
-          "firstPrisonerRole": "${request.firstPrisonerReason}",
+          "firstPrisonerRole": "${request.firstPrisonerReason.toRole()}",
           "secondPrisonerNumber": "${request.secondPrisonerNumber}",
-          "secondPrisonerRole": "${request.secondPrisonerReason}",
+          "secondPrisonerRole": "${request.secondPrisonerReason.toRole()}",
           "reason": "OTHER",
-          "restrictionType": "${request.restrictionType}",
+          "restrictionType": "${request.restrictionType.toRestrictionType()}",
           "comment": "${request.comment}",
           "authorisedBy": "${request.authorisedBy}",
           "isClosed": false,
@@ -166,9 +166,9 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
     fun `without the correct role and scope responds 403 Forbidden`() {
       val request = CreateSyncRequest(
         firstPrisonerNumber = "A7777XX",
-        firstPrisonerReason = LegacyReason.VICTIM,
+        firstPrisonerReason = LegacyReason.VIC,
         secondPrisonerNumber = "B7777XX",
-        secondPrisonerReason = LegacyReason.PERPETRATOR,
+        secondPrisonerReason = LegacyReason.PER,
         restrictionType = LegacyRestrictionType.CELL,
         comment = "They keep fighting",
         authorisedBy = "Me",
@@ -233,9 +233,9 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
     fun `creating an non-association`() {
       val request = CreateSyncRequest(
         firstPrisonerNumber = "A7777XX",
-        firstPrisonerReason = LegacyReason.VICTIM,
+        firstPrisonerReason = LegacyReason.VIC,
         secondPrisonerNumber = "B7777XX",
-        secondPrisonerReason = LegacyReason.PERPETRATOR,
+        secondPrisonerReason = LegacyReason.PER,
         restrictionType = LegacyRestrictionType.CELL,
         expiryDate = LocalDate.now(clock).minusDays(4),
         active = false,
@@ -247,11 +247,11 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         """
         {
           "firstPrisonerNumber": "${request.firstPrisonerNumber}",
-          "firstPrisonerRole": "${request.firstPrisonerReason}",
+          "firstPrisonerRole": "${request.firstPrisonerReason.toRole()}",
           "secondPrisonerNumber": "${request.secondPrisonerNumber}",
-          "secondPrisonerRole": "${request.secondPrisonerReason}",
+          "secondPrisonerRole": "${request.secondPrisonerReason.toRole()}",
           "reason": "OTHER",
-          "restrictionType": "${request.restrictionType}",
+          "restrictionType": "${request.restrictionType.toRestrictionType()}",
           "comment": "No comment provided",
           "authorisedBy": "",
           "isClosed": true,
@@ -287,8 +287,8 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
 
       val request = UpdateSyncRequest(
         id = naUpdate.id!!,
-        firstPrisonerReason = LegacyReason.PERPETRATOR,
-        secondPrisonerReason = LegacyReason.VICTIM,
+        firstPrisonerReason = LegacyReason.PER,
+        secondPrisonerReason = LegacyReason.VIC,
         restrictionType = LegacyRestrictionType.WING,
         expiryDate = LocalDate.now(clock),
         active = false,
@@ -303,11 +303,11 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         {
           "id": ${request.id},
           "firstPrisonerNumber": "C1234AA",
-          "firstPrisonerRole": "${request.firstPrisonerReason}",
+          "firstPrisonerRole": "${request.firstPrisonerReason.toRole()}",
           "secondPrisonerNumber": "D1234AA",
-          "secondPrisonerRole": "${request.secondPrisonerReason}",
+          "secondPrisonerRole": "${request.secondPrisonerReason.toRole()}",
           "reason": "BULLYING",
-          "restrictionType": "${request.restrictionType}",
+          "restrictionType": "${request.restrictionType.toRestrictionType()}",
           "comment": "${request.comment}",
           "authorisedBy": "${request.authorisedBy}",
           "isClosed": true,
@@ -347,8 +347,8 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
 
       val request = UpdateSyncRequest(
         id = naUpdate.id!!,
-        firstPrisonerReason = LegacyReason.PERPETRATOR,
-        secondPrisonerReason = LegacyReason.VICTIM,
+        firstPrisonerReason = LegacyReason.PER,
+        secondPrisonerReason = LegacyReason.VIC,
         restrictionType = LegacyRestrictionType.WING,
         expiryDate = LocalDate.now(clock),
         active = true,
@@ -362,11 +362,11 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         {
           "id": ${request.id},
           "firstPrisonerNumber": "C1234AA",
-          "firstPrisonerRole": "${request.firstPrisonerReason}",
+          "firstPrisonerRole": "${request.firstPrisonerReason.toRole()}",
           "secondPrisonerNumber": "D1234AA",
-          "secondPrisonerRole": "${request.secondPrisonerReason}",
+          "secondPrisonerRole": "${request.secondPrisonerReason.toRole()}",
           "reason": "BULLYING",
-          "restrictionType": "${request.restrictionType}",
+          "restrictionType": "${request.restrictionType.toRestrictionType()}",
           "comment": "${request.comment}",
           "authorisedBy": "${request.authorisedBy}",
           "isClosed": false,

@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.FeatureFlagsConfig
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationAlreadyClosedException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.UserInContextMissingException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
@@ -16,7 +17,9 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssocia
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociationDetails
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyOffenderNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.toPrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.updateWith
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
@@ -34,6 +37,7 @@ class NonAssociationsService(
   private val authenticationFacade: AuthenticationFacade,
   private val prisonApiService: PrisonApiService,
   private val telemetryClient: TelemetryClient,
+  private val featureFlagsConfig: FeatureFlagsConfig,
   private val clock: Clock,
 ) {
 
@@ -139,13 +143,51 @@ class NonAssociationsService(
   }
 
   fun getLegacyDetails(prisonerNumber: String): LegacyNonAssociationDetails {
-    return prisonApiService.getNonAssociationDetails(prisonerNumber)
+    return when (featureFlagsConfig.legacyEndpointNomisSourceOfTruth) {
+      true -> prisonApiService.getNonAssociationDetails(prisonerNumber)
+      false -> {
+        return getPrisonerNonAssociations(
+          prisonerNumber,
+          NonAssociationListOptions(includeClosed = true, includeOtherPrisons = true),
+        ).toLegacy()
+      }
+    }
   }
 
   private fun persistNonAssociation(nonAssociation: NonAssociationJPA): NonAssociationJPA {
     return nonAssociationsRepository.save(nonAssociation)
   }
 }
+
+private fun PrisonerNonAssociations.toLegacy() =
+  LegacyNonAssociationDetails(
+    offenderNo = this.prisonerNumber,
+    firstName = this.firstName,
+    lastName = this.lastName,
+    agencyDescription = this.prisonName,
+    assignedLivingUnitDescription = this.cellLocation,
+    nonAssociations = this.nonAssociations.map {
+      LegacyNonAssociation(
+        reasonCode = it.roleCode.toLegacyRole(),
+        reasonDescription = it.roleCode.toLegacyRole().description,
+        typeCode = it.restrictionTypeCode.toLegacyRestrictionType(),
+        typeDescription = it.restrictionTypeCode.toLegacyRestrictionType().description,
+        effectiveDate = it.whenCreated,
+        expiryDate = it.closedAt,
+        authorisedBy = it.authorisedBy,
+        comments = it.comment,
+        offenderNonAssociation = LegacyOffenderNonAssociation(
+          offenderNo = it.otherPrisonerDetails.prisonerNumber,
+          firstName = it.otherPrisonerDetails.firstName,
+          lastName = it.otherPrisonerDetails.lastName,
+          reasonCode = it.otherPrisonerDetails.roleCode.toLegacyRole(),
+          reasonDescription = it.otherPrisonerDetails.roleCode.toLegacyRole().description,
+          agencyDescription = it.otherPrisonerDetails.prisonName,
+          assignedLivingUnitDescription = it.otherPrisonerDetails.cellLocation,
+        ),
+      )
+    },
+  )
 
 data class NonAssociationListOptions(
   val includeOtherPrisons: Boolean = false,

@@ -7,6 +7,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.FeatureFlagsConfig
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
@@ -22,12 +23,14 @@ class NonAssociationsServiceTest {
   private val authenticationFacade: AuthenticationFacade = mock()
   private val telemetryClient: TelemetryClient = mock()
   private val clock: Clock = mock()
+  private val featureFlagsConfig: FeatureFlagsConfig = mock()
   private val service = NonAssociationsService(
     nonAssociationsRepository,
     offenderSearchService,
     authenticationFacade,
     prisonApiService,
     telemetryClient,
+    featureFlagsConfig,
     clock,
   )
 
