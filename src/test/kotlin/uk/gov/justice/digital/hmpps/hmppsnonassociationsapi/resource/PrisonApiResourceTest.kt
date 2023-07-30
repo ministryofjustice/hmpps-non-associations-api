@@ -24,6 +24,7 @@ class PrisonApiResourceTest : SqsIntegrationTestBase() {
       lastName = "Hall",
       agencyDescription = "Moorland (HMP & YOI)",
       assignedLivingUnitDescription = "MDI-1-1-3",
+      assignedLivingUnitId = 113,
       nonAssociations = listOf(
         LegacyNonAssociation(
           reasonCode = LegacyReason.VIC,
@@ -42,6 +43,7 @@ class PrisonApiResourceTest : SqsIntegrationTestBase() {
             reasonDescription = "Perpetrator",
             agencyDescription = "Moorland (HMP & YOI)",
             assignedLivingUnitDescription = "MDI-2-3-4",
+            assignedLivingUnitId = 234,
           ),
         ),
       ),

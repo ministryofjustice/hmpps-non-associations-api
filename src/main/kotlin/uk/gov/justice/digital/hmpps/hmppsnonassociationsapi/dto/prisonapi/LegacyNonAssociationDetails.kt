@@ -19,6 +19,8 @@ data class LegacyNonAssociationDetails(
   val agencyDescription: String,
   @Schema(description = "Description of living unit (e.g. cell) the offender is assigned to.", required = false, example = "MDI-1-1-3")
   val assignedLivingUnitDescription: String?,
+  @Schema(description = "ID of living unit (e.g. cell) the offender is assigned to.", required = false, example = "113")
+  val assignedLivingUnitId: Long? = null,
   @Schema(description = "Non-associations with other prisoners", required = true)
   val nonAssociations: List<LegacyNonAssociation>,
 )
@@ -65,4 +67,6 @@ data class LegacyOffenderNonAssociation(
   val agencyDescription: String,
   @Schema(description = "Description of living unit (e.g. cell) the offender is assigned to.", required = false, example = "MDI-2-3-4")
   val assignedLivingUnitDescription: String?,
+  @Schema(description = "ID of living unit (e.g. cell) the offender is assigned to.", required = false, example = "234")
+  val assignedLivingUnitId: Long? = null,
 )
