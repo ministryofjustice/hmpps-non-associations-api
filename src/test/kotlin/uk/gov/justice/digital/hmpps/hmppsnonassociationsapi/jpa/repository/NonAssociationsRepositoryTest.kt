@@ -23,7 +23,7 @@ import java.time.LocalDateTime
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(AuthenticationFacade::class, AuditorAwareImpl::class)
-@WithMockUser
+@WithMockUser(username = "A_USER")
 @Transactional
 class NonAssociationsRepositoryTest : TestBase() {
 

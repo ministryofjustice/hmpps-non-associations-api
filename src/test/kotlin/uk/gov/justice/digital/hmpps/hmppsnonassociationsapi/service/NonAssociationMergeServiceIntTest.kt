@@ -17,7 +17,7 @@ import java.time.LocalDateTime
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(AuthenticationFacade::class, AuditorAwareImpl::class, NonAssociationsMergeService::class)
-@WithMockUser
+@WithMockUser(username = "A_USER")
 @DataJpaTest
 class NonAssociationMergeServiceIntTest : TestBase() {
 
