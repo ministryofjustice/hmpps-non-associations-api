@@ -245,7 +245,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   }
 
   @Nested
-  inner class `PATCH a non-association` {
+  inner class `Update a non-association` {
 
     private lateinit var nonAssociation: NonAssociationJPA
     private lateinit var url: String
@@ -765,7 +765,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   }
 
   @Nested
-  inner class `GET non associations for a prisoner` {
+  inner class `Get non-associations lists for a prisoner` {
 
     private val prisonerNumber = "A1234BC"
 
@@ -838,6 +838,16 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
+    fun `respond with 400 if neither open nor closed non-associations are requested`() {
+      webTestClient.get()
+        .uri("/prisoner/$prisonerNumber/non-associations?includeOpen=false&includeClosed=false")
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+    }
+
+    @Test
     fun `by default returns only open non-associations in same prison the given prisoner is in`() {
       // prisoners in MDI
       val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
@@ -866,7 +876,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         secondPrisonerNumber = prisonerMerlin.prisonerNumber,
       )
 
-      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
+      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerEdward)
       offenderSearchMockServer.stubSearchByPrisonerNumbers(
         prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
         prisoners,
@@ -1032,6 +1042,91 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
+    fun `optionally returns only closed non-associations`() {
+      // prisoners in MDI
+      val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
+      val prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
+      val prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
+      // prisoner in another prison
+      val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
+
+      // open non-association, same prison, not returned
+      createNonAssociation(
+        prisonerJohn.prisonerNumber,
+        prisonerMerlin.prisonerNumber,
+        isClosed = false,
+      )
+
+      // closed non-association, same prison, returned
+      val closedNonAssociation = createNonAssociation(
+        firstPrisonerNumber = prisonerMerlin.prisonerNumber,
+        secondPrisonerNumber = prisonerJosh.prisonerNumber,
+        isClosed = true,
+      )
+
+      // non-association with someone in a different prison, not returned
+      createNonAssociation(
+        firstPrisonerNumber = prisonerEdward.prisonerNumber,
+        secondPrisonerNumber = prisonerMerlin.prisonerNumber,
+      )
+
+      val prisoners = listOf(prisonerMerlin, prisonerJosh)
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
+        prisoners,
+      )
+
+      // NOTE: Non-associations for Merlin
+      val url = "/prisoner/${prisonerMerlin.prisonerNumber}/non-associations?includeOpen=false&includeClosed=true"
+      webTestClient.get()
+        .uri(url)
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+            {
+              "prisonerNumber": "${prisonerMerlin.prisonerNumber}",
+              "firstName": "${prisonerMerlin.firstName}",
+              "lastName": "${prisonerMerlin.lastName}",
+              "prisonId": "${prisonerMerlin.prisonId}",
+              "prisonName": "${prisonerMerlin.prisonName}",
+              "cellLocation": "${prisonerMerlin.cellLocation}",
+              "nonAssociations": [
+                {
+                  "id": ${closedNonAssociation.id},
+                  "roleCode": "${closedNonAssociation.firstPrisonerRole}",
+                  "roleDescription": "${closedNonAssociation.firstPrisonerRole.description}",
+                  "reasonCode": "${closedNonAssociation.reason}",
+                  "reasonDescription": "${closedNonAssociation.reason.description}",
+                  "restrictionTypeCode": "${closedNonAssociation.restrictionType}",
+                  "restrictionTypeDescription": "${closedNonAssociation.restrictionType.description}",
+                  "comment": "${closedNonAssociation.comment}",
+                  "authorisedBy": "${closedNonAssociation.authorisedBy}",
+                  "updatedBy": "$expectedUsername",
+                  "isClosed": true,
+                  "closedReason": "They're friends now",
+                  "closedBy": "CLOSE_USER",
+                  "otherPrisonerDetails": {
+                    "prisonerNumber": "${prisonerJosh.prisonerNumber}",
+                    "roleCode": "${closedNonAssociation.secondPrisonerRole}",
+                    "roleDescription": "${closedNonAssociation.secondPrisonerRole.description}",
+                    "firstName": "${prisonerJosh.firstName}",
+                    "lastName": "${prisonerJosh.lastName}",
+                    "prisonId": "${prisonerJosh.prisonId}",
+                    "prisonName": "${prisonerJosh.prisonName}",
+                    "cellLocation": "${prisonerJosh.cellLocation}"
+                  }
+                }
+              ]
+            }
+          """,
+          false,
+        )
+    }
+
+    @Test
     fun `optionally returns non-associations in other prisons`() {
       // prisoners in MDI
       val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
@@ -1060,7 +1155,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         secondPrisonerNumber = prisonerMerlin.prisonerNumber,
       )
 
-      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
+      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerEdward)
       offenderSearchMockServer.stubSearchByPrisonerNumbers(
         prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
         prisoners,

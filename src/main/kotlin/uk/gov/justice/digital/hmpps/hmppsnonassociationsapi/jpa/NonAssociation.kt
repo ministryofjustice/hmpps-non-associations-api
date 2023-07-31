@@ -62,7 +62,8 @@ class NonAssociation(
     this.closedAt = closedAt
   }
 
-  fun isOpen() = !isClosed
+  val isOpen: Boolean
+    get() = !isClosed
 
   fun toDto(): NonAssociationDTO {
     return NonAssociationDTO(

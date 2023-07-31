@@ -23,7 +23,7 @@ class OffenderSearchService(
    * Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role.
    */
   fun searchByPrisonerNumbers(
-    prisonerNumbers: List<String>,
+    prisonerNumbers: Collection<String>,
     useClientCredentials: Boolean = true,
   ): Map<String, OffenderSearchPrisoner> {
     val requestBody = mapOf("prisonerNumbers" to prisonerNumbers)
