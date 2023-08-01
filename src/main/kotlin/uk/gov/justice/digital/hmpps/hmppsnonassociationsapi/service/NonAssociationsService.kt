@@ -112,26 +112,28 @@ class NonAssociationsService(
     val nonAssociations = nonAssociationsRepository.findAllByFirstPrisonerNumber(prisonerNumber) +
       nonAssociationsRepository.findAllBySecondPrisonerNumber(prisonerNumber)
 
-    val prisonerNumbers = (
-      listOf(prisonerNumber) +
-        nonAssociations.map(NonAssociationJPA::firstPrisonerNumber) +
-        nonAssociations.map(NonAssociationJPA::secondPrisonerNumber)
-      ).distinct()
+    // filter out open or closed non-associations if necessary
+    var nonAssociationsFiltered = if (options.includeOpen && options.includeClosed) {
+      nonAssociations
+    } else if (options.includeOpen) {
+      nonAssociations.filter(NonAssociationJPA::isOpen)
+    } else if (options.includeClosed) {
+      nonAssociations.filter(NonAssociationJPA::isClosed)
+    } else {
+      emptyList()
+    }
+
+    val prisonerNumbers = nonAssociationsFiltered.flatMapTo(mutableSetOf(prisonerNumber)) {
+      listOf(it.firstPrisonerNumber, it.secondPrisonerNumber)
+    }
     val prisoners = offenderSearch.searchByPrisonerNumbers(prisonerNumbers)
 
-    var nonAssociationsFiltered = nonAssociations
     // filter out non-associations in other prisons
     if (!options.includeOtherPrisons) {
       val prisonId = prisoners[prisonerNumber]!!.prisonId
       nonAssociationsFiltered = nonAssociationsFiltered.filter { nonna ->
         prisoners[nonna.firstPrisonerNumber]!!.prisonId == prisonId &&
           prisoners[nonna.secondPrisonerNumber]!!.prisonId == prisonId
-      }
-    }
-    // filter out closed non-associations
-    if (!options.includeClosed) {
-      nonAssociationsFiltered = nonAssociationsFiltered.filter { nonna ->
-        !nonna.isClosed
       }
     }
 
@@ -148,7 +150,7 @@ class NonAssociationsService(
       false -> {
         return getPrisonerNonAssociations(
           prisonerNumber,
-          NonAssociationListOptions(includeClosed = true, includeOtherPrisons = true),
+          NonAssociationListOptions(includeOpen = true, includeClosed = true, includeOtherPrisons = true),
         ).toLegacy()
       }
     }
@@ -190,8 +192,9 @@ private fun PrisonerNonAssociations.toLegacy() =
   )
 
 data class NonAssociationListOptions(
-  val includeOtherPrisons: Boolean = false,
+  val includeOpen: Boolean = true,
   val includeClosed: Boolean = false,
+  val includeOtherPrisons: Boolean = false,
   val sortBy: NonAssociationsSort = NonAssociationsSort.WHEN_CREATED,
   val sortDirection: Sort.Direction = Sort.Direction.DESC,
 )

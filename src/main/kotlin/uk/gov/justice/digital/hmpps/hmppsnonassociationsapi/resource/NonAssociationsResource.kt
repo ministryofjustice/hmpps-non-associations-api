@@ -73,13 +73,22 @@ class NonAssociationsResource(
     prisonerNumber: String,
 
     @Schema(
+      description = "Whether to include open non-associations or not",
+      required = false,
+      defaultValue = "true",
+      example = "false",
+    )
+    @RequestParam(required = false, defaultValue = "true")
+    includeOpen: Boolean = true,
+
+    @Schema(
       description = "Whether to include closed non-associations or not",
       required = false,
       defaultValue = "false",
       example = "true",
     )
-    @RequestParam(required = false)
-    includeClosed: Boolean,
+    @RequestParam(required = false, defaultValue = "false")
+    includeClosed: Boolean = false,
 
     @Schema(
       description = "Whether to include non-associations with prisoners in other prisons",
@@ -87,8 +96,8 @@ class NonAssociationsResource(
       defaultValue = "false",
       example = "true",
     )
-    @RequestParam(required = false)
-    includeOtherPrisons: Boolean,
+    @RequestParam(required = false, defaultValue = "false")
+    includeOtherPrisons: Boolean = false,
 
     @Schema(
       description = "Sort non-associations by",
@@ -110,9 +119,14 @@ class NonAssociationsResource(
     @RequestParam(required = false)
     sortDirection: Sort.Direction?,
   ): PrisonerNonAssociations {
+    if (!includeOpen && !includeClosed) {
+      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
+    }
+
     return nonAssociationsService.getPrisonerNonAssociations(
       prisonerNumber,
       NonAssociationListOptions(
+        includeOpen = includeOpen,
         includeClosed = includeClosed,
         includeOtherPrisons = includeOtherPrisons,
         sortBy = sortBy ?: NonAssociationsSort.WHEN_CREATED,
