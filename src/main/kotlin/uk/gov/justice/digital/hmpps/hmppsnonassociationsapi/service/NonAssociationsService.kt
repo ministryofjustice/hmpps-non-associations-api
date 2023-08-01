@@ -23,6 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.Legacy
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.toPrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.updateWith
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAllByPrisonerNumber
 import java.time.Clock
 import java.time.LocalDateTime
 import kotlin.jvm.optionals.getOrNull
@@ -109,8 +110,7 @@ class NonAssociationsService(
   }
 
   fun getPrisonerNonAssociations(prisonerNumber: String, options: NonAssociationListOptions): PrisonerNonAssociations {
-    val nonAssociations = nonAssociationsRepository.findAllByFirstPrisonerNumber(prisonerNumber) +
-      nonAssociationsRepository.findAllBySecondPrisonerNumber(prisonerNumber)
+    val nonAssociations = nonAssociationsRepository.findAllByPrisonerNumber(prisonerNumber)
 
     // filter out open or closed non-associations if necessary
     var nonAssociationsFiltered = if (options.includeOpen && options.includeClosed) {
