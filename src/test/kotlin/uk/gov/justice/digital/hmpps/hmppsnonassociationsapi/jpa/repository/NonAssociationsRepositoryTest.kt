@@ -40,8 +40,10 @@ class NonAssociationsRepositoryTest : TestBase() {
   fun findAllByPrisonerNumber() {
     repository.saveAll(
       listOf(
+        nonAssociation("A1234CB", "X0123BB"), // not returned
         nonAssociation("D5678EF", "A1234BC"),
         nonAssociation("A1234BC", "D5678EG"),
+        nonAssociation("X0123AA", "X0123BB"), // not returned
         nonAssociation("A1234BC", "G0011AA"),
         nonAssociation("G0022BB", "A1234BC"),
       ),
@@ -52,6 +54,26 @@ class NonAssociationsRepositoryTest : TestBase() {
     assertThat(nonAssociations).hasSize(4)
     assertThat(nonAssociations).allMatch {
       (it.firstPrisonerNumber == "A1234BC").xor(it.secondPrisonerNumber == "A1234BC")
+    }
+  }
+
+  @Test
+  fun findAllByPairOfPrisonerNumber() {
+    repository.saveAll(
+      listOf(
+        nonAssociation("G0022BB", "X0123BB"), // not returned
+        nonAssociation("A1234BC", "D5678EF", closed = true),
+        nonAssociation("A1234BC", "D5678EG"), // not returned
+        nonAssociation("D5678EF", "A1234BC"),
+      ),
+    )
+
+    val nonAssociations = repository.findAllByPairOfPrisonerNumber("D5678EF" to "A1234BC")
+
+    assertThat(nonAssociations).hasSize(2)
+    assertThat(nonAssociations).allMatch {
+      (it.firstPrisonerNumber == "D5678EF" && it.secondPrisonerNumber == "A1234BC")
+        .xor(it.firstPrisonerNumber == "A1234BC" && it.secondPrisonerNumber == "D5678EF")
     }
   }
 
@@ -155,7 +177,7 @@ class NonAssociationsRepositoryTest : TestBase() {
     assertThat(updated.whenUpdated).isAfter(updated.whenCreated)
   }
 
-  private fun nonAssociation(firstPrisonerNumber: String, secondPrisonerNumber: String): NonAssociation {
+  private fun nonAssociation(firstPrisonerNumber: String, secondPrisonerNumber: String, closed: Boolean = false): NonAssociation {
     return NonAssociation(
       firstPrisonerNumber = firstPrisonerNumber,
       firstPrisonerRole = Role.VICTIM,
@@ -166,6 +188,10 @@ class NonAssociationsRepositoryTest : TestBase() {
       comment = "John attacked Bob",
       authorisedBy = "A_USER",
       updatedBy = "A_USER",
+      isClosed = closed,
+      closedAt = if (closed) { LocalDateTime.now() } else { null },
+      closedBy = if (closed) { "A USER" } else { null },
+      closedReason = if (closed) { "Problems resolved" } else { null },
     )
   }
 }
