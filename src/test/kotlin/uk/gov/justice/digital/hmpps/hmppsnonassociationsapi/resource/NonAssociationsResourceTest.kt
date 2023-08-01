@@ -17,7 +17,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchPrisoners
@@ -27,13 +26,16 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
-@WithMockUser
+// language=text
+const val expectedUsername = "A_TEST_USER"
+
+@WithMockUser(username = expectedUsername)
 class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   @TestConfiguration
   class FixedClockConfig {
     @Primary
     @Bean
-    fun fixedClock(): Clock = TestBase.clock
+    fun fixedClock(): Clock = clock
   }
 
   @Nested
@@ -200,8 +202,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         comment = "They keep fighting",
       )
 
-      // language=text
-      val expectedUsername = "A_TEST_USER"
       val expectedResponse =
         // language=json
         """
@@ -214,6 +214,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           "restrictionType": "${request.restrictionType}",
           "comment": "${request.comment}",
           "authorisedBy": "$expectedUsername",
+          "updatedBy": "$expectedUsername",
           "isClosed": false,
           "closedReason": null,
           "closedBy": null,
@@ -353,8 +354,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         "comment" to updatedComment,
       )
 
-      // language=text
-      val expectedUsername = "A_TEST_USER"
       val expectedResponse =
         // language=json
         """
@@ -367,6 +366,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           "restrictionType": "${nonAssociation.restrictionType}",
           "comment": "$updatedComment",
           "authorisedBy": "${nonAssociation.authorisedBy}",
+          "updatedBy": "$expectedUsername",
           "isClosed": false,
           "closedReason": null,
           "closedBy": null,
@@ -634,8 +634,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       val closureReasonComment = "All fine now"
       val request = mapOf("closureReason" to closureReasonComment)
 
-      // language=text
-      val expectedUsername = "A_TEST_USER"
       val expectedResponse =
         // language=json
         """
@@ -648,6 +646,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           "restrictionType": "${nonAssociation.restrictionType}",
           "comment": "${nonAssociation.comment}",
           "authorisedBy": "${nonAssociation.authorisedBy}",
+          "updatedBy": "$expectedUsername",
           "isClosed": true,
           "closedReason": "$closureReasonComment",
           "closedBy": $expectedUsername,
@@ -900,6 +899,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "restrictionTypeDescription": "${openNonAssociation.restrictionType.description}",
                   "comment": "${openNonAssociation.comment}",
                   "authorisedBy": "${openNonAssociation.authorisedBy}",
+                  "updatedBy": "$expectedUsername",
                   "isClosed": false,
                   "closedReason": null,
                   "closedBy": null,
@@ -985,6 +985,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "restrictionTypeDescription": "${openNonAssociation.restrictionType.description}",
                   "comment": "${openNonAssociation.comment}",
                   "authorisedBy": "${openNonAssociation.authorisedBy}",
+                  "updatedBy": "$expectedUsername",
                   "isClosed": false,
                   "closedReason": null,
                   "closedBy": null,
@@ -1010,6 +1011,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "restrictionTypeDescription": "${closedNonAssociation.restrictionType.description}",
                   "comment": "${closedNonAssociation.comment}",
                   "authorisedBy": "${closedNonAssociation.authorisedBy}",
+                  "updatedBy": "$expectedUsername",
                   "isClosed": true,
                   "closedReason": "They're friends now",
                   "closedBy": "CLOSE_USER",
@@ -1094,6 +1096,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "restrictionTypeDescription": "${openNonAssociation.restrictionType.description}",
                   "comment": "${openNonAssociation.comment}",
                   "authorisedBy": "${openNonAssociation.authorisedBy}",
+                  "updatedBy": "$expectedUsername",
                   "isClosed": false,
                   "closedReason": null,
                   "closedBy": null,
@@ -1119,6 +1122,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "restrictionTypeDescription": "${otherPrisonNonAssociation.restrictionType.description}",
                   "comment": "${otherPrisonNonAssociation.comment}",
                   "authorisedBy": "${otherPrisonNonAssociation.authorisedBy}",
+                  "updatedBy": "$expectedUsername",
                   "isClosed": false,
                   "closedReason": null,
                   "closedBy": null,
@@ -1231,6 +1235,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     )
 
     if (isClosed) {
+      nonna.updatedBy = "CLOSE_USER"
       nonna.isClosed = true
       nonna.closedReason = "They're friends now"
       nonna.closedBy = "CLOSE_USER"
