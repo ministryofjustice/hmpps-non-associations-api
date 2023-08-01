@@ -51,6 +51,11 @@ class NonAssociationsResource(
         description = "Returns non-association details for this prisoner",
       ),
       ApiResponse(
+        responseCode = "400",
+        description = "Bad request; for example including neither open nor closed non-associations",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
