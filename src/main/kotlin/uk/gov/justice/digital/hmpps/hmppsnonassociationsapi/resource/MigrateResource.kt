@@ -24,7 +24,10 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.SyncAndMigra
 @Validated
 @RequestMapping("/migrate", produces = [MediaType.APPLICATION_JSON_VALUE])
 @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS_MIGRATE')")
-@Tag(name = "Migrate Non Association Data", description = "Receive non-association record from NOMIS and migrate in to database")
+@Tag(
+  name = "Migrate non-associations from NOMIS",
+  description = "Receive initial data being copied over from NOMIS",
+)
 class MigrateResource(
   private val syncAndMigrateService: SyncAndMigrateService,
 ) {

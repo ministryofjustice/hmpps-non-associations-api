@@ -43,8 +43,8 @@ class NonAssociationsResource(
   @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
-    summary = "Get non-associations by prisoner number. Requires ROLE_NON_ASSOCIATIONS role.",
-    description = "The offender prisoner number",
+    summary = "Get non-associations by prisoner number",
+    description = "Requires ROLE_NON_ASSOCIATIONS role.",
     responses = [
       ApiResponse(
         responseCode = "200",
@@ -225,7 +225,7 @@ class NonAssociationsResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Non association updated and returned",
+        description = "Non-association updated and returned",
       ),
       ApiResponse(
         responseCode = "401",

@@ -28,8 +28,8 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.SyncAndMigra
 @Validated
 @RequestMapping("/sync", produces = [MediaType.APPLICATION_JSON_VALUE])
 @Tag(
-  name = "Sync Non Association Data",
-  description = "Receive non-association record from NOMIS and store in database",
+  name = "Sync non-associations from NOMIS",
+  description = "Receive updates from NOMIS after migration has been completed",
 )
 @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS_SYNC')")
 class SyncResource(
@@ -102,7 +102,7 @@ class SyncResource(
     responses = [
       ApiResponse(
         responseCode = "204",
-        description = "Non association removed",
+        description = "Non-association removed",
       ),
       ApiResponse(
         responseCode = "401",
@@ -117,7 +117,7 @@ class SyncResource(
     ],
   )
   fun syncDelete(
-    @Schema(description = "Non association ID", example = "1234123423", required = true)
+    @Schema(description = "Non-association ID", example = "1234123423", required = true)
     @PathVariable
     id: String,
   ) =
