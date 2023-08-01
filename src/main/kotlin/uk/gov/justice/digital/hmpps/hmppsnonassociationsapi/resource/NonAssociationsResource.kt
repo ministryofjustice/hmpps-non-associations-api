@@ -221,6 +221,53 @@ class NonAssociationsResource(
     )
   }
 
+  @GetMapping("/non-associations/between")
+  @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+    summary = "Get a non-associations between two prisoners by prisoner number.",
+    description = "Requires ROLE_NON_ASSOCIATIONS role.",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returns the non-associations",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "When two distinct prisoner numbers aren't provided",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Missing required role. Requires the NON_ASSOCIATIONS role",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun getNonAssociationsBetweenPrisoners(
+    @Schema(description = "A prisoner number", required = true, example = "A1234BC")
+    @RequestParam(required = false)
+    firstPrisonerNumber: String?,
+
+    @Schema(description = "Another prisoner number", required = true, example = "A1234BC")
+    @RequestParam(required = false)
+    secondPrisonerNumber: String?,
+  ): List<NonAssociation> {
+    if (
+      firstPrisonerNumber == null || secondPrisonerNumber == null ||
+      firstPrisonerNumber == secondPrisonerNumber ||
+      firstPrisonerNumber.isEmpty() || secondPrisonerNumber.isEmpty()
+    ) {
+      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Two distinct prisoner numbers are required")
+    }
+    return nonAssociationsService.getAllByPrisonerNumbers(firstPrisonerNumber to secondPrisonerNumber)
+  }
+
   @PatchMapping("/non-associations/{id}")
   @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS') and hasAuthority('SCOPE_write')")
   @ResponseStatus(HttpStatus.OK)
