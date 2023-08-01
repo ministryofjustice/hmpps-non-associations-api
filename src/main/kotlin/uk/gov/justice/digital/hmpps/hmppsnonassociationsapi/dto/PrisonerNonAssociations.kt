@@ -72,7 +72,10 @@ data class NonAssociationDetails(
 
   @Schema(description = "Details about the other person in the non-association.", required = true)
   val otherPrisonerDetails: OtherPrisonerDetails,
-)
+) {
+  val isOpen: Boolean
+    get() = !isClosed
+}
 
 /**
  * Details about the other prisoner to non-associate with

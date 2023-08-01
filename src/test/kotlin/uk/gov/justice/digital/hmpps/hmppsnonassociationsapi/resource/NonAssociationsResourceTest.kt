@@ -1463,6 +1463,47 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "closedBy": null,
               "closedReason": null,
               "closedAt": null
+            }
+          ]
+          """,
+          false,
+        )
+    }
+
+    @Test
+    fun `when there are non-associations between the prisoners including open and closed`() {
+      createNonAssociation()
+      createNonAssociation(isClosed = true)
+
+      webTestClient.get()
+        .uri {
+          it.path(urlPath)
+            .queryParam("firstPrisonerNumber", prisonerMerlinNumber)
+            .queryParam("secondPrisonerNumber", prisonerJohnNumber)
+            .queryParam("includeClosed", true)
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+          [
+            {
+              "firstPrisonerNumber": "A1234BC",
+              "firstPrisonerRole": "VICTIM",
+              "secondPrisonerNumber": "D5678EF",
+              "secondPrisonerRole": "PERPETRATOR",
+              "reason": "BULLYING",
+              "restrictionType": "CELL",
+              "comment": "They keep fighting",
+              "authorisedBy": "USER_1",
+              "updatedBy": "A_TEST_USER",
+              "isClosed": false,
+              "closedBy": null,
+              "closedReason": null,
+              "closedAt": null
             },
             {
               "firstPrisonerNumber": "A1234BC",
@@ -1482,6 +1523,66 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           """,
           false,
         )
+    }
+
+    @Test
+    fun `when there are non-associations between the prisoners including only closed`() {
+      createNonAssociation()
+      createNonAssociation(isClosed = true)
+
+      webTestClient.get()
+        .uri {
+          it.path(urlPath)
+            .queryParam("firstPrisonerNumber", prisonerMerlinNumber)
+            .queryParam("secondPrisonerNumber", prisonerJohnNumber)
+            .queryParam("includeOpen", false)
+            .queryParam("includeClosed", true)
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+          [
+            {
+              "firstPrisonerNumber": "A1234BC",
+              "firstPrisonerRole": "VICTIM",
+              "secondPrisonerNumber": "D5678EF",
+              "secondPrisonerRole": "PERPETRATOR",
+              "reason": "BULLYING",
+              "restrictionType": "CELL",
+              "comment": "They keep fighting",
+              "authorisedBy": "USER_1",
+              "updatedBy": "A_TEST_USER",
+              "isClosed": true,
+              "closedBy": "CLOSE_USER",
+              "closedReason": "They're friends now"
+            }
+          ]
+          """,
+          false,
+        )
+    }
+
+    @Test
+    fun `when there are non-associations between the prisoners but neither open nor closed were included`() {
+      createNonAssociation()
+      createNonAssociation(isClosed = true)
+
+      webTestClient.get()
+        .uri {
+          it.path(urlPath)
+            .queryParam("firstPrisonerNumber", prisonerMerlinNumber)
+            .queryParam("secondPrisonerNumber", prisonerJohnNumber)
+            .queryParam("includeOpen", false)
+            .queryParam("includeClosed", false)
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus().isBadRequest
     }
   }
 

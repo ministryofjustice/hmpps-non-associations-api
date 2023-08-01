@@ -234,7 +234,7 @@ class NonAssociationsResource(
       ),
       ApiResponse(
         responseCode = "400",
-        description = "When two distinct prisoner numbers aren't provided",
+        description = "When two distinct prisoner numbers aren't provided or neither open nor closed non-associations are included",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
@@ -257,6 +257,24 @@ class NonAssociationsResource(
     @Schema(description = "Another prisoner number", required = true, example = "A1234BC")
     @RequestParam(required = false)
     secondPrisonerNumber: String?,
+
+    @Schema(
+      description = "Whether to include open non-associations or not",
+      required = false,
+      defaultValue = "true",
+      example = "false",
+    )
+    @RequestParam(required = false, defaultValue = "true")
+    includeOpen: Boolean = true,
+
+    @Schema(
+      description = "Whether to include closed non-associations or not",
+      required = false,
+      defaultValue = "false",
+      example = "true",
+    )
+    @RequestParam(required = false, defaultValue = "false")
+    includeClosed: Boolean = false,
   ): List<NonAssociation> {
     if (
       firstPrisonerNumber == null || secondPrisonerNumber == null ||
@@ -265,7 +283,19 @@ class NonAssociationsResource(
     ) {
       throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Two distinct prisoner numbers are required")
     }
+
+    val filter: (NonAssociation) -> Boolean = if (!includeOpen && !includeClosed) {
+      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
+    } else if (includeOpen && includeClosed) {
+      { _ -> true }
+    } else if (includeOpen) {
+      { nonAssociation -> nonAssociation.isOpen }
+    } else {
+      { nonAssociation -> nonAssociation.isClosed }
+    }
+
     return nonAssociationsService.getAllByPrisonerNumbers(firstPrisonerNumber to secondPrisonerNumber)
+      .filter(filter)
   }
 
   @PatchMapping("/non-associations/{id}")
