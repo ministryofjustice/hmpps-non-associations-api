@@ -16,7 +16,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-@WithMockUser
+@WithMockUser(username = expectedUsername)
 class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
 
   @Nested
@@ -126,6 +126,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "restrictionType": "${request.restrictionType.toRestrictionType()}",
           "comment": "${request.comment}",
           "authorisedBy": "${request.authorisedBy}",
+          "updatedBy": "$SYSTEM_USERNAME",
           "isClosed": false,
           "closedReason": null,
           "closedBy": null,
@@ -254,6 +255,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "restrictionType": "${request.restrictionType.toRestrictionType()}",
           "comment": "No comment provided",
           "authorisedBy": "",
+          "updatedBy": "$SYSTEM_USERNAME",
           "isClosed": true,
           "closedReason": "UNDEFINED",
           "closedBy": "$SYSTEM_USERNAME",
@@ -310,6 +312,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "restrictionType": "${request.restrictionType.toRestrictionType()}",
           "comment": "${request.comment}",
           "authorisedBy": "${request.authorisedBy}",
+          "updatedBy": "$expectedUsername",
           "isClosed": true,
           "closedReason": "UNDEFINED",
           "closedBy": "TEST",
@@ -369,6 +372,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "restrictionType": "${request.restrictionType.toRestrictionType()}",
           "comment": "${request.comment}",
           "authorisedBy": "${request.authorisedBy}",
+          "updatedBy": "$expectedUsername",
           "isClosed": false,
           "closedReason": null,
           "closedBy": null,

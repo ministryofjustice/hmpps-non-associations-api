@@ -28,13 +28,15 @@ data class NonAssociation(
 
   @Schema(description = "Explanation of why prisoners are non-associated", required = true, example = "John and Luke always end up fighting")
   val comment: String,
-  @Schema(description = "User ID of the person who created the non-association. NOTE: For records migrated from NOMIS/Prison API this is free text and may not be a valid User ID", required = true, example = "OFF3_GEN")
+  @Schema(description = "User ID of the person who created the non-association. NOTE: For records migrated from NOMIS/Prison API this is free text and may not be a valid User ID. Additionally, migrated records might use an internal system username", required = true, example = "OFF3_GEN")
   val authorisedBy: String,
 
   @Schema(description = "When the non-association was created", required = true, example = "2021-12-31T12:34:56.789012")
   val whenCreated: LocalDateTime,
   @Schema(description = "When the non-association was last updated", required = true, example = "2022-01-03T12:34:56.789012")
   val whenUpdated: LocalDateTime,
+  @Schema(description = "User ID of the person who last updated the non-association", required = true, example = "OFF3_GEN")
+  val updatedBy: String,
 
   @Schema(description = "Whether the non-association is closed or is in effect", required = true, example = "false")
   val isClosed: Boolean = false,

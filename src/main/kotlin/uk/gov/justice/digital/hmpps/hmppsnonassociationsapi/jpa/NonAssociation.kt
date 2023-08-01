@@ -81,6 +81,7 @@ class NonAssociation(
       authorisedBy = authorisedBy ?: "",
       whenCreated = whenCreated,
       whenUpdated = whenUpdated,
+      updatedBy = updatedBy,
       isClosed = isClosed,
       closedReason = closedReason,
       closedBy = closedBy,
