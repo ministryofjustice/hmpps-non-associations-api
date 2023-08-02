@@ -134,8 +134,8 @@ class NonAssociationsResource(
         includeOpen = includeOpen,
         includeClosed = includeClosed,
         includeOtherPrisons = includeOtherPrisons,
-        sortBy = sortBy ?: NonAssociationsSort.WHEN_CREATED,
-        sortDirection = sortDirection ?: Sort.Direction.DESC,
+        sortBy = sortBy,
+        sortDirection = sortDirection,
       ),
     )
   }

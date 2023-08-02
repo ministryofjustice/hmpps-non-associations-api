@@ -206,8 +206,8 @@ data class NonAssociationListOptions(
   val includeOpen: Boolean = true,
   val includeClosed: Boolean = false,
   val includeOtherPrisons: Boolean = false,
-  val sortBy: NonAssociationsSort = NonAssociationsSort.WHEN_CREATED,
-  val sortDirection: Sort.Direction = Sort.Direction.DESC,
+  val sortBy: NonAssociationsSort? = null,
+  val sortDirection: Sort.Direction? = null,
 ) {
   val filterForOpenAndClosed: (NonAssociationJPA) -> Boolean
     get() {
@@ -224,6 +224,8 @@ data class NonAssociationListOptions(
 
   val comparator: Comparator<PrisonerNonAssociation>
     get() {
+      val sortBy = sortBy ?: NonAssociationsSort.WHEN_CREATED
+      val sortDirection = sortDirection ?: sortBy.defaultSortDirection
       return when (sortBy) {
         NonAssociationsSort.WHEN_CREATED -> compareBy(PrisonerNonAssociation::whenCreated)
         NonAssociationsSort.WHEN_UPDATED -> compareBy(PrisonerNonAssociation::whenUpdated)
@@ -236,10 +238,10 @@ data class NonAssociationListOptions(
     }
 }
 
-enum class NonAssociationsSort {
-  WHEN_CREATED,
-  WHEN_UPDATED,
-  LAST_NAME,
-  FIRST_NAME,
-  PRISONER_NUMBER,
+enum class NonAssociationsSort(val defaultSortDirection: Sort.Direction) {
+  WHEN_CREATED(Sort.Direction.DESC),
+  WHEN_UPDATED(Sort.Direction.DESC),
+  LAST_NAME(Sort.Direction.ASC),
+  FIRST_NAME(Sort.Direction.ASC),
+  PRISONER_NUMBER(Sort.Direction.ASC),
 }

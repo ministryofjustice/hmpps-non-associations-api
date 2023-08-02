@@ -168,7 +168,7 @@ private fun List<NonAssociationJPA>.mapPrisonerNonAssociationItems(
     val (_, otherPrisoner, role, otherRole) = prisonersInfo
 
     PrisonerNonAssociation(
-      id = nonna.id ?: throw Exception("Only persisted non-associations can used to build a PrisonerNonAssociations instance"),
+      id = nonna.id ?: throw Exception("Only persisted non-associations can by used to build a PrisonerNonAssociations instance"),
       roleCode = role,
       roleDescription = role.description,
       reasonCode = nonna.reason,
