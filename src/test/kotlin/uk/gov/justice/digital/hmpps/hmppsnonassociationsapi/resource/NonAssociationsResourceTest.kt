@@ -821,6 +821,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           prisonId = prisoner.prisonId,
           prisonName = prisoner.prisonName,
           cellLocation = prisoner.cellLocation,
+          openCount = 0,
+          closedCount = 0,
           nonAssociations = emptyList(),
         ),
       )
@@ -898,6 +900,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "prisonId": "${prisonerMerlin.prisonId}",
               "prisonName": "${prisonerMerlin.prisonName}",
               "cellLocation": "${prisonerMerlin.cellLocation}",
+              "openCount": 1,
+              "closedCount": 1,
               "nonAssociations": [
                 {
                   "id": ${openNonAssociation.id},
@@ -984,6 +988,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "prisonId": "${prisonerMerlin.prisonId}",
               "prisonName": "${prisonerMerlin.prisonName}",
               "cellLocation": "${prisonerMerlin.cellLocation}",
+              "openCount": 1,
+              "closedCount": 1,
               "nonAssociations": [
                 {
                   "id": ${openNonAssociation.id},
@@ -1095,6 +1101,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "prisonId": "${prisonerMerlin.prisonId}",
               "prisonName": "${prisonerMerlin.prisonName}",
               "cellLocation": "${prisonerMerlin.cellLocation}",
+              "openCount": 1,
+              "closedCount": 1,
               "nonAssociations": [
                 {
                   "id": ${closedNonAssociation.id},
@@ -1180,6 +1188,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "prisonId": "${prisonerMerlin.prisonId}",
               "prisonName": "${prisonerMerlin.prisonName}",
               "cellLocation": "${prisonerMerlin.cellLocation}",
+              "openCount": 2,
+              "closedCount": 1,
               "nonAssociations": [
                 {
                   "id": ${openNonAssociation.id},

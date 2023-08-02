@@ -133,6 +133,16 @@ class NonAssociationsService(
       }
     }
 
+    // count open & closed non-associations
+    val (openCount, closedCount) = nonAssociations.fold(0 to 0) { counts, nonAssociation ->
+      val (openCount, closedCount) = counts
+      if (nonAssociation.isOpen) {
+        (openCount + 1) to closedCount
+      } else {
+        openCount to (closedCount + 1)
+      }
+    }
+
     // filter out open or closed non-associations if necessary
     nonAssociations = nonAssociations.filter(options.filterForOpenAndClosed)
 
@@ -140,6 +150,8 @@ class NonAssociationsService(
       prisonerNumber,
       prisoners,
       options,
+      openCount,
+      closedCount,
     )
   }
 
