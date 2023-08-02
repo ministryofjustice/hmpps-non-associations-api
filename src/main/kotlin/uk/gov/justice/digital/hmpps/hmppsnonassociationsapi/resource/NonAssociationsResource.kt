@@ -289,18 +289,10 @@ class NonAssociationsResource(
       throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Two distinct prisoner numbers are required")
     }
 
-    val filter: (NonAssociation) -> Boolean = if (!includeOpen && !includeClosed) {
-      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
-    } else if (includeOpen && includeClosed) {
-      { true }
-    } else if (includeOpen) {
-      { it.isOpen }
-    } else {
-      { it.isClosed }
-    }
+    val inclusion = NonAssociationListInclusion.of(includeOpen, includeClosed)
+      ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
 
-    return nonAssociationsService.getAllByPairOfPrisonerNumbers(firstPrisonerNumber to secondPrisonerNumber)
-      .filter(filter)
+    return nonAssociationsService.getAnyBetween(listOf(firstPrisonerNumber, secondPrisonerNumber), inclusion)
   }
 
   @PatchMapping("/non-associations/{id}")

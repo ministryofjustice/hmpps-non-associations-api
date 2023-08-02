@@ -59,26 +59,6 @@ class NonAssociationsRepositoryTest : TestBase() {
     }
   }
 
-  @Test
-  fun findAllByPairOfPrisonerNumber() {
-    repository.saveAll(
-      listOf(
-        nonAssociation("G0022BB", "X0123BB"), // not returned
-        nonAssociation("A1234BC", "D5678EF", closed = true),
-        nonAssociation("A1234BC", "D5678EG"), // not returned
-        nonAssociation("D5678EF", "A1234BC"),
-      ),
-    )
-
-    val nonAssociations = repository.findAllByPairOfPrisonerNumbers("D5678EF" to "A1234BC")
-
-    assertThat(nonAssociations).hasSize(2)
-    assertThat(nonAssociations).allMatch {
-      (it.firstPrisonerNumber == "D5678EF" && it.secondPrisonerNumber == "A1234BC")
-        .xor(it.firstPrisonerNumber == "A1234BC" && it.secondPrisonerNumber == "D5678EF")
-    }
-  }
-
   @Nested
   inner class findAnyBetweenPrisonerNumbers() {
     @Test

@@ -23,8 +23,8 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.Legacy
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.toPrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.updateWith
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAllByPairOfPrisonerNumbers
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAllByPrisonerNumber
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAnyBetweenPrisonerNumbers
 import java.time.Clock
 import java.time.LocalDateTime
 import kotlin.jvm.optionals.getOrNull
@@ -78,8 +78,15 @@ class NonAssociationsService(
     return nonAssociationsRepository.findById(id).getOrNull()?.toDto()
   }
 
-  fun getAllByPairOfPrisonerNumbers(prisonerNumbers: Pair<String, String>): List<NonAssociationDTO> {
-    return nonAssociationsRepository.findAllByPairOfPrisonerNumbers(prisonerNumbers).map { it.toDto() }
+  /**
+   * Returns all non-associations that exist amongst provided group of prisoners
+   */
+  fun getAnyBetween(
+    prisonerNumbers: Collection<String>,
+    inclusion: NonAssociationListInclusion = NonAssociationListInclusion.OPEN_ONLY,
+  ): List<NonAssociationDTO> {
+    return nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonerNumbers, inclusion)
+      .map { it.toDto() }
   }
 
   fun updateNonAssociation(id: Long, update: PatchNonAssociationRequest): NonAssociationDTO {
