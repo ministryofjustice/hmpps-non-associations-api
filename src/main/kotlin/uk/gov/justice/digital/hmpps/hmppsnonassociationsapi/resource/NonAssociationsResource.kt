@@ -287,11 +287,11 @@ class NonAssociationsResource(
     val filter: (NonAssociation) -> Boolean = if (!includeOpen && !includeClosed) {
       throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
     } else if (includeOpen && includeClosed) {
-      { _ -> true }
+      { true }
     } else if (includeOpen) {
-      { nonAssociation -> nonAssociation.isOpen }
+      { it.isOpen }
     } else {
-      { nonAssociation -> nonAssociation.isClosed }
+      { it.isClosed }
     }
 
     return nonAssociationsService.getAllByPairOfPrisonerNumbers(firstPrisonerNumber to secondPrisonerNumber)

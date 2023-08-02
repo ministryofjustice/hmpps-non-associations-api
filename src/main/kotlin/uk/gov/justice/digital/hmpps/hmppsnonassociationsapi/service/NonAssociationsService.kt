@@ -134,15 +134,7 @@ class NonAssociationsService(
     }
 
     // filter out open or closed non-associations if necessary
-    nonAssociations = if (options.includeOpen && options.includeClosed) {
-      nonAssociations
-    } else if (options.includeOpen) {
-      nonAssociations.filter(NonAssociationJPA::isOpen)
-    } else if (options.includeClosed) {
-      nonAssociations.filter(NonAssociationJPA::isClosed)
-    } else {
-      emptyList()
-    }
+    nonAssociations = nonAssociations.filter(options.filterForOpenAndClosed)
 
     return nonAssociations.toPrisonerNonAssociations(
       prisonerNumber,
@@ -205,6 +197,19 @@ data class NonAssociationListOptions(
   val sortBy: NonAssociationsSort = NonAssociationsSort.WHEN_CREATED,
   val sortDirection: Sort.Direction = Sort.Direction.DESC,
 ) {
+  val filterForOpenAndClosed: (NonAssociationJPA) -> Boolean
+    get() {
+      return if (includeOpen && includeClosed) {
+        { true }
+      } else if (includeOpen) {
+        { it.isOpen }
+      } else if (includeClosed) {
+        { it.isClosed }
+      } else {
+        { false }
+      }
+    }
+
   val comparator: Comparator<PrisonerNonAssociation>
     get() {
       return when (sortBy) {
