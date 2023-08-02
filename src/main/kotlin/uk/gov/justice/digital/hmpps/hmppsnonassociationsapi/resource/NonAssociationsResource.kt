@@ -294,7 +294,7 @@ class NonAssociationsResource(
       { nonAssociation -> nonAssociation.isClosed }
     }
 
-    return nonAssociationsService.getAllByPrisonerNumbers(firstPrisonerNumber to secondPrisonerNumber)
+    return nonAssociationsService.getAllByPairOfPrisonerNumbers(firstPrisonerNumber to secondPrisonerNumber)
       .filter(filter)
   }
 

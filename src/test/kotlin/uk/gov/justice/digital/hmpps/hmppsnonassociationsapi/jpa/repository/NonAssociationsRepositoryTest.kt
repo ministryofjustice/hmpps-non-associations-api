@@ -68,7 +68,7 @@ class NonAssociationsRepositoryTest : TestBase() {
       ),
     )
 
-    val nonAssociations = repository.findAllByPairOfPrisonerNumber("D5678EF" to "A1234BC")
+    val nonAssociations = repository.findAllByPairOfPrisonerNumbers("D5678EF" to "A1234BC")
 
     assertThat(nonAssociations).hasSize(2)
     assertThat(nonAssociations).allMatch {

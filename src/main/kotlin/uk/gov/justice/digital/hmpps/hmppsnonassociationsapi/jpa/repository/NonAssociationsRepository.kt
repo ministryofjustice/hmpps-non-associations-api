@@ -6,7 +6,10 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
 
 @Repository
 interface NonAssociationsRepository : JpaRepository<NonAssociation, Long> {
+  /** Use findAllByPrisonerNumber convenience extension function instead */
   fun findAllByFirstPrisonerNumberOrSecondPrisonerNumber(firstPrisonerNumber: String, secondPrisonerNumber: String): List<NonAssociation>
+
+  /** Use findAllByPairOfPrisonerNumbers convenience extension function instead */
   fun findAllByFirstPrisonerNumberAndSecondPrisonerNumberOrFirstPrisonerNumberAndSecondPrisonerNumber(pn1: String, pn2: String, pn3: String, pn4: String): List<NonAssociation>
 
   // TODO: Assumes that there can only be 1 non-association given a pair of prisoner numbers.
@@ -23,7 +26,7 @@ fun NonAssociationsRepository.findAllByPrisonerNumber(prisonerNumber: String): L
 /**
  * Returns all non-associations given two prisoner numbers
  */
-fun NonAssociationsRepository.findAllByPairOfPrisonerNumber(prisonerNumbers: Pair<String, String>): List<NonAssociation> =
+fun NonAssociationsRepository.findAllByPairOfPrisonerNumbers(prisonerNumbers: Pair<String, String>): List<NonAssociation> =
   findAllByFirstPrisonerNumberAndSecondPrisonerNumberOrFirstPrisonerNumberAndSecondPrisonerNumber(
     prisonerNumbers.first,
     prisonerNumbers.second,
