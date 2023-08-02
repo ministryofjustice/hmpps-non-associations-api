@@ -821,6 +821,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           prisonId = prisoner.prisonId,
           prisonName = prisoner.prisonName,
           cellLocation = prisoner.cellLocation,
+          openCount = 0,
+          closedCount = 0,
           nonAssociations = emptyList(),
         ),
       )
@@ -875,7 +877,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         secondPrisonerNumber = prisonerMerlin.prisonerNumber,
       )
 
-      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerEdward)
+      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
       offenderSearchMockServer.stubSearchByPrisonerNumbers(
         prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
         prisoners,
@@ -898,6 +900,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "prisonId": "${prisonerMerlin.prisonId}",
               "prisonName": "${prisonerMerlin.prisonName}",
               "cellLocation": "${prisonerMerlin.cellLocation}",
+              "openCount": 1,
+              "closedCount": 1,
               "nonAssociations": [
                 {
                   "id": ${openNonAssociation.id},
@@ -984,6 +988,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "prisonId": "${prisonerMerlin.prisonId}",
               "prisonName": "${prisonerMerlin.prisonName}",
               "cellLocation": "${prisonerMerlin.cellLocation}",
+              "openCount": 1,
+              "closedCount": 1,
               "nonAssociations": [
                 {
                   "id": ${openNonAssociation.id},
@@ -1072,7 +1078,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         secondPrisonerNumber = prisonerMerlin.prisonerNumber,
       )
 
-      val prisoners = listOf(prisonerMerlin, prisonerJosh)
+      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
       offenderSearchMockServer.stubSearchByPrisonerNumbers(
         prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
         prisoners,
@@ -1095,6 +1101,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "prisonId": "${prisonerMerlin.prisonId}",
               "prisonName": "${prisonerMerlin.prisonName}",
               "cellLocation": "${prisonerMerlin.cellLocation}",
+              "openCount": 1,
+              "closedCount": 1,
               "nonAssociations": [
                 {
                   "id": ${closedNonAssociation.id},
@@ -1157,7 +1165,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         secondPrisonerNumber = prisonerMerlin.prisonerNumber,
       )
 
-      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerEdward)
+      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
       offenderSearchMockServer.stubSearchByPrisonerNumbers(
         prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
         prisoners,
@@ -1180,6 +1188,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "prisonId": "${prisonerMerlin.prisonId}",
               "prisonName": "${prisonerMerlin.prisonName}",
               "cellLocation": "${prisonerMerlin.cellLocation}",
+              "openCount": 2,
+              "closedCount": 1,
               "nonAssociations": [
                 {
                   "id": ${openNonAssociation.id},
@@ -1306,6 +1316,283 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           "Doe",
         ),
       )
+    }
+  }
+
+  @Nested
+  inner class `Get non-associations between two prisoners` {
+    private val prisonerJohnNumber = "A1234BC"
+    private val prisonerMerlinNumber = "D5678EF"
+
+    private val urlPath = "/non-associations/between"
+
+    @Test
+    fun `without a valid token responds 401 Unauthorized`() {
+      webTestClient.get()
+        .uri {
+          it.path(urlPath)
+            .queryParam("firstPrisonerNumber", prisonerJohnNumber)
+            .queryParam("secondPrisonerNumber", prisonerMerlinNumber)
+            .build()
+        }
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `without the correct role responds 403 Forbidden`() {
+      webTestClient.get()
+        .uri {
+          it.path(urlPath)
+            .queryParam("firstPrisonerNumber", prisonerJohnNumber)
+            .queryParam("secondPrisonerNumber", prisonerMerlinNumber)
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("WRONG_ROLE")))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `without two distinct prisoner numbers responds with 400 Bad Request`() {
+      webTestClient.get()
+        .uri(urlPath)
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+
+      webTestClient.get()
+        .uri {
+          it.path(urlPath)
+            .queryParam("firstPrisonerNumber", prisonerJohnNumber)
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+
+      webTestClient.get()
+        .uri {
+          it.path(urlPath)
+            .queryParam("secondPrisonerNumber", prisonerMerlinNumber)
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+
+      webTestClient.get()
+        .uri {
+          it.path(urlPath)
+            .queryParam("firstPrisonerNumber", prisonerJohnNumber)
+            .queryParam("secondPrisonerNumber", prisonerJohnNumber)
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+
+      webTestClient.get()
+        .uri {
+          it.path(urlPath)
+            .queryParam("firstPrisonerNumber", "")
+            .queryParam("secondPrisonerNumber", prisonerJohnNumber)
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+
+      webTestClient.get()
+        .uri {
+          it.path(urlPath)
+            .queryParam("firstPrisonerNumber", prisonerJohnNumber)
+            .queryParam("secondPrisonerNumber", "")
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+    }
+
+    @Test
+    fun `when there are no non-associations between the prisoners`() {
+      createNonAssociation("A0011AA", prisonerJohnNumber)
+
+      webTestClient.get()
+        .uri {
+          it.path(urlPath)
+            .queryParam("firstPrisonerNumber", prisonerJohnNumber)
+            .queryParam("secondPrisonerNumber", prisonerMerlinNumber)
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json("[]", true)
+    }
+
+    @Test
+    fun `when there are non-associations between the prisoners`() {
+      createNonAssociation()
+      createNonAssociation(isClosed = true)
+
+      webTestClient.get()
+        .uri {
+          it.path(urlPath)
+            .queryParam("firstPrisonerNumber", prisonerMerlinNumber)
+            .queryParam("secondPrisonerNumber", prisonerJohnNumber)
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+          [
+            {
+              "firstPrisonerNumber": "A1234BC",
+              "firstPrisonerRole": "VICTIM",
+              "secondPrisonerNumber": "D5678EF",
+              "secondPrisonerRole": "PERPETRATOR",
+              "reason": "BULLYING",
+              "restrictionType": "CELL",
+              "comment": "They keep fighting",
+              "authorisedBy": "USER_1",
+              "updatedBy": "A_TEST_USER",
+              "isClosed": false,
+              "closedBy": null,
+              "closedReason": null,
+              "closedAt": null
+            }
+          ]
+          """,
+          false,
+        )
+    }
+
+    @Test
+    fun `when there are non-associations between the prisoners including open and closed`() {
+      createNonAssociation()
+      createNonAssociation(isClosed = true)
+
+      webTestClient.get()
+        .uri {
+          it.path(urlPath)
+            .queryParam("firstPrisonerNumber", prisonerMerlinNumber)
+            .queryParam("secondPrisonerNumber", prisonerJohnNumber)
+            .queryParam("includeClosed", true)
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+          [
+            {
+              "firstPrisonerNumber": "A1234BC",
+              "firstPrisonerRole": "VICTIM",
+              "secondPrisonerNumber": "D5678EF",
+              "secondPrisonerRole": "PERPETRATOR",
+              "reason": "BULLYING",
+              "restrictionType": "CELL",
+              "comment": "They keep fighting",
+              "authorisedBy": "USER_1",
+              "updatedBy": "A_TEST_USER",
+              "isClosed": false,
+              "closedBy": null,
+              "closedReason": null,
+              "closedAt": null
+            },
+            {
+              "firstPrisonerNumber": "A1234BC",
+              "firstPrisonerRole": "VICTIM",
+              "secondPrisonerNumber": "D5678EF",
+              "secondPrisonerRole": "PERPETRATOR",
+              "reason": "BULLYING",
+              "restrictionType": "CELL",
+              "comment": "They keep fighting",
+              "authorisedBy": "USER_1",
+              "updatedBy": "A_TEST_USER",
+              "isClosed": true,
+              "closedBy": "CLOSE_USER",
+              "closedReason": "They're friends now"
+            }
+          ]
+          """,
+          false,
+        )
+    }
+
+    @Test
+    fun `when there are non-associations between the prisoners including only closed`() {
+      createNonAssociation()
+      createNonAssociation(isClosed = true)
+
+      webTestClient.get()
+        .uri {
+          it.path(urlPath)
+            .queryParam("firstPrisonerNumber", prisonerMerlinNumber)
+            .queryParam("secondPrisonerNumber", prisonerJohnNumber)
+            .queryParam("includeOpen", false)
+            .queryParam("includeClosed", true)
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+          [
+            {
+              "firstPrisonerNumber": "A1234BC",
+              "firstPrisonerRole": "VICTIM",
+              "secondPrisonerNumber": "D5678EF",
+              "secondPrisonerRole": "PERPETRATOR",
+              "reason": "BULLYING",
+              "restrictionType": "CELL",
+              "comment": "They keep fighting",
+              "authorisedBy": "USER_1",
+              "updatedBy": "A_TEST_USER",
+              "isClosed": true,
+              "closedBy": "CLOSE_USER",
+              "closedReason": "They're friends now"
+            }
+          ]
+          """,
+          false,
+        )
+    }
+
+    @Test
+    fun `when there are non-associations between the prisoners but neither open nor closed were included`() {
+      createNonAssociation()
+      createNonAssociation(isClosed = true)
+
+      webTestClient.get()
+        .uri {
+          it.path(urlPath)
+            .queryParam("firstPrisonerNumber", prisonerMerlinNumber)
+            .queryParam("secondPrisonerNumber", prisonerJohnNumber)
+            .queryParam("includeOpen", false)
+            .queryParam("includeClosed", false)
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .exchange()
+        .expectStatus().isBadRequest
     }
   }
 

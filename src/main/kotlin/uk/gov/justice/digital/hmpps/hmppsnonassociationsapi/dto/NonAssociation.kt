@@ -46,7 +46,10 @@ data class NonAssociation(
   val closedReason: String? = null,
   @Schema(description = "Date and time of when the non-association was closed. Only present when the non-association is closed, null for open non-associations", required = false, example = "null")
   val closedAt: LocalDateTime? = null,
-)
+) {
+  val isOpen: Boolean
+    get() = !isClosed
+}
 
 /**
  * Request format for creating a new, open, non-association between two prisoners

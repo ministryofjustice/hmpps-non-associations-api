@@ -14,8 +14,8 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociatio
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.UserInContextMissingException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociationDetails
@@ -23,6 +23,8 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.Legacy
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.toPrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.updateWith
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAllByPairOfPrisonerNumbers
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAllByPrisonerNumber
 import java.time.Clock
 import java.time.LocalDateTime
 import kotlin.jvm.optionals.getOrNull
@@ -76,6 +78,10 @@ class NonAssociationsService(
     return nonAssociationsRepository.findById(id).getOrNull()?.toDto()
   }
 
+  fun getAllByPairOfPrisonerNumbers(prisonerNumbers: Pair<String, String>): List<NonAssociationDTO> {
+    return nonAssociationsRepository.findAllByPairOfPrisonerNumbers(prisonerNumbers).map { it.toDto() }
+  }
+
   fun updateNonAssociation(id: Long, update: PatchNonAssociationRequest): NonAssociationDTO {
     val nonAssociation = nonAssociationsRepository.findById(id).getOrNull() ?: throw ResponseStatusException(
       HttpStatus.NOT_FOUND,
@@ -109,38 +115,43 @@ class NonAssociationsService(
   }
 
   fun getPrisonerNonAssociations(prisonerNumber: String, options: NonAssociationListOptions): PrisonerNonAssociations {
-    val nonAssociations = nonAssociationsRepository.findAllByFirstPrisonerNumber(prisonerNumber) +
-      nonAssociationsRepository.findAllBySecondPrisonerNumber(prisonerNumber)
+    var nonAssociations = nonAssociationsRepository.findAllByPrisonerNumber(prisonerNumber)
 
-    // filter out open or closed non-associations if necessary
-    var nonAssociationsFiltered = if (options.includeOpen && options.includeClosed) {
-      nonAssociations
-    } else if (options.includeOpen) {
-      nonAssociations.filter(NonAssociationJPA::isOpen)
-    } else if (options.includeClosed) {
-      nonAssociations.filter(NonAssociationJPA::isClosed)
-    } else {
-      emptyList()
-    }
-
-    val prisonerNumbers = nonAssociationsFiltered.flatMapTo(mutableSetOf(prisonerNumber)) {
+    // load all prisoner mentioned in any non-association
+    val prisonerNumbers = nonAssociations.flatMapTo(mutableSetOf(prisonerNumber)) {
       listOf(it.firstPrisonerNumber, it.secondPrisonerNumber)
     }
     val prisoners = offenderSearch.searchByPrisonerNumbers(prisonerNumbers)
 
     // filter out non-associations in other prisons
+    // this should be done first because open/closed non-associations will need to be counted
     if (!options.includeOtherPrisons) {
       val prisonId = prisoners[prisonerNumber]!!.prisonId
-      nonAssociationsFiltered = nonAssociationsFiltered.filter { nonna ->
+      nonAssociations = nonAssociations.filter { nonna ->
         prisoners[nonna.firstPrisonerNumber]!!.prisonId == prisonId &&
           prisoners[nonna.secondPrisonerNumber]!!.prisonId == prisonId
       }
     }
 
-    return nonAssociationsFiltered.toPrisonerNonAssociations(
+    // count open & closed non-associations
+    val (openCount, closedCount) = nonAssociations.fold(0 to 0) { counts, nonAssociation ->
+      val (openCount, closedCount) = counts
+      if (nonAssociation.isOpen) {
+        (openCount + 1) to closedCount
+      } else {
+        openCount to (closedCount + 1)
+      }
+    }
+
+    // filter out open or closed non-associations if necessary
+    nonAssociations = nonAssociations.filter(options.filterForOpenAndClosed)
+
+    return nonAssociations.toPrisonerNonAssociations(
       prisonerNumber,
       prisoners,
       options,
+      openCount,
+      closedCount,
     )
   }
 
@@ -195,27 +206,42 @@ data class NonAssociationListOptions(
   val includeOpen: Boolean = true,
   val includeClosed: Boolean = false,
   val includeOtherPrisons: Boolean = false,
-  val sortBy: NonAssociationsSort = NonAssociationsSort.WHEN_CREATED,
-  val sortDirection: Sort.Direction = Sort.Direction.DESC,
-)
-
-enum class NonAssociationsSort {
-  WHEN_CREATED,
-  WHEN_UPDATED,
-  LAST_NAME,
-  FIRST_NAME,
-  PRISONER_NUMBER,
-  ;
-
-  fun comparator(direction: Sort.Direction): Comparator<NonAssociationDetails> {
-    return when (this) {
-      WHEN_CREATED -> Comparator.comparing(NonAssociationDetails::whenCreated)
-      WHEN_UPDATED -> Comparator.comparing(NonAssociationDetails::whenUpdated)
-      LAST_NAME -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.lastName }
-      FIRST_NAME -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.firstName }
-      PRISONER_NUMBER -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.prisonerNumber }
-    }.run {
-      if (direction == Sort.Direction.DESC) this.reversed() else this
+  val sortBy: NonAssociationsSort? = null,
+  val sortDirection: Sort.Direction? = null,
+) {
+  val filterForOpenAndClosed: (NonAssociationJPA) -> Boolean
+    get() {
+      return if (includeOpen && includeClosed) {
+        { true }
+      } else if (includeOpen) {
+        { it.isOpen }
+      } else if (includeClosed) {
+        { it.isClosed }
+      } else {
+        { false }
+      }
     }
-  }
+
+  val comparator: Comparator<PrisonerNonAssociation>
+    get() {
+      val sortBy = sortBy ?: NonAssociationsSort.WHEN_CREATED
+      val sortDirection = sortDirection ?: sortBy.defaultSortDirection
+      return when (sortBy) {
+        NonAssociationsSort.WHEN_CREATED -> compareBy(PrisonerNonAssociation::whenCreated)
+        NonAssociationsSort.WHEN_UPDATED -> compareBy(PrisonerNonAssociation::whenUpdated)
+        NonAssociationsSort.LAST_NAME -> compareBy { nonna -> nonna.otherPrisonerDetails.lastName }
+        NonAssociationsSort.FIRST_NAME -> compareBy { nonna -> nonna.otherPrisonerDetails.firstName }
+        NonAssociationsSort.PRISONER_NUMBER -> compareBy { nonna -> nonna.otherPrisonerDetails.prisonerNumber }
+      }.run {
+        if (sortDirection == Sort.Direction.DESC) reversed() else this
+      }
+    }
+}
+
+enum class NonAssociationsSort(val defaultSortDirection: Sort.Direction) {
+  WHEN_CREATED(Sort.Direction.DESC),
+  WHEN_UPDATED(Sort.Direction.DESC),
+  LAST_NAME(Sort.Direction.ASC),
+  FIRST_NAME(Sort.Direction.ASC),
+  PRISONER_NUMBER(Sort.Direction.ASC),
 }

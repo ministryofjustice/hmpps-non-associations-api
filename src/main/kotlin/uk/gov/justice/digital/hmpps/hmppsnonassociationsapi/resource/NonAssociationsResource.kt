@@ -51,6 +51,11 @@ class NonAssociationsResource(
         description = "Returns non-association details for this prisoner",
       ),
       ApiResponse(
+        responseCode = "400",
+        description = "Bad request; for example including neither open nor closed non-associations",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
@@ -115,7 +120,13 @@ class NonAssociationsResource(
     @RequestParam(required = false)
     sortBy: NonAssociationsSort?,
 
-    @Schema(description = "Sort direction", required = false, defaultValue = "DESC", example = "DESC", allowableValues = ["ASC", "DESC"])
+    @Schema(
+      description = "Sort direction (fallback depends on sortBy)",
+      required = false,
+      defaultValue = "DESC",
+      example = "DESC",
+      allowableValues = ["ASC", "DESC"],
+    )
     @RequestParam(required = false)
     sortDirection: Sort.Direction?,
   ): PrisonerNonAssociations {
@@ -129,8 +140,8 @@ class NonAssociationsResource(
         includeOpen = includeOpen,
         includeClosed = includeClosed,
         includeOtherPrisons = includeOtherPrisons,
-        sortBy = sortBy ?: NonAssociationsSort.WHEN_CREATED,
-        sortDirection = sortDirection ?: Sort.Direction.DESC,
+        sortBy = sortBy,
+        sortDirection = sortDirection,
       ),
     )
   }
@@ -214,6 +225,83 @@ class NonAssociationsResource(
       HttpStatus.NOT_FOUND,
       "Non-association with ID $id not found",
     )
+  }
+
+  @GetMapping("/non-associations/between")
+  @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+    summary = "Get a non-associations between two prisoners by prisoner number.",
+    description = "Requires ROLE_NON_ASSOCIATIONS role.",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returns the non-associations",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "When two distinct prisoner numbers aren't provided or neither open nor closed non-associations are included",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Missing required role. Requires the NON_ASSOCIATIONS role",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun getNonAssociationsBetweenPrisoners(
+    @Schema(description = "A prisoner number", required = true, example = "A1234BC")
+    @RequestParam(required = false)
+    firstPrisonerNumber: String?,
+
+    @Schema(description = "Another prisoner number", required = true, example = "A1234BC")
+    @RequestParam(required = false)
+    secondPrisonerNumber: String?,
+
+    @Schema(
+      description = "Whether to include open non-associations or not",
+      required = false,
+      defaultValue = "true",
+      example = "false",
+    )
+    @RequestParam(required = false, defaultValue = "true")
+    includeOpen: Boolean = true,
+
+    @Schema(
+      description = "Whether to include closed non-associations or not",
+      required = false,
+      defaultValue = "false",
+      example = "true",
+    )
+    @RequestParam(required = false, defaultValue = "false")
+    includeClosed: Boolean = false,
+  ): List<NonAssociation> {
+    if (
+      firstPrisonerNumber == null || secondPrisonerNumber == null ||
+      firstPrisonerNumber == secondPrisonerNumber ||
+      firstPrisonerNumber.isEmpty() || secondPrisonerNumber.isEmpty()
+    ) {
+      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Two distinct prisoner numbers are required")
+    }
+
+    val filter: (NonAssociation) -> Boolean = if (!includeOpen && !includeClosed) {
+      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
+    } else if (includeOpen && includeClosed) {
+      { true }
+    } else if (includeOpen) {
+      { it.isOpen }
+    } else {
+      { it.isClosed }
+    }
+
+    return nonAssociationsService.getAllByPairOfPrisonerNumbers(firstPrisonerNumber to secondPrisonerNumber)
+      .filter(filter)
   }
 
   @PatchMapping("/non-associations/{id}")

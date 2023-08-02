@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAllByPrisonerNumber
 
 @Service
 @Transactional
@@ -22,8 +23,7 @@ class NonAssociationsMergeService(
 
     val updatedRecords = mutableListOf<NonAssociation>()
 
-    nonAssociationsRepository.findAllByFirstPrisonerNumber(oldPrisonerNumber)
-      .plus(nonAssociationsRepository.findAllBySecondPrisonerNumber(oldPrisonerNumber))
+    nonAssociationsRepository.findAllByPrisonerNumber(oldPrisonerNumber)
       .forEach { nonAssociation ->
 
         log.debug("Looking at record $nonAssociation")

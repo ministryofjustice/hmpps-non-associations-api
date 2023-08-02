@@ -26,14 +26,18 @@ data class PrisonerNonAssociations(
   val prisonName: String,
   @Schema(description = "Cell the prisoner is assigned to", required = true, example = "A-1-002")
   val cellLocation: String,
+  @Schema(description = "Number of open non-associations (follows includeOtherPrisons filter)", required = true, example = "1", minimum = "0", type = "integer", format = "int32")
+  val openCount: Int,
+  @Schema(description = "Number of closed non-associations (follows includeOtherPrisons filter)", required = true, example = "0", minimum = "0", type = "integer", format = "int32")
+  val closedCount: Int,
   @Schema(description = "Non-associations with other prisoners", required = true)
-  val nonAssociations: List<NonAssociationDetails>,
+  val nonAssociations: List<PrisonerNonAssociation>,
 )
 
 /**
  * Details about a single non-association and link to the other prisoner involved
  */
-data class NonAssociationDetails(
+data class PrisonerNonAssociation(
   @Schema(description = "ID of the non-association", required = true, example = "42")
   val id: Long,
 
@@ -72,7 +76,10 @@ data class NonAssociationDetails(
 
   @Schema(description = "Details about the other person in the non-association.", required = true)
   val otherPrisonerDetails: OtherPrisonerDetails,
-)
+) {
+  val isOpen: Boolean
+    get() = !isClosed
+}
 
 /**
  * Details about the other prisoner to non-associate with
@@ -102,6 +109,7 @@ data class OtherPrisonerDetails(
  * @param prisonerNumber prisoner number of the "main" prisoner
  * @param prisoners is a dictionary with the information about the prisoners
  *                  from Offender Search API (e.g first name, etc...)
+ * @param options sorting options
  *
  * @return an instance of `PrisonerNonAssociations`
  */
@@ -109,25 +117,29 @@ fun List<NonAssociationJPA>.toPrisonerNonAssociations(
   prisonerNumber: String,
   prisoners: Map<String, OffenderSearchPrisoner>,
   options: NonAssociationListOptions,
+  openCount: Int,
+  closedCount: Int,
 ): PrisonerNonAssociations {
-  val sortComparator = options.sortBy.comparator(options.sortDirection)
-  val nonAssociations = this.toNonAssociationsDetails(prisonerNumber, prisoners)
-    .sortedWith(sortComparator)
+  val nonAssociations = mapPrisonerNonAssociationItems(prisonerNumber, prisoners)
+    .sortedWith(options.comparator)
+  val mainPrisoner = prisoners[prisonerNumber]!!
   return PrisonerNonAssociations(
     prisonerNumber = prisonerNumber,
-    firstName = prisoners[prisonerNumber]!!.firstName,
-    lastName = prisoners[prisonerNumber]!!.lastName,
-    prisonId = prisoners[prisonerNumber]!!.prisonId,
-    prisonName = prisoners[prisonerNumber]!!.prisonName,
-    cellLocation = prisoners[prisonerNumber]!!.cellLocation,
+    firstName = mainPrisoner.firstName,
+    lastName = mainPrisoner.lastName,
+    prisonId = mainPrisoner.prisonId,
+    prisonName = mainPrisoner.prisonName,
+    cellLocation = mainPrisoner.cellLocation,
+    openCount = openCount,
+    closedCount = closedCount,
     nonAssociations = nonAssociations,
   )
 }
 
-private fun List<NonAssociationJPA>.toNonAssociationsDetails(
+private fun List<NonAssociationJPA>.mapPrisonerNonAssociationItems(
   prisonerNumber: String,
   prisoners: Map<String, OffenderSearchPrisoner>,
-): List<NonAssociationDetails> {
+): List<PrisonerNonAssociation> {
   data class PrisonersInfo(
     val prisoner: OffenderSearchPrisoner,
     val otherPrisoner: OffenderSearchPrisoner,
@@ -155,8 +167,8 @@ private fun List<NonAssociationJPA>.toNonAssociationsDetails(
     }
     val (_, otherPrisoner, role, otherRole) = prisonersInfo
 
-    NonAssociationDetails(
-      id = nonna.id ?: throw Exception("Only persisted non-associations can used to build a PrisonerNonAssociations instance"),
+    PrisonerNonAssociation(
+      id = nonna.id ?: throw Exception("Only persisted non-associations can by used to build a PrisonerNonAssociations instance"),
       roleCode = role,
       roleDescription = role.description,
       reasonCode = nonna.reason,
