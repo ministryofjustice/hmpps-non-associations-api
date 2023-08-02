@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
@@ -54,7 +55,23 @@ class LegacyResource(
     @Schema(description = "The offender prisoner number", example = "A1234BC", required = true)
     @PathVariable
     prisonerNumber: String,
+    @Schema(
+      description = "Returns only non-association details for this prisoner in the same prison",
+      required = false,
+      defaultValue = "false",
+      example = "true",
+    )
+    @RequestParam(value = "currentPrisonOnly", required = false, defaultValue = "false")
+    currentPrisonOnly: Boolean,
+    @Schema(
+      description = "Returns only active non-association details for this prisoner",
+      required = false,
+      defaultValue = "false",
+      example = "true",
+    )
+    @RequestParam(value = "excludeInactive", required = false, defaultValue = "false")
+    excludeInactive: Boolean,
   ): LegacyNonAssociationDetails {
-    return nonAssociationsService.getLegacyDetails(prisonerNumber)
+    return nonAssociationsService.getLegacyDetails(prisonerNumber, currentPrisonOnly, excludeInactive)
   }
 }
