@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationListOptions
 import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
