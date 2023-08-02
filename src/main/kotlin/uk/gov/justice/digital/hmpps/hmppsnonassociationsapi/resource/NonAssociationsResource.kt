@@ -120,7 +120,13 @@ class NonAssociationsResource(
     @RequestParam(required = false)
     sortBy: NonAssociationsSort?,
 
-    @Schema(description = "Sort direction", required = false, defaultValue = "DESC", example = "DESC", allowableValues = ["ASC", "DESC"])
+    @Schema(
+      description = "Sort direction (fallback depends on sortBy)",
+      required = false,
+      defaultValue = "DESC",
+      example = "DESC",
+      allowableValues = ["ASC", "DESC"],
+    )
     @RequestParam(required = false)
     sortDirection: Sort.Direction?,
   ): PrisonerNonAssociations {
