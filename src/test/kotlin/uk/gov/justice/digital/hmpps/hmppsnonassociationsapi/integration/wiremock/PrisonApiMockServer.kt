@@ -18,7 +18,7 @@ class PrisonApiMockServer : WireMockServer(WIREMOCK_PORT) {
 
   fun stubGetNonAssociationDetailsByPrisonerNumber(nonAssociationDetails: LegacyNonAssociationDetails) {
     stubFor(
-      get("/api/offenders/${nonAssociationDetails.offenderNo}/non-association-details").willReturn(
+      get("/api/offenders/${nonAssociationDetails.offenderNo}/non-association-details?currentPrisonOnly=false&excludeInactive=false").willReturn(
         aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(
