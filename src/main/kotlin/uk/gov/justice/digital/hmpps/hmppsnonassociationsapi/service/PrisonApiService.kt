@@ -14,10 +14,15 @@ class PrisonApiService(
     return if (useClientCredentials) prisonWebClientClientCredentials else prisonWebClient
   }
 
-  fun getNonAssociationDetails(prisonerNumber: String, useClientCredentials: Boolean = false): LegacyNonAssociationDetails {
+  fun getNonAssociationDetails(
+    prisonerNumber: String,
+    currentPrisonOnly: Boolean = true,
+    excludeInactive: Boolean = true,
+    useClientCredentials: Boolean = false,
+  ): LegacyNonAssociationDetails {
     return getClient(useClientCredentials)
       .get()
-      .uri("/api/offenders/$prisonerNumber/non-association-details")
+      .uri("/api/offenders/$prisonerNumber/non-association-details?currentPrisonOnly=$currentPrisonOnly&excludeInactive=$excludeInactive")
       .retrieve()
       .bodyToMono(LegacyNonAssociationDetails::class.java)
       .block()!!

@@ -400,24 +400,33 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   @Nested
   inner class `Get a legacy non-association` {
 
-    @Test
-    fun `a non-association that exists is returned in the legacy format`() {
+    private lateinit var dtFormat: DateTimeFormatter
+    private lateinit var prisonerJohn: OffenderSearchPrisoner
+    private lateinit var prisonerMerlin: OffenderSearchPrisoner
+    private lateinit var prisonerJosh: OffenderSearchPrisoner
+    private lateinit var prisonerEdward: OffenderSearchPrisoner
+    private lateinit var openNonAssociation: NonAssociationJPA
+    private lateinit var closedNa: NonAssociationJPA
+    private lateinit var otherPrisonNa: NonAssociationJPA
+
+    @BeforeEach
+    fun setup() {
       // prisoners in MDI
-      val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
-      val prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
-      val prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
+      prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
+      prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
+      prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
       // prisoner in another prison
-      val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
+      prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
 
       // open non-association, same prison
-      val openNonAssociation = createNonAssociation(
+      openNonAssociation = createNonAssociation(
         prisonerJohn.prisonerNumber,
         prisonerMerlin.prisonerNumber,
         isClosed = false,
       )
 
       // closed non-association
-      val closedNa = createNonAssociation(
+      closedNa = createNonAssociation(
         firstPrisonerNumber = prisonerMerlin.prisonerNumber,
         secondPrisonerNumber = prisonerJosh.prisonerNumber,
         isClosed = true,
@@ -427,7 +436,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       )
 
       // non-association with someone in a different prison
-      val otherPrisonNa = createNonAssociation(
+      otherPrisonNa = createNonAssociation(
         firstPrisonerNumber = prisonerEdward.prisonerNumber,
         secondPrisonerNumber = prisonerMerlin.prisonerNumber,
         firstPrisonerRole = Role.VICTIM,
@@ -440,10 +449,13 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         prisoners,
       )
 
-      val dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+      dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+    }
 
+    @Test
+    fun `a non-association that exists is returned in the legacy format for all NAs`() {
       webTestClient.get()
-        .uri("/legacy/api/offenders/${prisonerMerlin.prisonerNumber}/non-association-details")
+        .uri("/legacy/api/offenders/${prisonerMerlin.prisonerNumber}/non-association-details?currentPrisonOnly=false&excludeInactive=false")
         .headers(
           setAuthorisation(),
         )
@@ -480,6 +492,185 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "assignedLivingUnitDescription": "${prisonerEdward.cellLocation}"
                 }
               },
+              {
+                "reasonCode": "${closedNa.firstPrisonerRole.toLegacyRole()}",
+                "reasonDescription": "${closedNa.firstPrisonerRole.toLegacyRole().description}",
+                "typeCode": "${closedNa.restrictionType.toLegacyRestrictionType()}",
+                "typeDescription": "${closedNa.restrictionType.toLegacyRestrictionType().description}",
+                "effectiveDate": "${closedNa.whenCreated.format(dtFormat)}",
+                "expiryDate": "${closedNa.closedAt?.format(dtFormat)}",
+                "authorisedBy": "${closedNa.authorisedBy}",
+                "comments": "${closedNa.comment}",
+                "offenderNonAssociation": {
+                  "offenderNo": "${prisonerJosh.prisonerNumber}",
+                  "firstName": "${prisonerJosh.firstName}",
+                  "lastName": "${prisonerJosh.lastName}",
+                  "reasonCode": "${closedNa.secondPrisonerRole.toLegacyRole()}",
+                  "reasonDescription": "${closedNa.secondPrisonerRole.toLegacyRole().description}",
+                  "agencyDescription": "${prisonerJosh.prisonName}",
+                  "assignedLivingUnitDescription": "${prisonerJosh.cellLocation}"
+                }
+              },
+              {
+                "reasonCode": "${openNonAssociation.secondPrisonerRole.toLegacyRole()}",
+                "reasonDescription": "${openNonAssociation.secondPrisonerRole.toLegacyRole().description}",
+                "typeCode": "${openNonAssociation.restrictionType.toLegacyRestrictionType()}",
+                "typeDescription": "${openNonAssociation.restrictionType.toLegacyRestrictionType().description}",
+                "effectiveDate": "${openNonAssociation.whenCreated.format(dtFormat)}",
+                "expiryDate": null,
+                "authorisedBy": "${openNonAssociation.authorisedBy}",
+                "comments": "${openNonAssociation.comment}",
+                "offenderNonAssociation": {
+                  "offenderNo": "${prisonerJohn.prisonerNumber}",
+                  "firstName": "${prisonerJohn.firstName}",
+                  "lastName": "${prisonerJohn.lastName}",
+                  "reasonCode": "${openNonAssociation.firstPrisonerRole.toLegacyRole()}",
+                  "reasonDescription": "${openNonAssociation.firstPrisonerRole.toLegacyRole().description}",
+                  "agencyDescription": "${prisonerJohn.prisonName}",
+                  "assignedLivingUnitDescription": "${prisonerJohn.cellLocation}"
+                }
+              }
+            ]
+          }
+          """,
+          false,
+        )
+    }
+
+    @Test
+    fun `a non-association that exists is returned in the legacy format for active only NAs`() {
+      webTestClient.get()
+        .uri("/legacy/api/offenders/${prisonerMerlin.prisonerNumber}/non-association-details?currentPrisonOnly=false&excludeInactive=true")
+        .headers(
+          setAuthorisation(),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody().json(
+          // language=json
+          """
+           {
+            "offenderNo": "${prisonerMerlin.prisonerNumber}",
+            "firstName": "${prisonerMerlin.firstName}",
+            "lastName": "${prisonerMerlin.lastName}",
+            "agencyDescription": "${prisonerMerlin.prisonName}",
+            "assignedLivingUnitDescription": "${prisonerMerlin.cellLocation}",
+            "nonAssociations": [
+              {
+                "reasonCode": "${otherPrisonNa.secondPrisonerRole.toLegacyRole()}",
+                "reasonDescription": "${otherPrisonNa.secondPrisonerRole.toLegacyRole().description}",
+                "typeCode": "${otherPrisonNa.restrictionType.toLegacyRestrictionType()}",
+                "typeDescription": "${otherPrisonNa.restrictionType.toLegacyRestrictionType().description}",
+                "effectiveDate": "${otherPrisonNa.whenCreated.format(dtFormat)}",
+                "expiryDate": null,
+                "authorisedBy": "${otherPrisonNa.authorisedBy}",
+                "comments": "${otherPrisonNa.comment}",
+                "offenderNonAssociation": {
+                  "offenderNo": "${prisonerEdward.prisonerNumber}",
+                  "firstName": "${prisonerEdward.firstName}",
+                  "lastName": "${prisonerEdward.lastName}",
+                  "reasonCode": "${otherPrisonNa.firstPrisonerRole.toLegacyRole()}",
+                  "reasonDescription": "${otherPrisonNa.firstPrisonerRole.toLegacyRole().description}",
+                  "agencyDescription": "${prisonerEdward.prisonName}",
+                  "assignedLivingUnitDescription": "${prisonerEdward.cellLocation}"
+                }
+              },
+              {
+                "reasonCode": "${openNonAssociation.secondPrisonerRole.toLegacyRole()}",
+                "reasonDescription": "${openNonAssociation.secondPrisonerRole.toLegacyRole().description}",
+                "typeCode": "${openNonAssociation.restrictionType.toLegacyRestrictionType()}",
+                "typeDescription": "${openNonAssociation.restrictionType.toLegacyRestrictionType().description}",
+                "effectiveDate": "${openNonAssociation.whenCreated.format(dtFormat)}",
+                "expiryDate": null,
+                "authorisedBy": "${openNonAssociation.authorisedBy}",
+                "comments": "${openNonAssociation.comment}",
+                "offenderNonAssociation": {
+                  "offenderNo": "${prisonerJohn.prisonerNumber}",
+                  "firstName": "${prisonerJohn.firstName}",
+                  "lastName": "${prisonerJohn.lastName}",
+                  "reasonCode": "${openNonAssociation.firstPrisonerRole.toLegacyRole()}",
+                  "reasonDescription": "${openNonAssociation.firstPrisonerRole.toLegacyRole().description}",
+                  "agencyDescription": "${prisonerJohn.prisonName}",
+                  "assignedLivingUnitDescription": "${prisonerJohn.cellLocation}"
+                }
+              }
+            ]
+          }
+          """,
+          false,
+        )
+    }
+
+    @Test
+    fun `a non-association that exists is returned in the legacy format for current active prison only`() {
+      webTestClient.get()
+        .uri("/legacy/api/offenders/${prisonerMerlin.prisonerNumber}/non-association-details?currentPrisonOnly=true&excludeInactive=true")
+        .headers(
+          setAuthorisation(),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody().json(
+          // language=json
+          """
+           {
+            "offenderNo": "${prisonerMerlin.prisonerNumber}",
+            "firstName": "${prisonerMerlin.firstName}",
+            "lastName": "${prisonerMerlin.lastName}",
+            "agencyDescription": "${prisonerMerlin.prisonName}",
+            "assignedLivingUnitDescription": "${prisonerMerlin.cellLocation}",
+            "nonAssociations": [
+              {
+                "reasonCode": "${openNonAssociation.secondPrisonerRole.toLegacyRole()}",
+                "reasonDescription": "${openNonAssociation.secondPrisonerRole.toLegacyRole().description}",
+                "typeCode": "${openNonAssociation.restrictionType.toLegacyRestrictionType()}",
+                "typeDescription": "${openNonAssociation.restrictionType.toLegacyRestrictionType().description}",
+                "effectiveDate": "${openNonAssociation.whenCreated.format(dtFormat)}",
+                "expiryDate": null,
+                "authorisedBy": "${openNonAssociation.authorisedBy}",
+                "comments": "${openNonAssociation.comment}",
+                "offenderNonAssociation": {
+                  "offenderNo": "${prisonerJohn.prisonerNumber}",
+                  "firstName": "${prisonerJohn.firstName}",
+                  "lastName": "${prisonerJohn.lastName}",
+                  "reasonCode": "${openNonAssociation.firstPrisonerRole.toLegacyRole()}",
+                  "reasonDescription": "${openNonAssociation.firstPrisonerRole.toLegacyRole().description}",
+                  "agencyDescription": "${prisonerJohn.prisonName}",
+                  "assignedLivingUnitDescription": "${prisonerJohn.cellLocation}"
+                }
+              }
+            ]
+          }
+          """,
+          false,
+        )
+    }
+
+    @Test
+    fun `a non-association that exists is returned in the legacy format for all active and inactive current prison only`() {
+      webTestClient.get()
+        .uri("/legacy/api/offenders/${prisonerMerlin.prisonerNumber}/non-association-details?currentPrisonOnly=true&excludeInactive=false")
+        .headers(
+          setAuthorisation(),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody().json(
+          // language=json
+          """
+           {
+            "offenderNo": "${prisonerMerlin.prisonerNumber}",
+            "firstName": "${prisonerMerlin.firstName}",
+            "lastName": "${prisonerMerlin.lastName}",
+            "agencyDescription": "${prisonerMerlin.prisonName}",
+            "assignedLivingUnitDescription": "${prisonerMerlin.cellLocation}",
+            "nonAssociations": [
               {
                 "reasonCode": "${closedNa.firstPrisonerRole.toLegacyRole()}",
                 "reasonDescription": "${closedNa.firstPrisonerRole.toLegacyRole().description}",

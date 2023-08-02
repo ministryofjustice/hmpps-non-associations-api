@@ -155,13 +155,17 @@ class NonAssociationsService(
     )
   }
 
-  fun getLegacyDetails(prisonerNumber: String): LegacyNonAssociationDetails {
+  fun getLegacyDetails(
+    prisonerNumber: String,
+    currentPrisonOnly: Boolean = true,
+    excludeInactive: Boolean = true,
+  ): LegacyNonAssociationDetails {
     return when (featureFlagsConfig.legacyEndpointNomisSourceOfTruth) {
-      true -> prisonApiService.getNonAssociationDetails(prisonerNumber)
+      true -> prisonApiService.getNonAssociationDetails(prisonerNumber, currentPrisonOnly, excludeInactive)
       false -> {
         return getPrisonerNonAssociations(
           prisonerNumber,
-          NonAssociationListOptions(includeOpen = true, includeClosed = true, includeOtherPrisons = true),
+          NonAssociationListOptions(includeOpen = true, includeClosed = !excludeInactive, includeOtherPrisons = !currentPrisonOnly),
         ).toLegacy()
       }
     }
