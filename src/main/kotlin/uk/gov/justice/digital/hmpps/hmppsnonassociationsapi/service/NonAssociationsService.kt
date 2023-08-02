@@ -14,8 +14,8 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociatio
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.UserInContextMissingException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociationDetails
@@ -202,7 +202,20 @@ data class NonAssociationListOptions(
   val includeOtherPrisons: Boolean = false,
   val sortBy: NonAssociationsSort = NonAssociationsSort.WHEN_CREATED,
   val sortDirection: Sort.Direction = Sort.Direction.DESC,
-)
+) {
+  val comparator: Comparator<PrisonerNonAssociation>
+    get() {
+      return when (sortBy) {
+        NonAssociationsSort.WHEN_CREATED -> compareBy(PrisonerNonAssociation::whenCreated)
+        NonAssociationsSort.WHEN_UPDATED -> compareBy(PrisonerNonAssociation::whenUpdated)
+        NonAssociationsSort.LAST_NAME -> compareBy { nonna -> nonna.otherPrisonerDetails.lastName }
+        NonAssociationsSort.FIRST_NAME -> compareBy { nonna -> nonna.otherPrisonerDetails.firstName }
+        NonAssociationsSort.PRISONER_NUMBER -> compareBy { nonna -> nonna.otherPrisonerDetails.prisonerNumber }
+      }.run {
+        if (sortDirection == Sort.Direction.DESC) reversed() else this
+      }
+    }
+}
 
 enum class NonAssociationsSort {
   WHEN_CREATED,
@@ -210,17 +223,4 @@ enum class NonAssociationsSort {
   LAST_NAME,
   FIRST_NAME,
   PRISONER_NUMBER,
-  ;
-
-  fun comparator(direction: Sort.Direction): Comparator<NonAssociationDetails> {
-    return when (this) {
-      WHEN_CREATED -> Comparator.comparing(NonAssociationDetails::whenCreated)
-      WHEN_UPDATED -> Comparator.comparing(NonAssociationDetails::whenUpdated)
-      LAST_NAME -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.lastName }
-      FIRST_NAME -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.firstName }
-      PRISONER_NUMBER -> Comparator.comparing { nonna -> nonna.otherPrisonerDetails.prisonerNumber }
-    }.run {
-      if (direction == Sort.Direction.DESC) this.reversed() else this
-    }
-  }
 }
