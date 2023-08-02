@@ -3,24 +3,40 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto
 import org.springframework.data.domain.Sort
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
 
+enum class NonAssociationListInclusion {
+  OPEN_ONLY,
+  CLOSED_ONLY,
+  ALL,
+  ;
+
+  companion object {
+    fun of(
+      includeOpen: Boolean = true,
+      includeClosed: Boolean = false,
+    ): NonAssociationListInclusion? =
+      if (!includeOpen && !includeClosed) {
+        null
+      } else if (!includeClosed) {
+        OPEN_ONLY
+      } else if (!includeOpen) {
+        CLOSED_ONLY
+      } else {
+        ALL
+      }
+  }
+}
+
 data class NonAssociationListOptions(
-  val includeOpen: Boolean = true,
-  val includeClosed: Boolean = false,
+  val inclusion: NonAssociationListInclusion = NonAssociationListInclusion.OPEN_ONLY,
   val includeOtherPrisons: Boolean = false,
   val sortBy: NonAssociationsSort? = null,
   val sortDirection: Sort.Direction? = null,
 ) {
   val filterForOpenAndClosed: (NonAssociation) -> Boolean
-    get() {
-      return if (includeOpen && includeClosed) {
-        { true }
-      } else if (includeOpen) {
-        { it.isOpen }
-      } else if (includeClosed) {
-        { it.isClosed }
-      } else {
-        { false }
-      }
+    get() = when (inclusion) {
+      NonAssociationListInclusion.OPEN_ONLY -> NonAssociation::isOpen
+      NonAssociationListInclusion.CLOSED_ONLY -> NonAssociation::isClosed
+      NonAssociationListInclusion.ALL -> { _ -> true }
     }
 
   val comparator: Comparator<PrisonerNonAssociation>

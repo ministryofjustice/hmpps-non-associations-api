@@ -25,6 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListInclusion
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListOptions
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationsSort
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
@@ -130,15 +131,13 @@ class NonAssociationsResource(
     @RequestParam(required = false)
     sortDirection: Sort.Direction?,
   ): PrisonerNonAssociations {
-    if (!includeOpen && !includeClosed) {
-      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
-    }
+    val inclusion = NonAssociationListInclusion.of(includeOpen, includeClosed)
+      ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
 
     return nonAssociationsService.getPrisonerNonAssociations(
       prisonerNumber,
       NonAssociationListOptions(
-        includeOpen = includeOpen,
-        includeClosed = includeClosed,
+        inclusion = inclusion,
         includeOtherPrisons = includeOtherPrisons,
         sortBy = sortBy,
         sortDirection = sortDirection,

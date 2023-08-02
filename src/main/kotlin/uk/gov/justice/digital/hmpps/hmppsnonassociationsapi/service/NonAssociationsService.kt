@@ -13,6 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociatio
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.UserInContextMissingException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListInclusion
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListOptions
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
@@ -162,9 +163,10 @@ class NonAssociationsService(
     return when (featureFlagsConfig.legacyEndpointNomisSourceOfTruth) {
       true -> prisonApiService.getNonAssociationDetails(prisonerNumber, currentPrisonOnly, excludeInactive)
       false -> {
+        val inclusion = if (excludeInactive) NonAssociationListInclusion.OPEN_ONLY else NonAssociationListInclusion.ALL
         return getPrisonerNonAssociations(
           prisonerNumber,
-          NonAssociationListOptions(includeOpen = true, includeClosed = !excludeInactive, includeOtherPrisons = !currentPrisonOnly),
+          NonAssociationListOptions(inclusion = inclusion, includeOtherPrisons = !currentPrisonOnly),
         ).toLegacy()
       }
     }
