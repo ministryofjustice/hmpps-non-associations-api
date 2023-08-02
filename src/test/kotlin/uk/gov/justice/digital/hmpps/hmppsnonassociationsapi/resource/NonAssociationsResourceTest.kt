@@ -875,7 +875,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         secondPrisonerNumber = prisonerMerlin.prisonerNumber,
       )
 
-      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerEdward)
+      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
       offenderSearchMockServer.stubSearchByPrisonerNumbers(
         prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
         prisoners,
@@ -1072,7 +1072,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         secondPrisonerNumber = prisonerMerlin.prisonerNumber,
       )
 
-      val prisoners = listOf(prisonerMerlin, prisonerJosh)
+      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
       offenderSearchMockServer.stubSearchByPrisonerNumbers(
         prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
         prisoners,
@@ -1157,7 +1157,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         secondPrisonerNumber = prisonerMerlin.prisonerNumber,
       )
 
-      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerEdward)
+      val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
       offenderSearchMockServer.stubSearchByPrisonerNumbers(
         prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
         prisoners,

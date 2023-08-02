@@ -115,10 +115,26 @@ class NonAssociationsService(
   }
 
   fun getPrisonerNonAssociations(prisonerNumber: String, options: NonAssociationListOptions): PrisonerNonAssociations {
-    val nonAssociations = nonAssociationsRepository.findAllByPrisonerNumber(prisonerNumber)
+    var nonAssociations = nonAssociationsRepository.findAllByPrisonerNumber(prisonerNumber)
+
+    // load all prisoner mentioned in any non-association
+    val prisonerNumbers = nonAssociations.flatMapTo(mutableSetOf(prisonerNumber)) {
+      listOf(it.firstPrisonerNumber, it.secondPrisonerNumber)
+    }
+    val prisoners = offenderSearch.searchByPrisonerNumbers(prisonerNumbers)
+
+    // filter out non-associations in other prisons
+    // this should be done first because open/closed non-associations will need to be counted
+    if (!options.includeOtherPrisons) {
+      val prisonId = prisoners[prisonerNumber]!!.prisonId
+      nonAssociations = nonAssociations.filter { nonna ->
+        prisoners[nonna.firstPrisonerNumber]!!.prisonId == prisonId &&
+          prisoners[nonna.secondPrisonerNumber]!!.prisonId == prisonId
+      }
+    }
 
     // filter out open or closed non-associations if necessary
-    var nonAssociationsFiltered = if (options.includeOpen && options.includeClosed) {
+    nonAssociations = if (options.includeOpen && options.includeClosed) {
       nonAssociations
     } else if (options.includeOpen) {
       nonAssociations.filter(NonAssociationJPA::isOpen)
@@ -128,21 +144,7 @@ class NonAssociationsService(
       emptyList()
     }
 
-    val prisonerNumbers = nonAssociationsFiltered.flatMapTo(mutableSetOf(prisonerNumber)) {
-      listOf(it.firstPrisonerNumber, it.secondPrisonerNumber)
-    }
-    val prisoners = offenderSearch.searchByPrisonerNumbers(prisonerNumbers)
-
-    // filter out non-associations in other prisons
-    if (!options.includeOtherPrisons) {
-      val prisonId = prisoners[prisonerNumber]!!.prisonId
-      nonAssociationsFiltered = nonAssociationsFiltered.filter { nonna ->
-        prisoners[nonna.firstPrisonerNumber]!!.prisonId == prisonId &&
-          prisoners[nonna.secondPrisonerNumber]!!.prisonId == prisonId
-      }
-    }
-
-    return nonAssociationsFiltered.toPrisonerNonAssociations(
+    return nonAssociations.toPrisonerNonAssociations(
       prisonerNumber,
       prisoners,
       options,
