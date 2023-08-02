@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -226,11 +227,11 @@ class NonAssociationsResource(
     )
   }
 
-  @GetMapping("/non-associations/between")
+  @PostMapping("/non-associations/between")
   @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
-    summary = "Get a non-associations between two prisoners by prisoner number.",
+    summary = "Get non-associations between two or more prisoners by prisoner number.",
     description = "Requires ROLE_NON_ASSOCIATIONS role.",
     responses = [
       ApiResponse(
@@ -239,7 +240,7 @@ class NonAssociationsResource(
       ),
       ApiResponse(
         responseCode = "400",
-        description = "When two distinct prisoner numbers aren't provided or neither open nor closed non-associations are included",
+        description = "When fewer than two distinct prisoner numbers are provided or neither open nor closed non-associations are included",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
@@ -255,13 +256,15 @@ class NonAssociationsResource(
     ],
   )
   fun getNonAssociationsBetweenPrisoners(
-    @Schema(description = "A prisoner number", required = true, example = "A1234BC")
-    @RequestParam(required = false)
-    firstPrisonerNumber: String?,
-
-    @Schema(description = "Another prisoner number", required = true, example = "A1234BC")
-    @RequestParam(required = false)
-    secondPrisonerNumber: String?,
+    @ArraySchema(
+      arraySchema = Schema(description = "Two or more distinct prisoner numbers"),
+      schema = Schema(description = "Prisoner number", required = true, example = "A1234BC", type = "string"),
+      minItems = 2,
+      uniqueItems = true,
+    )
+    @RequestBody
+    @Validated
+    prisonerNumbers: List<String>?,
 
     @Schema(
       description = "Whether to include open non-associations or not",
@@ -281,18 +284,15 @@ class NonAssociationsResource(
     @RequestParam(required = false, defaultValue = "false")
     includeClosed: Boolean = false,
   ): List<NonAssociation> {
-    if (
-      firstPrisonerNumber == null || secondPrisonerNumber == null ||
-      firstPrisonerNumber == secondPrisonerNumber ||
-      firstPrisonerNumber.isEmpty() || secondPrisonerNumber.isEmpty()
-    ) {
-      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Two distinct prisoner numbers are required")
+    val distinctPrisonerNumbers = prisonerNumbers?.toSet()?.filter { it.isNotEmpty() }
+    if (distinctPrisonerNumbers == null || distinctPrisonerNumbers.size < 2) {
+      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Two or more distinct prisoner numbers are required")
     }
 
     val inclusion = NonAssociationListInclusion.of(includeOpen, includeClosed)
       ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
 
-    return nonAssociationsService.getAnyBetween(listOf(firstPrisonerNumber, secondPrisonerNumber), inclusion)
+    return nonAssociationsService.getAnyBetween(prisonerNumbers, inclusion)
   }
 
   @PatchMapping("/non-associations/{id}")
