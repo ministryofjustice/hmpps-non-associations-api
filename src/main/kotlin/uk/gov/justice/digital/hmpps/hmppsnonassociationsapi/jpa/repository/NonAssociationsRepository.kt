@@ -12,6 +12,9 @@ interface NonAssociationsRepository : JpaRepository<NonAssociation, Long> {
   /** Use findAllByPairOfPrisonerNumbers convenience extension function instead */
   fun findAllByFirstPrisonerNumberAndSecondPrisonerNumberOrFirstPrisonerNumberAndSecondPrisonerNumber(pn1: String, pn2: String, pn3: String, pn4: String): List<NonAssociation>
 
+  /** Use findAnyBetweenPrisonerNumbers convenience extension function instead */
+  fun findAllByFirstPrisonerNumberInAndSecondPrisonerNumberInAndIsClosed(p1: Iterable<String>, p2: Iterable<String>, isClosed: Boolean): List<NonAssociation>
+
   // TODO: Assumes that there can only be 1 non-association given a pair of prisoner numbers.
   //       In future, this will only be true for open non-associations.
   fun findByFirstPrisonerNumberAndSecondPrisonerNumber(firstPrisonerNumber: String, secondPrisonerNumber: String): NonAssociation?
@@ -24,7 +27,7 @@ fun NonAssociationsRepository.findAllByPrisonerNumber(prisonerNumber: String): L
   findAllByFirstPrisonerNumberOrSecondPrisonerNumber(prisonerNumber, prisonerNumber)
 
 /**
- * Returns all non-associations given two prisoner numbers
+ * Returns all non-associations between two prisoner numbers
  */
 fun NonAssociationsRepository.findAllByPairOfPrisonerNumbers(prisonerNumbers: Pair<String, String>): List<NonAssociation> =
   findAllByFirstPrisonerNumberAndSecondPrisonerNumberOrFirstPrisonerNumberAndSecondPrisonerNumber(
@@ -33,3 +36,9 @@ fun NonAssociationsRepository.findAllByPairOfPrisonerNumbers(prisonerNumbers: Pa
     prisonerNumbers.second,
     prisonerNumbers.first,
   )
+
+/**
+ * Returns non-associations between any prisoners in given prisoner numbers
+ */
+fun NonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonerNumbers: Iterable<String>, isClosed: Boolean = false): List<NonAssociation> =
+  findAllByFirstPrisonerNumberInAndSecondPrisonerNumberInAndIsClosed(prisonerNumbers, prisonerNumbers, isClosed)
