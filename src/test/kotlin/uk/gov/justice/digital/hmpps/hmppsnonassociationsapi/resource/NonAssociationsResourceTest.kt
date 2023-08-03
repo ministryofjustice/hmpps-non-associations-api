@@ -1511,7 +1511,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   }
 
   @Nested
-  inner class `Get non-associations between two prisoners` {
+  inner class `Get non-associations between a group of prisoners` {
     private val prisonerJohnNumber = "A1234BC"
     private val prisonerMerlinNumber = "D5678EF"
 
@@ -1735,6 +1735,73 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun `when non-associations are requested between more than 2 prisoners`() {
+      // language=mermaid
+      """
+      classDiagram
+        A0000AA -- A1111AA
+        A0000AA -- A2222AA
+        A2222AA -- A3333AA
+        A1111AA -- A4444AA
+        A4444AA -- A2222AA : closed
+      """
+      createNonAssociation("A0000AA", "A1111AA") // never returned
+      createNonAssociation("A0000AA", "A2222AA") // returned
+      createNonAssociation("A2222AA", "A3333AA") // never returned
+      createNonAssociation("A1111AA", "A4444AA") // never returned
+      createNonAssociation("A4444AA", "A2222AA", true) // returned when closed is included
+
+      webTestClient.post()
+        .uri(urlPath)
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .bodyValue(listOf("A0000AA", "A2222AA", "A4444AA", "B0000BB"))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+          [
+            {
+              "firstPrisonerNumber": "A0000AA",
+              "secondPrisonerNumber": "A2222AA",
+              "isClosed": false
+            }
+          ]
+          """,
+          false,
+        )
+
+      webTestClient.post()
+        .uri {
+          it.path(urlPath)
+            .queryParam("includeClosed", true)
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .bodyValue(listOf("A0000AA", "A2222AA", "A4444AA", "B0000BB"))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+          [
+            {
+              "firstPrisonerNumber": "A0000AA",
+              "secondPrisonerNumber": "A2222AA",
+              "isClosed": false
+            },
+            {
+              "firstPrisonerNumber": "A4444AA",
+              "secondPrisonerNumber": "A2222AA",
+              "isClosed": true
+            }
+          ]
+          """,
+          false,
+        )
     }
   }
 
