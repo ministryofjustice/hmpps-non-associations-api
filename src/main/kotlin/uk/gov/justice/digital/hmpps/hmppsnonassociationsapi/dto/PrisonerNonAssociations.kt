@@ -23,8 +23,8 @@ data class PrisonerNonAssociations(
   val prisonId: String,
   @Schema(description = "Name of the prison the prisoner is assigned to", required = true, example = "Moorland (HMP & YOI)")
   val prisonName: String,
-  @Schema(description = "Cell the prisoner is assigned to", required = true, example = "A-1-002")
-  val cellLocation: String,
+  @Schema(description = "Cell the prisoner is assigned to", required = false, example = "A-1-002")
+  val cellLocation: String?,
   @Schema(description = "Number of open non-associations (follows includeOtherPrisons filter)", required = true, example = "1", minimum = "0", type = "integer", format = "int32")
   val openCount: Int,
   @Schema(description = "Number of closed non-associations (follows includeOtherPrisons filter)", required = true, example = "0", minimum = "0", type = "integer", format = "int32")
@@ -98,8 +98,8 @@ data class OtherPrisonerDetails(
   val prisonId: String,
   @Schema(description = "Name of the prison the prisoner is assigned to", required = true, example = "Moorland (HMP & YOI)")
   val prisonName: String,
-  @Schema(description = "Cell the prisoner is assigned to", required = true, example = "B-2-007")
-  val cellLocation: String,
+  @Schema(description = "Cell the prisoner is assigned to", required = false, example = "B-2-007")
+  val cellLocation: String?,
 )
 
 /**

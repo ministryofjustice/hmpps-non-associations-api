@@ -189,6 +189,7 @@ private fun PrisonerNonAssociations.toLegacy() =
     offenderNo = this.prisonerNumber,
     firstName = this.firstName,
     lastName = this.lastName,
+    agencyId = this.prisonId,
     agencyDescription = this.prisonName,
     assignedLivingUnitDescription = this.cellLocation,
     nonAssociations = this.nonAssociations.map {
@@ -207,6 +208,7 @@ private fun PrisonerNonAssociations.toLegacy() =
           lastName = it.otherPrisonerDetails.lastName,
           reasonCode = it.otherPrisonerDetails.roleCode.toLegacyRole(),
           reasonDescription = it.otherPrisonerDetails.roleCode.toLegacyRole().description,
+          agencyId = it.otherPrisonerDetails.prisonId,
           agencyDescription = it.otherPrisonerDetails.prisonName,
           assignedLivingUnitDescription = it.otherPrisonerDetails.cellLocation,
         ),
