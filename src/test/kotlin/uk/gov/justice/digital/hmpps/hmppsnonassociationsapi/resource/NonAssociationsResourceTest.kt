@@ -1511,7 +1511,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   }
 
   @Nested
-  inner class `Get non-associations between two prisoners` {
+  inner class `Get non-associations between a group of prisoners` {
     private val prisonerJohnNumber = "A1234BC"
     private val prisonerMerlinNumber = "D5678EF"
 
@@ -1519,13 +1519,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `without a valid token responds 401 Unauthorized`() {
-      webTestClient.get()
-        .uri {
-          it.path(urlPath)
-            .queryParam("firstPrisonerNumber", prisonerJohnNumber)
-            .queryParam("secondPrisonerNumber", prisonerMerlinNumber)
-            .build()
-        }
+      webTestClient.post()
+        .uri(urlPath)
+        .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -1533,82 +1529,48 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `without the correct role responds 403 Forbidden`() {
-      webTestClient.get()
-        .uri {
-          it.path(urlPath)
-            .queryParam("firstPrisonerNumber", prisonerJohnNumber)
-            .queryParam("secondPrisonerNumber", prisonerMerlinNumber)
-            .build()
-        }
+      webTestClient.post()
+        .uri(urlPath)
         .headers(setAuthorisation(roles = listOf("WRONG_ROLE")))
+        .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus()
         .isForbidden
     }
 
     @Test
-    fun `without two distinct prisoner numbers responds with 400 Bad Request`() {
-      webTestClient.get()
+    fun `without two or more distinct prisoner numbers responds with 400 Bad Request`() {
+      // no prisoners provided
+      webTestClient.post()
         .uri(urlPath)
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus()
         .isBadRequest
 
-      webTestClient.get()
-        .uri {
-          it.path(urlPath)
-            .queryParam("firstPrisonerNumber", prisonerJohnNumber)
-            .build()
-        }
+      // 1 prisoner provided
+      webTestClient.post()
+        .uri(urlPath)
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .bodyValue(listOf(prisonerJohnNumber))
         .exchange()
         .expectStatus()
         .isBadRequest
 
-      webTestClient.get()
-        .uri {
-          it.path(urlPath)
-            .queryParam("secondPrisonerNumber", prisonerMerlinNumber)
-            .build()
-        }
+      // 2 non-distinct prisoners provided
+      webTestClient.post()
+        .uri(urlPath)
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .bodyValue(listOf(prisonerJohnNumber, prisonerJohnNumber))
         .exchange()
         .expectStatus()
         .isBadRequest
 
-      webTestClient.get()
-        .uri {
-          it.path(urlPath)
-            .queryParam("firstPrisonerNumber", prisonerJohnNumber)
-            .queryParam("secondPrisonerNumber", prisonerJohnNumber)
-            .build()
-        }
+      // 1 non-blank prisoner provided
+      webTestClient.post()
+        .uri(urlPath)
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
-        .exchange()
-        .expectStatus()
-        .isBadRequest
-
-      webTestClient.get()
-        .uri {
-          it.path(urlPath)
-            .queryParam("firstPrisonerNumber", "")
-            .queryParam("secondPrisonerNumber", prisonerJohnNumber)
-            .build()
-        }
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
-        .exchange()
-        .expectStatus()
-        .isBadRequest
-
-      webTestClient.get()
-        .uri {
-          it.path(urlPath)
-            .queryParam("firstPrisonerNumber", prisonerJohnNumber)
-            .queryParam("secondPrisonerNumber", "")
-            .build()
-        }
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .bodyValue(listOf(prisonerJohnNumber, ""))
         .exchange()
         .expectStatus()
         .isBadRequest
@@ -1618,14 +1580,10 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     fun `when there are no non-associations between the prisoners`() {
       createNonAssociation("A0011AA", prisonerJohnNumber)
 
-      webTestClient.get()
-        .uri {
-          it.path(urlPath)
-            .queryParam("firstPrisonerNumber", prisonerJohnNumber)
-            .queryParam("secondPrisonerNumber", prisonerMerlinNumber)
-            .build()
-        }
+      webTestClient.post()
+        .uri(urlPath)
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
         .expectBody().json("[]", true)
@@ -1636,14 +1594,10 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       createNonAssociation()
       createNonAssociation(isClosed = true)
 
-      webTestClient.get()
-        .uri {
-          it.path(urlPath)
-            .queryParam("firstPrisonerNumber", prisonerMerlinNumber)
-            .queryParam("secondPrisonerNumber", prisonerJohnNumber)
-            .build()
-        }
+      webTestClient.post()
+        .uri(urlPath)
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
         .expectBody().json(
@@ -1676,15 +1630,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       createNonAssociation()
       createNonAssociation(isClosed = true)
 
-      webTestClient.get()
+      webTestClient.post()
         .uri {
           it.path(urlPath)
-            .queryParam("firstPrisonerNumber", prisonerMerlinNumber)
-            .queryParam("secondPrisonerNumber", prisonerJohnNumber)
             .queryParam("includeClosed", true)
             .build()
         }
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
         .expectBody().json(
@@ -1731,16 +1684,15 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       createNonAssociation()
       createNonAssociation(isClosed = true)
 
-      webTestClient.get()
+      webTestClient.post()
         .uri {
           it.path(urlPath)
-            .queryParam("firstPrisonerNumber", prisonerMerlinNumber)
-            .queryParam("secondPrisonerNumber", prisonerJohnNumber)
             .queryParam("includeOpen", false)
             .queryParam("includeClosed", true)
             .build()
         }
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
         .expectBody().json(
@@ -1772,18 +1724,84 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       createNonAssociation()
       createNonAssociation(isClosed = true)
 
-      webTestClient.get()
+      webTestClient.post()
         .uri {
           it.path(urlPath)
-            .queryParam("firstPrisonerNumber", prisonerMerlinNumber)
-            .queryParam("secondPrisonerNumber", prisonerJohnNumber)
             .queryParam("includeOpen", false)
             .queryParam("includeClosed", false)
             .build()
         }
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun `when non-associations are requested between more than 2 prisoners`() {
+      // language=mermaid
+      """
+      classDiagram
+        A0000AA -- A1111AA
+        A0000AA -- A2222AA
+        A2222AA -- A3333AA
+        A1111AA -- A4444AA
+        A4444AA -- A2222AA : closed
+      """
+      createNonAssociation("A0000AA", "A1111AA") // never returned
+      createNonAssociation("A0000AA", "A2222AA") // returned
+      createNonAssociation("A2222AA", "A3333AA") // never returned
+      createNonAssociation("A1111AA", "A4444AA") // never returned
+      createNonAssociation("A4444AA", "A2222AA", true) // returned when closed is included
+
+      webTestClient.post()
+        .uri(urlPath)
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .bodyValue(listOf("A0000AA", "A2222AA", "A4444AA", "B0000BB"))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+          [
+            {
+              "firstPrisonerNumber": "A0000AA",
+              "secondPrisonerNumber": "A2222AA",
+              "isClosed": false
+            }
+          ]
+          """,
+          false,
+        )
+
+      webTestClient.post()
+        .uri {
+          it.path(urlPath)
+            .queryParam("includeClosed", true)
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .bodyValue(listOf("A0000AA", "A2222AA", "A4444AA", "B0000BB"))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+          [
+            {
+              "firstPrisonerNumber": "A0000AA",
+              "secondPrisonerNumber": "A2222AA",
+              "isClosed": false
+            },
+            {
+              "firstPrisonerNumber": "A4444AA",
+              "secondPrisonerNumber": "A2222AA",
+              "isClosed": true
+            }
+          ]
+          """,
+          false,
+        )
     }
   }
 

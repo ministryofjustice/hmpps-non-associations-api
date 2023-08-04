@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -14,6 +15,7 @@ import org.springframework.test.context.transaction.TestTransaction
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuditorAwareImpl
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListInclusion
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
@@ -57,23 +59,94 @@ class NonAssociationsRepositoryTest : TestBase() {
     }
   }
 
-  @Test
-  fun findAllByPairOfPrisonerNumber() {
-    repository.saveAll(
-      listOf(
-        nonAssociation("G0022BB", "X0123BB"), // not returned
-        nonAssociation("A1234BC", "D5678EF", closed = true),
-        nonAssociation("A1234BC", "D5678EG"), // not returned
-        nonAssociation("D5678EF", "A1234BC"),
-      ),
-    )
+  @Nested
+  inner class findAnyBetweenPrisonerNumbers() {
+    @Test
+    fun openNonAssociations() {
+      repository.saveAll(
+        listOf(
+          nonAssociation("B0000BB", "A0000AA"), // not returned
+          nonAssociation("A0000AA", "A1111AA"),
+          nonAssociation("A1111AA", "B0000BB"), // not returned
+          nonAssociation("A0000AA", "A2222AA", closed = true), // not returned
+          nonAssociation("A1111AA", "A2222AA"),
+          nonAssociation("B0000BB", "B1111BB"), // not returned
+        ),
+      )
 
-    val nonAssociations = repository.findAllByPairOfPrisonerNumbers("D5678EF" to "A1234BC")
+      val prisonerNumbers = listOf("A0000AA", "A1111AA", "A2222AA")
+      val nonAssociations = repository.findAnyBetweenPrisonerNumbers(prisonerNumbers)
+      assertThat(nonAssociations).hasSize(2)
+      assertThat(nonAssociations).allMatch {
+        prisonerNumbers.contains(it.firstPrisonerNumber) && prisonerNumbers.contains(it.secondPrisonerNumber)
+      }
+      val nonAssociationPairs = nonAssociations.map { listOf(it.firstPrisonerNumber, it.secondPrisonerNumber) }
+      assertThat(nonAssociationPairs).isEqualTo(
+        listOf(
+          listOf("A0000AA", "A1111AA"),
+          listOf("A1111AA", "A2222AA"),
+        ),
+      )
+    }
 
-    assertThat(nonAssociations).hasSize(2)
-    assertThat(nonAssociations).allMatch {
-      (it.firstPrisonerNumber == "D5678EF" && it.secondPrisonerNumber == "A1234BC")
-        .xor(it.firstPrisonerNumber == "A1234BC" && it.secondPrisonerNumber == "D5678EF")
+    @Test
+    fun closedNonAssociations() {
+      repository.saveAll(
+        listOf(
+          nonAssociation("B0000BB", "A0000AA"), // not returned
+          nonAssociation("A0000AA", "A1111AA", closed = true),
+          nonAssociation("A1111AA", "B0000BB"), // not returned
+          nonAssociation("A0000AA", "A2222AA", closed = true),
+          nonAssociation("A1111AA", "A2222AA"), // not returned
+          nonAssociation("B0000BB", "B1111BB", closed = true), // not returned
+          nonAssociation("A0000AA", "A1111AA"), // not returned
+        ),
+      )
+
+      val prisonerNumbers = listOf("A0000AA", "A1111AA", "A2222AA")
+      val nonAssociations = repository.findAnyBetweenPrisonerNumbers(prisonerNumbers, NonAssociationListInclusion.CLOSED_ONLY)
+      assertThat(nonAssociations).hasSize(2)
+      assertThat(nonAssociations).allMatch {
+        prisonerNumbers.contains(it.firstPrisonerNumber) && prisonerNumbers.contains(it.secondPrisonerNumber)
+      }
+      val nonAssociationPairs = nonAssociations.map { listOf(it.firstPrisonerNumber, it.secondPrisonerNumber) }
+      assertThat(nonAssociationPairs).isEqualTo(
+        listOf(
+          listOf("A0000AA", "A1111AA"),
+          listOf("A0000AA", "A2222AA"),
+        ),
+      )
+    }
+
+    @Test
+    fun allNonAssociations() {
+      repository.saveAll(
+        listOf(
+          nonAssociation("B0000BB", "A0000AA"), // not returned
+          nonAssociation("A0000AA", "A1111AA", closed = true),
+          nonAssociation("A1111AA", "B0000BB"), // not returned
+          nonAssociation("A0000AA", "A2222AA", closed = true),
+          nonAssociation("A1111AA", "A2222AA"),
+          nonAssociation("B0000BB", "B1111BB", closed = true), // not returned
+          nonAssociation("A0000AA", "A1111AA"),
+        ),
+      )
+
+      val prisonerNumbers = listOf("A0000AA", "A1111AA", "A2222AA")
+      val nonAssociations = repository.findAnyBetweenPrisonerNumbers(prisonerNumbers, NonAssociationListInclusion.ALL)
+      assertThat(nonAssociations).hasSize(4)
+      assertThat(nonAssociations).allMatch {
+        prisonerNumbers.contains(it.firstPrisonerNumber) && prisonerNumbers.contains(it.secondPrisonerNumber)
+      }
+      val nonAssociationPairs = nonAssociations.map { listOf(it.firstPrisonerNumber, it.secondPrisonerNumber) }
+      assertThat(nonAssociationPairs).isEqualTo(
+        listOf(
+          listOf("A0000AA", "A1111AA"),
+          listOf("A0000AA", "A2222AA"),
+          listOf("A1111AA", "A2222AA"),
+          listOf("A0000AA", "A1111AA"),
+        ),
+      )
     }
   }
 
