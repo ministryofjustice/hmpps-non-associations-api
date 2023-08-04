@@ -102,6 +102,40 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
+    fun `already ready open NA rejects request`() {
+      repository.save(
+        genNonAssociation(
+          firstPrisonerNumber = "D7777XX",
+          secondPrisonerNumber = "C7777XX",
+          createTime = LocalDateTime.now(clock),
+        ),
+      )
+
+      val request = MigrateRequest(
+        firstPrisonerNumber = "C7777XX",
+        firstPrisonerReason = LegacyReason.VIC,
+        secondPrisonerNumber = "D7777XX",
+        secondPrisonerReason = LegacyReason.PER,
+        restrictionType = LegacyRestrictionType.CELL,
+        comment = "This is a comment",
+        authorisedBy = "Test",
+        active = true,
+      )
+
+      webTestClient.post()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_MIGRATE"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isBadRequest
+    }
+
+    @Test
     fun `for a valid request migrates the non-association`() {
       val request = MigrateRequest(
         firstPrisonerNumber = "C7777XX",
@@ -228,6 +262,38 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus()
         .isBadRequest
+    }
+
+    @Test
+    fun `cannot sync non-association already in open state`() {
+      repository.save(
+        genNonAssociation(
+          firstPrisonerNumber = "A7777XX",
+          secondPrisonerNumber = "B7777XX",
+          createTime = LocalDateTime.now(clock),
+        ),
+      )
+      val request = CreateSyncRequest(
+        firstPrisonerNumber = "A7777XX",
+        firstPrisonerReason = LegacyReason.VIC,
+        secondPrisonerNumber = "B7777XX",
+        secondPrisonerReason = LegacyReason.PER,
+        restrictionType = LegacyRestrictionType.CELL,
+        expiryDate = LocalDate.now(clock).minusDays(4),
+        active = true,
+      )
+
+      webTestClient.post()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isBadRequest
     }
 
     @Test

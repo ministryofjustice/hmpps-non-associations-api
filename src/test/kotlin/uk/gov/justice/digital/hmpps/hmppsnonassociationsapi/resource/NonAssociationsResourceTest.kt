@@ -19,6 +19,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchPrisoners
 import java.lang.String.format
 import java.time.Clock
@@ -242,6 +243,92 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           assertThat(nonAssociation.whenCreated).isNotNull()
           assertThat(nonAssociation.whenUpdated).isEqualTo(nonAssociation.whenCreated)
         }
+    }
+
+    @Test
+    fun `cannot create NA for already open NA between same prisoners`() {
+      val firstPrisoner = offenderSearchPrisoners["A1234BC"]!!
+      val secondPrisoner = offenderSearchPrisoners["D5678EF"]!!
+
+      repository.save(
+        genNonAssociation(
+          firstPrisonerNumber = secondPrisoner.prisonerNumber,
+          secondPrisonerNumber = firstPrisoner.prisonerNumber,
+          createTime = LocalDateTime.now(clock),
+        ),
+      )
+
+      val request = createNonAssociationRequest(
+        firstPrisonerNumber = firstPrisoner.prisonerNumber,
+        firstPrisonerRole = Role.VICTIM,
+        secondPrisonerNumber = secondPrisoner.prisonerNumber,
+        secondPrisonerRole = Role.PERPETRATOR,
+        reason = Reason.VIOLENCE,
+        restrictionType = RestrictionType.CELL,
+        comment = "They keep fighting",
+      )
+
+      webTestClient.post()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            user = expectedUsername,
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            scopes = listOf("write", "read"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun `can create NA for already closed NA between same prisoners`() {
+      val firstPrisoner = offenderSearchPrisoners["A1234BC"]!!
+      val secondPrisoner = offenderSearchPrisoners["D5678EF"]!!
+      val prisonerNumbers = listOf(
+        firstPrisoner.prisonerNumber,
+        secondPrisoner.prisonerNumber,
+      )
+      val prisoners = listOf(firstPrisoner, secondPrisoner)
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers,
+        prisoners,
+      )
+
+      repository.save(
+        genNonAssociation(
+          firstPrisonerNumber = firstPrisoner.prisonerNumber,
+          secondPrisonerNumber = secondPrisoner.prisonerNumber,
+          createTime = LocalDateTime.now(clock),
+          closed = true,
+        ),
+      )
+
+      val request = createNonAssociationRequest(
+        firstPrisonerNumber = firstPrisoner.prisonerNumber,
+        firstPrisonerRole = Role.VICTIM,
+        secondPrisonerNumber = secondPrisoner.prisonerNumber,
+        secondPrisonerRole = Role.PERPETRATOR,
+        reason = Reason.VIOLENCE,
+        restrictionType = RestrictionType.CELL,
+        comment = "They keep fighting",
+      )
+
+      webTestClient.post()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            user = expectedUsername,
+            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            scopes = listOf("write", "read"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isCreated
     }
   }
 

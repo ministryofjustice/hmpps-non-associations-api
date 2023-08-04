@@ -168,6 +168,21 @@ class HmppsNonAssociationsApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(OpenNonAssociationAlreadyExistsException::class)
+  fun handleOpenNonAssociationAlreadyExistsException(e: OpenNonAssociationAlreadyExistsException): ResponseEntity<ErrorResponse?>? {
+    log.debug("Non association already exists for these prisoners that is open: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.BAD_REQUEST)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.BAD_REQUEST,
+          errorCode = ErrorCode.OpenNonAssociationAlreadyExist,
+          userMessage = "Non association already exists for these prisoners that is open: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
@@ -182,6 +197,7 @@ class HmppsNonAssociationsApiExceptionHandler {
 enum class ErrorCode(val errorCode: Int) {
   NonAssociationAlreadyClosed(100),
   UserInContextMissing(401),
+  OpenNonAssociationAlreadyExist(101),
 }
 
 @Schema(description = "Error response")
@@ -210,3 +226,5 @@ data class ErrorResponse(
 class NonAssociationAlreadyClosedException(id: Long) : Exception("Non-association [ID=$id] already closed")
 
 class UserInContextMissingException() : Exception("There is no user in context for this request")
+
+class OpenNonAssociationAlreadyExistsException(prisoners: List<String>) : Exception("Prisoners [$prisoners] already have open non-associations")

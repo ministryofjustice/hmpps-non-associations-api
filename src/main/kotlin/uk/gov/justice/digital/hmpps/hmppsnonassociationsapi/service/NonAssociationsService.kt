@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.FeatureFlagsConfig
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationAlreadyClosedException
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.OpenNonAssociationAlreadyExistsException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.UserInContextMissingException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
@@ -48,12 +49,16 @@ class NonAssociationsService(
   }
 
   fun createNonAssociation(createNonAssociationRequest: CreateNonAssociationRequest): NonAssociationDTO {
-    offenderSearch.searchByPrisonerNumbers(
-      listOf(
-        createNonAssociationRequest.firstPrisonerNumber,
-        createNonAssociationRequest.secondPrisonerNumber,
-      ),
+    val prisonersToKeepApart = listOf(
+      createNonAssociationRequest.firstPrisonerNumber,
+      createNonAssociationRequest.secondPrisonerNumber,
     )
+
+    if (nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonersToKeepApart).isNotEmpty()) {
+      throw OpenNonAssociationAlreadyExistsException(prisonersToKeepApart)
+    }
+
+    offenderSearch.searchByPrisonerNumbers(prisonersToKeepApart)
 
     val nonAssociationJpa = createNonAssociationRequest.toNewEntity(
       authorisedBy = authenticationFacade.currentUsername
