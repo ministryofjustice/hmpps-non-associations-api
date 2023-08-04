@@ -15,6 +15,8 @@ data class LegacyNonAssociationDetails(
   val firstName: String,
   @Schema(description = "Last name", required = true, example = "Hall")
   val lastName: String,
+  @Schema(description = "Prison ID where prisoner resides or OUT for released", required = true, example = "MDI")
+  val agencyId: String,
   @Schema(description = "Description of the agency (e.g. prison) the offender is assigned to", required = true, example = "Moorland (HMP & YOI)")
   val agencyDescription: String,
   @Schema(description = "Description of living unit (e.g. cell) the offender is assigned to.", required = false, example = "MDI-1-1-3")
@@ -35,9 +37,9 @@ data class LegacyNonAssociation(
   val typeCode: LegacyRestrictionType,
   @Schema(description = "The non-association type description", required = true, example = "Do Not Locate on Same Wing")
   val typeDescription: String,
-  @Schema(description = "Date and time the non-association is effective from. In Europe/London (ISO 8601) format without timezone offset e.g. YYYY-MM-DDTHH:MM:SS.", required = true, example = "2021-07-05T10:35:17")
+  @Schema(description = "Date and time the non-association is effective from. In Europe/London (ISO 8601) format without timezone offset e.g. YYYY-MM-DDTHH:MM:SS.", required = true, example = "2021-07-05T00:00:00")
   val effectiveDate: LocalDateTime,
-  @Schema(description = "Date and time the non-association expires. In Europe/London (ISO 8601) format without timezone offset e.g. YYYY-MM-DDTHH:MM:SS.", required = false, example = "2021-07-05T10:35:17")
+  @Schema(description = "Date and time the non-association expires. In Europe/London (ISO 8601) format without timezone offset e.g. YYYY-MM-DDTHH:MM:SS.", required = false, example = "2021-07-05T00:00:00")
   val expiryDate: LocalDateTime?,
   @Schema(description = "The person who authorised the non-association (free text).", required = false, example = "Officer Alice B.")
   val authorisedBy: String?,
@@ -61,6 +63,8 @@ data class LegacyOffenderNonAssociation(
   val reasonCode: LegacyReason,
   @Schema(description = "Reason for the non-association", required = true, example = "Perpetrator")
   val reasonDescription: String,
+  @Schema(description = "Prison ID where prisoner resides or OUT for released", required = true, example = "MDI")
+  val agencyId: String,
   @Schema(description = "Description of the agency (e.g. prison) the offender is assigned to", required = true, example = "Moorland (HMP & YOI)")
   val agencyDescription: String,
   @Schema(description = "Description of living unit (e.g. cell) the offender is assigned to.", required = false, example = "MDI-2-3-4")
