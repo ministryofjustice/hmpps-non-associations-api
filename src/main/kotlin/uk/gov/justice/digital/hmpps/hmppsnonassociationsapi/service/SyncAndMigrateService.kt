@@ -6,11 +6,13 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.OpenNonAssociationAlreadyExistsException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateSyncRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.MigrateRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.UpdateSyncRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAnyBetweenPrisonerNumbers
 
 @Service
 @Transactional
@@ -23,6 +25,15 @@ class SyncAndMigrateService(
   }
 
   fun syncCreate(createSyncRequest: CreateSyncRequest): NonAssociation {
+    if (createSyncRequest.active) {
+      val prisonersToKeepApart = listOf(
+        createSyncRequest.firstPrisonerNumber,
+        createSyncRequest.secondPrisonerNumber,
+      )
+      if (nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonersToKeepApart).isNotEmpty()) {
+        throw OpenNonAssociationAlreadyExistsException(prisonersToKeepApart)
+      }
+    }
     return nonAssociationsRepository.save(createSyncRequest.toNewEntity()).toDto().also {
       log.info("Created Non-association [$createSyncRequest]")
       telemetryClient.trackEvent(
@@ -83,6 +94,16 @@ class SyncAndMigrateService(
   }
 
   fun migrate(migrateRequest: MigrateRequest): NonAssociation {
+    if (migrateRequest.active) {
+      val prisonersToKeepApart = listOf(
+        migrateRequest.firstPrisonerNumber,
+        migrateRequest.secondPrisonerNumber,
+      )
+      if (nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonersToKeepApart).isNotEmpty()) {
+        throw OpenNonAssociationAlreadyExistsException(prisonersToKeepApart)
+      }
+    }
+
     return nonAssociationsRepository.save(migrateRequest.toNewEntity()).toDto().also {
       log.info("Migrated Non-association [$migrateRequest]")
       telemetryClient.trackEvent(
