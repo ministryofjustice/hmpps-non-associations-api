@@ -22,6 +22,7 @@ class LegacyResourceTest : SqsIntegrationTestBase() {
       offenderNo = prisonerNumber,
       firstName = "James",
       lastName = "Hall",
+      agencyId = "MDI",
       agencyDescription = "Moorland (HMP & YOI)",
       assignedLivingUnitDescription = "MDI-1-1-3",
       nonAssociations = listOf(
@@ -40,6 +41,7 @@ class LegacyResourceTest : SqsIntegrationTestBase() {
             lastName = "Bloggs",
             reasonCode = LegacyReason.PER,
             reasonDescription = "Perpetrator",
+            agencyId = "MDI",
             agencyDescription = "Moorland (HMP & YOI)",
             assignedLivingUnitDescription = "MDI-2-3-4",
           ),
