@@ -1004,7 +1004,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     fun `without the correct role and scope responds 403 Forbidden`() {
       val request = DeleteNonAssociationRequest(
         deletionReason = "Raised in Error",
-        staffMemberRequestingDeletion = "John A Barnes",
+        staffUserNameRequestingDeletion = "JBarnes",
       )
 
       // correct role, missing write scope
@@ -1074,7 +1074,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           ),
         )
         .header("Content-Type", "text/plain")
-        .bodyValue(jsonString("staffMemberRequestingDeletion" to "TEST"))
+        .bodyValue(jsonString("staffUserNameRequestingDeletion" to "TEST"))
         .exchange()
         .expectStatus()
         .isBadRequest
@@ -1082,7 +1082,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `for a valid request deletes the non-association`() {
-      val request = mapOf("deletionReason" to "Raised in error, please remove", "staffMemberRequestingDeletion" to "A Test Staff Member")
+      val request = mapOf("deletionReason" to "Raised in error, please remove", "staffUserNameRequestingDeletion" to "A Test Staff Member")
 
       webTestClient.post()
         .uri(format(url, nonAssociation.id))

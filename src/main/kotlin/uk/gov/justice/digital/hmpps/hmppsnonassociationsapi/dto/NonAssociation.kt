@@ -128,8 +128,8 @@ data class CloseNonAssociationRequest(
 data class DeleteNonAssociationRequest(
   @Schema(description = "Reason for deleting the non-association", required = true, example = "Created in error and removed on requested from OMU team")
   val deletionReason: String,
-  @Schema(description = "The name of the member of staff requesting the deletion", required = true, example = "Andrew Jones")
-  val staffMemberRequestingDeletion: String,
+  @Schema(description = "The username of the member of staff requesting the deletion", required = true, example = "AJONES")
+  val staffUserNameRequestingDeletion: String,
 )
 
 fun NonAssociationJPA.updateWith(patch: PatchNonAssociationRequest): NonAssociationJPA {
