@@ -15,7 +15,7 @@ class EventPublishService(
   private val clock: Clock,
 ) {
 
-  fun publishEvent(event: NonAssociationDomainEventType, nonAssociation: NonAssociation) {
+  fun publishEvent(event: NonAssociationDomainEventType, nonAssociation: NonAssociation, auditData: Any) {
     snsService.publishDomainEvent(
       event,
       "${event.description} ${nonAssociation.id}",
@@ -30,7 +30,7 @@ class EventPublishService(
     auditService.sendMessage(
       event.auditType,
       nonAssociation.id.toString(),
-      nonAssociation,
+      auditData,
     )
   }
 }

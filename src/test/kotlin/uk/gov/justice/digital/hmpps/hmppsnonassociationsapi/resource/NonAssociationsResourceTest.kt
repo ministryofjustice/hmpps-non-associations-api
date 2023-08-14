@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.reactive.server.returnResult
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
@@ -975,6 +976,129 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(jsonString(request))
         .exchange()
         .expectStatus().isEqualTo(409)
+    }
+  }
+
+  @Nested
+  inner class `Delete a non-association` {
+
+    private lateinit var nonAssociation: NonAssociationJPA
+    private lateinit var url: String
+
+    @BeforeEach
+    fun setUp() {
+      nonAssociation = createNonAssociation()
+      url = "/non-associations/%d/delete"
+    }
+
+    @Test
+    fun `without a valid token responds 401 Unauthorized`() {
+      webTestClient.post()
+        .uri(format(url, nonAssociation.id))
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `without the correct role and scope responds 403 Forbidden`() {
+      val request = DeleteNonAssociationRequest(
+        deletionReason = "Raised in Error",
+        staffUserNameRequestingDeletion = "JBarnes",
+      )
+
+      // correct role, missing write scope
+      webTestClient.post()
+        .uri(format(url, nonAssociation.id))
+        .headers(setAuthorisation(roles = listOf("ROLE_DELETE_NON_ASSOCIATIONS")))
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+
+      // correct role, missing write scope
+      webTestClient.post()
+        .uri(format(url, nonAssociation.id))
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_DELETE_NON_ASSOCIATIONS"),
+            scopes = listOf("read"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `without a valid request body responds 400 Bad Request`() {
+      // no request body
+      webTestClient.post()
+        .uri(format(url, nonAssociation.id))
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_DELETE_NON_ASSOCIATIONS"),
+            scopes = listOf("write"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+
+      // unsupported Content-Type
+      webTestClient.post()
+        .uri(format(url, nonAssociation.id))
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_DELETE_NON_ASSOCIATIONS"),
+            scopes = listOf("write"),
+          ),
+        )
+        .header("Content-Type", "text/plain")
+        .bodyValue("{}")
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+
+      // request body has invalid fields
+      webTestClient.post()
+        .uri(format(url, nonAssociation.id))
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_DELETE_NON_ASSOCIATIONS"),
+            scopes = listOf("write"),
+          ),
+        )
+        .header("Content-Type", "text/plain")
+        .bodyValue(jsonString("staffUserNameRequestingDeletion" to "TEST"))
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+    }
+
+    @Test
+    fun `for a valid request deletes the non-association`() {
+      val request = mapOf("deletionReason" to "Raised in error, please remove", "staffUserNameRequestingDeletion" to "A Test Staff Member")
+
+      webTestClient.post()
+        .uri(format(url, nonAssociation.id))
+        .headers(
+          setAuthorisation(
+            user = expectedUsername,
+            roles = listOf("ROLE_DELETE_NON_ASSOCIATIONS"),
+            scopes = listOf("write", "read"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isNoContent
+
+      assertThat(repository.findById(nonAssociation.id!!)).isEmpty
     }
   }
 

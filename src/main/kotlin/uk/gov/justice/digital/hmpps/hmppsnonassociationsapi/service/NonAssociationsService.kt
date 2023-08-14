@@ -14,6 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.OpenNonAssoci
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.UserInContextMissingException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListInclusion
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListOptions
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
@@ -123,6 +124,18 @@ class NonAssociationsService(
     )
 
     log.info("Closed Non-association [$id]")
+    return nonAssociation.toDto()
+  }
+
+  fun deleteNonAssociation(id: Long, deleteRequest: DeleteNonAssociationRequest): NonAssociationDTO {
+    val nonAssociation = nonAssociationsRepository.findById(id).getOrNull() ?: throw ResponseStatusException(
+      HttpStatus.NOT_FOUND,
+      "Non-association with ID $id not found",
+    )
+
+    nonAssociationsRepository.delete(nonAssociation)
+
+    log.info("Deleted Non-association [$id]")
     return nonAssociation.toDto()
   }
 
