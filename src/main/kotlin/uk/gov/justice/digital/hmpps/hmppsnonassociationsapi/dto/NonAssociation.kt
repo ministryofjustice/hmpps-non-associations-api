@@ -121,6 +121,17 @@ data class CloseNonAssociationRequest(
   val staffMemberRequestingClosure: String? = null,
 )
 
+/**
+ * Request format to delete a non-association between two prisoners
+ */
+@Schema(description = "Request to delete a non-association")
+data class DeleteNonAssociationRequest(
+  @Schema(description = "Reason for deleting the non-association", required = true, example = "Created in error and removed on requested from OMU team")
+  val deletionReason: String,
+  @Schema(description = "The name of the member of staff requesting the deletion", required = true, example = "Andrew Jones")
+  val staffMemberRequestingDeletion: String,
+)
+
 fun NonAssociationJPA.updateWith(patch: PatchNonAssociationRequest): NonAssociationJPA {
   this.firstPrisonerRole = patch.firstPrisonerRole ?: this.firstPrisonerRole
   this.secondPrisonerRole = patch.secondPrisonerRole ?: this.secondPrisonerRole

@@ -25,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListInclusion
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListOptions
@@ -374,4 +375,45 @@ class NonAssociationsResource(
     eventPublishWrapper(NonAssociationDomainEventType.NON_ASSOCIATION_CLOSED) {
       nonAssociationsService.closeNonAssociation(id, closeNonAssociationRequest)
     }
+
+  @PostMapping("/non-associations/{id}/delete")
+  @PreAuthorize("hasRole('ROLE_DELETE_NON_ASSOCIATIONS') and hasAuthority('SCOPE_write')")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @Operation(
+    summary = "Delete a non-association",
+    description = "Requires DELETE_NON_ASSOCIATIONS role with write scope.",
+    responses = [
+      ApiResponse(
+        responseCode = "204",
+        description = "Non association deleted",
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Missing required role. Requires the DELETE_NON_ASSOCIATIONS role with write scope.",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Non-association not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun deleteNonAssociation(
+    @Schema(description = "The non-association ID", example = "42", required = true)
+    @PathVariable
+    id: Long,
+    @RequestBody
+    @Validated
+    deleteNonAssociationRequest: DeleteNonAssociationRequest,
+  ) {
+    eventPublishWrapperAudit(NonAssociationDomainEventType.NON_ASSOCIATION_DELETED) {
+      Pair(nonAssociationsService.deleteNonAssociation(id, deleteNonAssociationRequest), deleteNonAssociationRequest)
+    }
+  }
 }

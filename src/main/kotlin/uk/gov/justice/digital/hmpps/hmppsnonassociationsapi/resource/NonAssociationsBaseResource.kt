@@ -11,5 +11,8 @@ abstract class NonAssociationsBaseResource {
   private lateinit var eventPublishService: EventPublishService
 
   protected fun eventPublishWrapper(event: NonAssociationDomainEventType, function: () -> NonAssociation) =
-    function().also { eventPublishService.publishEvent(event, it) }
+    function().also { eventPublishService.publishEvent(event, it, it) }
+
+  protected fun eventPublishWrapperAudit(event: NonAssociationDomainEventType, function: () -> Pair<NonAssociation, Any>) =
+    function().also { eventPublishService.publishEvent(event, it.first, it.second) }
 }

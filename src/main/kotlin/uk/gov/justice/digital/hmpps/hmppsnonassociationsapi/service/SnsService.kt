@@ -92,6 +92,7 @@ enum class NonAssociationDomainEventType(val value: String, val description: Str
   NON_ASSOCIATION_CREATED("non-associations.created", "A non-association has been created: ", AuditType.NON_ASSOCIATION_CREATED),
   NON_ASSOCIATION_UPSERT("non-associations.amended", "A non-association has been amended: ", AuditType.NON_ASSOCIATION_UPDATED),
   NON_ASSOCIATION_CLOSED("non-associations.closed", "A non-association has been closed: ", AuditType.NON_ASSOCIATION_CLOSED),
+  NON_ASSOCIATION_DELETED("non-associations.deleted", "A non-association has been deleted: ", AuditType.NON_ASSOCIATION_DELETED),
 }
 
 fun Instant.toOffsetDateFormat(): String =
