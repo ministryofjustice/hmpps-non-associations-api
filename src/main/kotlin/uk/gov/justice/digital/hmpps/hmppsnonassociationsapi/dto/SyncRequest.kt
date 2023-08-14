@@ -12,7 +12,7 @@ data class CreateSyncRequest(
   @Schema(
     description = "Reason why this prisoner should be kept apart from the other",
     required = true,
-    example = "VICTIM",
+    example = "VIC",
   )
   val firstPrisonerReason: LegacyReason,
   @Schema(description = "Prisoner number to not associate", required = true, example = "D5678EF")
@@ -20,7 +20,7 @@ data class CreateSyncRequest(
   @Schema(
     description = "Reason why this prisoner should be kept apart from the other",
     required = true,
-    example = "PERPETRATOR",
+    example = "PER",
   )
   val secondPrisonerReason: LegacyReason,
 
@@ -53,7 +53,7 @@ data class CreateSyncRequest(
       firstPrisonerRole = firstPrisonerReason.toRole(),
       secondPrisonerNumber = secondPrisonerNumber,
       secondPrisonerRole = secondPrisonerReason.toRole(),
-      reason = Reason.OTHER, // TODO: what's the "default" reason?
+      reason = translateToReason(firstPrisonerReason, secondPrisonerReason),
       restrictionType = restrictionType.toRestrictionType(),
       comment = comment ?: "No comment provided", // TODO: can we have a better message?
       authorisedBy = authorisedBy,
@@ -79,14 +79,14 @@ data class UpdateSyncRequest(
   @Schema(
     description = "Reason why this prisoner should be kept apart from the other",
     required = true,
-    example = "VICTIM",
+    example = "VIC",
   )
   val firstPrisonerReason: LegacyReason,
 
   @Schema(
     description = "Reason why this prisoner should be kept apart from the other",
     required = true,
-    example = "PERPETRATOR",
+    example = "PER",
   )
   val secondPrisonerReason: LegacyReason,
 

@@ -11,6 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateSyncReques
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.MigrateRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.UpdateSyncRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.translateToReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAnyBetweenPrisonerNumbers
 
@@ -52,6 +53,7 @@ class SyncAndMigrateService(
       restrictionType = updateSyncRequest.restrictionType.toRestrictionType()
       firstPrisonerRole = updateSyncRequest.firstPrisonerReason.toRole()
       secondPrisonerRole = updateSyncRequest.secondPrisonerReason.toRole()
+      reason = translateToReason(updateSyncRequest.firstPrisonerReason, updateSyncRequest.secondPrisonerReason)
       // TODO: can we have a better fall back message?
       comment = updateSyncRequest.comment ?: "No comment provided"
       authorisedBy = updateSyncRequest.authorisedBy
@@ -63,7 +65,7 @@ class SyncAndMigrateService(
       } else {
         if (closedReason == null) {
           // TODO: can we have a better message?
-          closedReason = "UNDEFINED"
+          closedReason = "No closure reason provided"
         }
         if (closedBy == null) {
           // TODO: perhaps system user would be more appropriate here

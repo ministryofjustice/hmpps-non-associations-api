@@ -53,7 +53,7 @@ data class MigrateRequest(
       firstPrisonerRole = firstPrisonerReason.toRole(),
       secondPrisonerNumber = secondPrisonerNumber,
       secondPrisonerRole = secondPrisonerReason.toRole(),
-      reason = Reason.OTHER, // TODO: what's the "default" reason?
+      reason = translateToReason(firstPrisonerReason, secondPrisonerReason),
       restrictionType = restrictionType.toRestrictionType(),
       comment = comment ?: "",
       authorisedBy = authorisedBy,

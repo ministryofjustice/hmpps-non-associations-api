@@ -24,4 +24,21 @@ enum class LegacyReason(val description: String) {
     BUL -> Role.UNKNOWN
     RIV -> Role.UNKNOWN
   }
+
+  fun toReason() =
+    when (this) {
+      BUL -> Reason.BULLYING
+      PER -> Reason.OTHER
+      RIV -> Reason.GANG_RELATED
+      VIC -> Reason.OTHER
+      NOT_RELEVANT -> Reason.OTHER
+      UNKNOWN -> Reason.OTHER
+    }
 }
+
+fun translateToReason(firstPrisonerReason: LegacyReason, secondPrisonerReason: LegacyReason) =
+  if (firstPrisonerReason.toReason() == Reason.OTHER) {
+    secondPrisonerReason.toReason()
+  } else {
+    firstPrisonerReason.toReason()
+  }
