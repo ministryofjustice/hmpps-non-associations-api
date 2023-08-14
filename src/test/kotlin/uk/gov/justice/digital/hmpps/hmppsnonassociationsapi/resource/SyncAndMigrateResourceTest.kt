@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateSyncReques
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyRestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.MigrateRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.UpdateSyncRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
@@ -141,7 +142,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         firstPrisonerNumber = "C7777XX",
         firstPrisonerReason = LegacyReason.VIC,
         secondPrisonerNumber = "D7777XX",
-        secondPrisonerReason = LegacyReason.PER,
+        secondPrisonerReason = LegacyReason.BUL,
         restrictionType = LegacyRestrictionType.CELL,
         comment = "This is a comment",
         authorisedBy = "Test",
@@ -156,7 +157,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "firstPrisonerRole": "${request.firstPrisonerReason.toRole()}",
           "secondPrisonerNumber": "${request.secondPrisonerNumber}",
           "secondPrisonerRole": "${request.secondPrisonerReason.toRole()}",
-          "reason": "OTHER",
+          "reason": "${Reason.BULLYING}",
           "restrictionType": "${request.restrictionType.toRestrictionType()}",
           "comment": "${request.comment}",
           "authorisedBy": "${request.authorisedBy}",
@@ -355,8 +356,8 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
 
       val request = UpdateSyncRequest(
         id = naUpdate.id!!,
-        firstPrisonerReason = LegacyReason.PER,
-        secondPrisonerReason = LegacyReason.VIC,
+        firstPrisonerReason = LegacyReason.RIV,
+        secondPrisonerReason = LegacyReason.BUL,
         restrictionType = LegacyRestrictionType.WING,
         expiryDate = LocalDate.now(clock),
         active = false,
@@ -374,13 +375,13 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "firstPrisonerRole": "${request.firstPrisonerReason.toRole()}",
           "secondPrisonerNumber": "D1234AA",
           "secondPrisonerRole": "${request.secondPrisonerReason.toRole()}",
-          "reason": "BULLYING",
+          "reason": "GANG_RELATED",
           "restrictionType": "${request.restrictionType.toRestrictionType()}",
           "comment": "${request.comment}",
           "authorisedBy": "${request.authorisedBy}",
           "updatedBy": "$expectedUsername",
           "isClosed": true,
-          "closedReason": "UNDEFINED",
+          "closedReason": "No closure reason provided",
           "closedBy": "TEST",
           "closedAt": "${request.expiryDate?.atStartOfDay()?.format(dtFormat)}"
         }
@@ -417,7 +418,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
       val request = UpdateSyncRequest(
         id = naUpdate.id!!,
         firstPrisonerReason = LegacyReason.PER,
-        secondPrisonerReason = LegacyReason.VIC,
+        secondPrisonerReason = LegacyReason.BUL,
         restrictionType = LegacyRestrictionType.WING,
         expiryDate = LocalDate.now(clock),
         active = true,
