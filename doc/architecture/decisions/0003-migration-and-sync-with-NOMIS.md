@@ -1,4 +1,4 @@
-# 1. Non Associations Data Design
+# 1. Non-associations Data Design
 
 [Next >>](0004-migration-and-sync-with-NOMIS.md)
 
@@ -17,7 +17,7 @@ This document will cover the data structures needed to record non-association da
 
 ```mermaid
 ---
-title: Non Associations Class Diagram
+title: Non-associations Class Diagram
 ---
 classDiagram
     direction TB
