@@ -26,7 +26,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchP
 import java.lang.String.format
 import java.time.Clock
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
 // language=text
@@ -570,8 +569,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     fun `when a closed non-association exists returns it`() {
       val nonAssociation = createNonAssociation(isClosed = true)
 
-      val dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-
       webTestClient.get()
         .uri("/legacy/api/non-associations/${nonAssociation.id}")
         .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC")))
@@ -605,8 +602,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
   @Nested
   inner class `Get legacy non-associations list` {
-
-    private lateinit var dtFormat: DateTimeFormatter
     private lateinit var prisonerJohn: OffenderSearchPrisoner
     private lateinit var prisonerMerlin: OffenderSearchPrisoner
     private lateinit var prisonerJosh: OffenderSearchPrisoner
@@ -660,8 +655,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
         prisoners,
       )
-
-      dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
     }
 
     @Test

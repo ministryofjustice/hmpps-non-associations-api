@@ -15,7 +15,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsInteg
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @WithMockUser(username = expectedUsername)
 class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
@@ -313,7 +312,6 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         active = false,
       )
 
-      val dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
       val expectedResponse =
         // language=json
         """
@@ -373,7 +371,6 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         authorisedBy = "TEST",
       )
 
-      val dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
       val expectedResponse =
         // language=json
         """

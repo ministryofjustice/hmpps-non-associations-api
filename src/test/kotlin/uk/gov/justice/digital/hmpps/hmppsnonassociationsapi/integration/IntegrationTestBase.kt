@@ -18,6 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.OffenderSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.PrisonApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
+import java.time.format.DateTimeFormatter
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 abstract class IntegrationTestBase : TestBase() {
@@ -65,6 +66,8 @@ abstract class IntegrationTestBase : TestBase() {
       prisonApiMockServer.stop()
       hmppsAuthMockServer.stop()
     }
+
+    val dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
   }
 
   @BeforeEach
