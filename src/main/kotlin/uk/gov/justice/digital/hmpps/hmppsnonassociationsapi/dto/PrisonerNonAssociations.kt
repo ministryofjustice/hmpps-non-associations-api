@@ -6,12 +6,9 @@ import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
 /**
- * Non-associations for a given prisoner
- *
- * TODO: This is WIP at the moment. It may share some similarities with the
- * format currently returned by NOMIS/Prison API but it's a distinct type
- * and will likely differ.
+ * A list of non-associations for a given prisoner
  */
+@Schema(description = "List of non-associations for a given prisoner")
 data class PrisonerNonAssociations(
   @Schema(description = "Prisoner number", required = true, example = "A1234BC")
   val prisonerNumber: String,
@@ -34,8 +31,9 @@ data class PrisonerNonAssociations(
 )
 
 /**
- * Details about a single non-association and link to the other prisoner involved
+ * Details about a single non-association in a list and link to the other prisoner involved
  */
+@Schema(description = "An item in a list of non-associations for a given prisoner")
 data class PrisonerNonAssociation(
   @Schema(description = "ID of the non-association", required = true, example = "42")
   val id: Long,
@@ -83,6 +81,7 @@ data class PrisonerNonAssociation(
 /**
  * Details about the other prisoner to non-associate with
  */
+@Schema(description = "Other prisoner’s details for an item in a list of non-associations")
 data class OtherPrisonerDetails(
   @Schema(description = "Prisoner number", required = true, example = "D5678EF")
   val prisonerNumber: String,
