@@ -23,6 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.Legacy
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociationDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyOffenderNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.toPrisonerNonAssociations
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.translateFromRolesAndReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.updateWith
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAllByPrisonerNumber
@@ -211,9 +212,10 @@ private fun PrisonerNonAssociations.toLegacy() =
     agencyDescription = this.prisonName,
     assignedLivingUnitDescription = this.cellLocation,
     nonAssociations = this.nonAssociations.map {
+      val (reason, otherReason) = translateFromRolesAndReason(it.role, it.otherPrisonerDetails.role, it.reason)
       LegacyNonAssociation(
-        reasonCode = it.role.toLegacyRole(),
-        reasonDescription = it.role.toLegacyRole().description,
+        reasonCode = reason,
+        reasonDescription = reason.description,
         typeCode = it.restrictionType.toLegacyRestrictionType(),
         typeDescription = it.restrictionType.toLegacyRestrictionType().description,
         effectiveDate = it.whenCreated,
@@ -224,8 +226,8 @@ private fun PrisonerNonAssociations.toLegacy() =
           offenderNo = it.otherPrisonerDetails.prisonerNumber,
           firstName = it.otherPrisonerDetails.firstName,
           lastName = it.otherPrisonerDetails.lastName,
-          reasonCode = it.otherPrisonerDetails.role.toLegacyRole(),
-          reasonDescription = it.otherPrisonerDetails.role.toLegacyRole().description,
+          reasonCode = otherReason,
+          reasonDescription = otherReason.description,
           agencyId = it.otherPrisonerDetails.prisonId,
           agencyDescription = it.otherPrisonerDetails.prisonName,
           assignedLivingUnitDescription = it.otherPrisonerDetails.cellLocation,

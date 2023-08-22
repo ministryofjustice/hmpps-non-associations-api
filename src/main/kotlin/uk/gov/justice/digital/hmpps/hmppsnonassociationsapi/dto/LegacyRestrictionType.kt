@@ -9,6 +9,8 @@ enum class LegacyRestrictionType(val description: String) {
   CELL("Do Not Locate in Same Cell"),
   LAND("Do Not Locate on Same Landing"),
   NONEX("Do Not Exercise Together"),
+
+  // following legacy restriction types do not have "modern" counterpart
   TNA("Total Non Association"),
   WING("Do Not Locate on Same Wing"),
   ;
