@@ -4,11 +4,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.ActiveProfiles
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyOtherPrisonerDetails
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyPrisonerNonAssociation
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyPrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyRestrictionType
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociation
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociationDetails
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyOffenderNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import java.time.LocalDateTime
 
@@ -18,7 +18,7 @@ class LegacyResourceTest : SqsIntegrationTestBase() {
   final val prisonerNumber = "A1234BC"
 
   val nonAssociationDetails =
-    LegacyNonAssociationDetails(
+    LegacyPrisonerNonAssociations(
       offenderNo = prisonerNumber,
       firstName = "James",
       lastName = "Hall",
@@ -26,7 +26,7 @@ class LegacyResourceTest : SqsIntegrationTestBase() {
       agencyDescription = "Moorland (HMP & YOI)",
       assignedLivingUnitDescription = "MDI-1-1-3",
       nonAssociations = listOf(
-        LegacyNonAssociation(
+        LegacyPrisonerNonAssociation(
           reasonCode = LegacyReason.VIC,
           reasonDescription = "Victim",
           typeCode = LegacyRestrictionType.WING,
@@ -35,7 +35,7 @@ class LegacyResourceTest : SqsIntegrationTestBase() {
           expiryDate = LocalDateTime.parse("2021-07-05T10:35:17"),
           authorisedBy = "Officer Alice B.",
           comments = "Mr. Bloggs assaulted Mr. Hall",
-          offenderNonAssociation = LegacyOffenderNonAssociation(
+          offenderNonAssociation = LegacyOtherPrisonerDetails(
             offenderNo = "B1234CD",
             firstName = "Joseph",
             lastName = "Bloggs",

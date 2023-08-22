@@ -15,13 +15,13 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.UserInContext
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyOtherPrisonerDetails
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyPrisonerNonAssociation
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyPrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListInclusion
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListOptions
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociation
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociationDetails
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyOffenderNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.toPrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.translateFromRolesAndReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.updateWith
@@ -185,7 +185,7 @@ class NonAssociationsService(
     prisonerNumber: String,
     currentPrisonOnly: Boolean = true,
     excludeInactive: Boolean = true,
-  ): LegacyNonAssociationDetails {
+  ): LegacyPrisonerNonAssociations {
     return when (featureFlagsConfig.legacyEndpointNomisSourceOfTruth) {
       true -> prisonApiService.getNonAssociationDetails(prisonerNumber, currentPrisonOnly, excludeInactive)
       false -> {
@@ -204,7 +204,7 @@ class NonAssociationsService(
 }
 
 private fun PrisonerNonAssociations.toLegacy() =
-  LegacyNonAssociationDetails(
+  LegacyPrisonerNonAssociations(
     offenderNo = this.prisonerNumber,
     firstName = this.firstName,
     lastName = this.lastName,
@@ -213,7 +213,7 @@ private fun PrisonerNonAssociations.toLegacy() =
     assignedLivingUnitDescription = this.cellLocation,
     nonAssociations = this.nonAssociations.map {
       val (reason, otherReason) = translateFromRolesAndReason(it.role, it.otherPrisonerDetails.role, it.reason)
-      LegacyNonAssociation(
+      LegacyPrisonerNonAssociation(
         reasonCode = reason,
         reasonDescription = reason.description,
         typeCode = it.restrictionType.toLegacyRestrictionType(),
@@ -222,7 +222,7 @@ private fun PrisonerNonAssociations.toLegacy() =
         expiryDate = it.closedAt,
         authorisedBy = it.authorisedBy,
         comments = it.comment,
-        offenderNonAssociation = LegacyOffenderNonAssociation(
+        offenderNonAssociation = LegacyOtherPrisonerDetails(
           offenderNo = it.otherPrisonerDetails.prisonerNumber,
           firstName = it.otherPrisonerDetails.firstName,
           lastName = it.otherPrisonerDetails.lastName,

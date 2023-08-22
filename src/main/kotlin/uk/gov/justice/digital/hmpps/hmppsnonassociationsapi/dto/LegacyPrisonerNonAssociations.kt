@@ -1,14 +1,12 @@
-package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi
+package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyReason
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyRestrictionType
 import java.time.LocalDateTime
 
 /**
- * Top-level type for non-association details returned by Prison API
+ * A list of non-associations for a given prisoner (in NOMIS/Prison API format)
  */
-data class LegacyNonAssociationDetails(
+data class LegacyPrisonerNonAssociations(
   @Schema(description = "Prisoner number", required = true, example = "A1234BC")
   val offenderNo: String,
   @Schema(description = "First name", required = true, example = "James")
@@ -22,13 +20,13 @@ data class LegacyNonAssociationDetails(
   @Schema(description = "Description of living unit (e.g. cell) the offender is assigned to.", required = false, example = "MDI-1-1-3")
   val assignedLivingUnitDescription: String?,
   @Schema(description = "Non-associations with other prisoners", required = true)
-  val nonAssociations: List<LegacyNonAssociation>,
+  val nonAssociations: List<LegacyPrisonerNonAssociation>,
 )
 
 /**
- * Prison API format for a single non-association
+ * Details about a single non-association in a list and link to the other prisoner involved (in NOMIS/Prison API format)
  */
-data class LegacyNonAssociation(
+data class LegacyPrisonerNonAssociation(
   @Schema(description = "Reason code for the non-association", required = true, example = "VIC")
   val reasonCode: LegacyReason,
   @Schema(description = "Reason for the non-association", required = true, example = "Victim")
@@ -46,13 +44,13 @@ data class LegacyNonAssociation(
   @Schema(description = "Additional free text comments related to the non-association.", required = false, example = "Mr. Bloggs assaulted Mr. Hall")
   val comments: String?,
   @Schema(description = "Details about the other non-association person.", required = true)
-  val offenderNonAssociation: LegacyOffenderNonAssociation,
+  val offenderNonAssociation: LegacyOtherPrisonerDetails,
 )
 
 /**
- * Prison API format containing the details of the other side of the non-association relation
+ * Details about the other prisoner to non-associate with (in NOMIS/Prison API format)
  */
-data class LegacyOffenderNonAssociation(
+data class LegacyOtherPrisonerDetails(
   @Schema(description = "Prisoner number", required = true, example = "B1234CD")
   val offenderNo: String,
   @Schema(description = "First name", required = true, example = "Joseph")

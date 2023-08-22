@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociationDetails
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyPrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
 
 @RestController
@@ -71,7 +71,7 @@ class LegacyResource(
     )
     @RequestParam(value = "excludeInactive", required = false, defaultValue = "false")
     excludeInactive: Boolean,
-  ): LegacyNonAssociationDetails {
+  ): LegacyPrisonerNonAssociations {
     return nonAssociationsService.getLegacyDetails(prisonerNumber, currentPrisonOnly, excludeInactive)
   }
 }
