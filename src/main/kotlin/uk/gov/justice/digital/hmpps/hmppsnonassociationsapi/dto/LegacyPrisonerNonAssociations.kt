@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 /**
  * A list of non-associations for a given prisoner (in NOMIS/Prison API format)
  */
+@Schema(description = "List of non-associations for a given prisoner in NOMIS/Prison API format")
 data class LegacyPrisonerNonAssociations(
   @Schema(description = "Prisoner number", required = true, example = "A1234BC")
   val offenderNo: String,
@@ -26,6 +27,7 @@ data class LegacyPrisonerNonAssociations(
 /**
  * Details about a single non-association in a list and link to the other prisoner involved (in NOMIS/Prison API format)
  */
+@Schema(description = "An item in a list of non-associations for a given prisoner in NOMIS/Prison API format")
 data class LegacyPrisonerNonAssociation(
   @Schema(description = "Reason code for the non-association", required = true, example = "VIC")
   val reasonCode: LegacyReason,
@@ -50,6 +52,7 @@ data class LegacyPrisonerNonAssociation(
 /**
  * Details about the other prisoner to non-associate with (in NOMIS/Prison API format)
  */
+@Schema(description = "Other prisoner’s details for an item in a list of non-associations in NOMIS/Prison API format")
 data class LegacyOtherPrisonerDetails(
   @Schema(description = "Prisoner number", required = true, example = "B1234CD")
   val offenderNo: String,

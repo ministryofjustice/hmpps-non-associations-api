@@ -15,6 +15,8 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.UserInContext
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyNonAssociation
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyNonAssociationOtherPrisonerDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyOtherPrisonerDetails
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyPrisonerNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyPrisonerNonAssociations
@@ -181,6 +183,10 @@ class NonAssociationsService(
     )
   }
 
+  fun getLegacyById(id: Long): LegacyNonAssociation? {
+    return getById(id)?.toLegacy()
+  }
+
   fun getLegacyDetails(
     prisonerNumber: String,
     currentPrisonOnly: Boolean = true,
@@ -201,6 +207,28 @@ class NonAssociationsService(
   private fun persistNonAssociation(nonAssociation: NonAssociationJPA): NonAssociationJPA {
     return nonAssociationsRepository.save(nonAssociation)
   }
+}
+
+private fun NonAssociationDTO.toLegacy(): LegacyNonAssociation {
+  val (firstPrisonerReason, secondPrisonerReason) = translateFromRolesAndReason(firstPrisonerRole, secondPrisonerRole, reason)
+  val typeCode = restrictionType.toLegacyRestrictionType()
+  return LegacyNonAssociation(
+    id = id,
+    offenderNo = firstPrisonerNumber,
+    reasonCode = firstPrisonerReason,
+    reasonDescription = firstPrisonerReason.description,
+    typeCode = typeCode,
+    typeDescription = typeCode.description,
+    effectiveDate = whenCreated,
+    expiryDate = closedAt,
+    authorisedBy = authorisedBy,
+    comments = comment,
+    offenderNonAssociation = LegacyNonAssociationOtherPrisonerDetails(
+      offenderNo = secondPrisonerNumber,
+      reasonCode = secondPrisonerReason,
+      reasonDescription = secondPrisonerReason.description,
+    ),
+  )
 }
 
 private fun PrisonerNonAssociations.toLegacy() =

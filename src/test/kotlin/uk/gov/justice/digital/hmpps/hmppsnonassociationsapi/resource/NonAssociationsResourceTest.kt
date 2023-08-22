@@ -495,7 +495,116 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   }
 
   @Nested
-  inner class `Get legacy non-associations` {
+  inner class `Get a legacy non-association` {
+    @Test
+    fun `without a valid token responds 401 Unauthorized`() {
+      val nonAssociation = createNonAssociation()
+
+      webTestClient.get()
+        .uri("/legacy/api/non-associations/${nonAssociation.id}")
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `without the correct role responds 403 Forbidden`() {
+      val nonAssociation = createNonAssociation()
+
+      webTestClient.get()
+        .uri("/legacy/api/non-associations/${nonAssociation.id}")
+        .headers(setAuthorisation(roles = listOf("ROLE_SOMETHING_ELSE")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `when the non-association doesn't exist responds 404 Not Found`() {
+      webTestClient.get()
+        .uri("/legacy/api/non-associations/101")
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isNotFound
+    }
+
+    @Test
+    fun `when an open non-association exists returns it`() {
+      val nonAssociation = createNonAssociation()
+
+      webTestClient.get()
+        .uri("/legacy/api/non-associations/${nonAssociation.id}")
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+          {
+            "id": ${nonAssociation.id},
+            "offenderNo": "${nonAssociation.firstPrisonerNumber}",
+            "reasonCode": "BUL",
+            "reasonDescription": "Anti Bullying Strategy",
+            "typeCode": "CELL",
+            "typeDescription": "Do Not Locate in Same Cell",
+            "expiryDate": null,
+            "authorisedBy": "USER_1",
+            "comments": "They keep fighting",
+            "offenderNonAssociation": {
+              "offenderNo": "${nonAssociation.secondPrisonerNumber}",
+              "reasonCode": "BUL",
+              "reasonDescription": "Anti Bullying Strategy"
+            }
+          }
+          """,
+          false,
+        )
+    }
+
+    @Test
+    fun `when a closed non-association exists returns it`() {
+      val nonAssociation = createNonAssociation(isClosed = true)
+
+      val dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+
+      webTestClient.get()
+        .uri("/legacy/api/non-associations/${nonAssociation.id}")
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+          {
+            "id": ${nonAssociation.id},
+            "offenderNo": "${nonAssociation.firstPrisonerNumber}",
+            "reasonCode": "BUL",
+            "reasonDescription": "Anti Bullying Strategy",
+            "typeCode": "CELL",
+            "typeDescription": "Do Not Locate in Same Cell",
+            "expiryDate": "${nonAssociation.closedAt?.format(dtFormat)}",
+            "authorisedBy": "USER_1",
+            "comments": "They keep fighting",
+            "offenderNonAssociation": {
+              "offenderNo": "${nonAssociation.secondPrisonerNumber}",
+              "reasonCode": "BUL",
+              "reasonDescription": "Anti Bullying Strategy"
+            }
+          }
+          """,
+          false,
+        )
+    }
+  }
+
+  @Nested
+  inner class `Get legacy non-associations list` {
 
     private lateinit var dtFormat: DateTimeFormatter
     private lateinit var prisonerJohn: OffenderSearchPrisoner
