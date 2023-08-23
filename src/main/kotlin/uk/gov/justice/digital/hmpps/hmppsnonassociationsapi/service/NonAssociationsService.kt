@@ -118,9 +118,9 @@ class NonAssociationsService(
     }
 
     nonAssociation.close(
-      closedAt = closeRequest.dateOfClosure ?: LocalDateTime.now(clock),
-      closedBy = closeRequest.staffMemberRequestingClosure ?: authenticationFacade.currentUsername ?: throw UserInContextMissingException(),
-      closedReason = closeRequest.closureReason,
+      closedAt = closeRequest.closedAt ?: LocalDateTime.now(clock),
+      closedBy = closeRequest.closedBy ?: authenticationFacade.currentUsername ?: throw UserInContextMissingException(),
+      closedReason = closeRequest.closedReason,
     )
 
     log.info("Closed Non-association [$id]")
@@ -212,10 +212,10 @@ private fun PrisonerNonAssociations.toLegacy() =
     assignedLivingUnitDescription = this.cellLocation,
     nonAssociations = this.nonAssociations.map {
       LegacyNonAssociation(
-        reasonCode = it.roleCode.toLegacyRole(),
-        reasonDescription = it.roleCode.toLegacyRole().description,
-        typeCode = it.restrictionTypeCode.toLegacyRestrictionType(),
-        typeDescription = it.restrictionTypeCode.toLegacyRestrictionType().description,
+        reasonCode = it.role.toLegacyRole(),
+        reasonDescription = it.role.toLegacyRole().description,
+        typeCode = it.restrictionType.toLegacyRestrictionType(),
+        typeDescription = it.restrictionType.toLegacyRestrictionType().description,
         effectiveDate = it.whenCreated,
         expiryDate = it.closedAt,
         authorisedBy = it.authorisedBy,
@@ -224,8 +224,8 @@ private fun PrisonerNonAssociations.toLegacy() =
           offenderNo = it.otherPrisonerDetails.prisonerNumber,
           firstName = it.otherPrisonerDetails.firstName,
           lastName = it.otherPrisonerDetails.lastName,
-          reasonCode = it.otherPrisonerDetails.roleCode.toLegacyRole(),
-          reasonDescription = it.otherPrisonerDetails.roleCode.toLegacyRole().description,
+          reasonCode = it.otherPrisonerDetails.role.toLegacyRole(),
+          reasonDescription = it.otherPrisonerDetails.role.toLegacyRole().description,
           agencyId = it.otherPrisonerDetails.prisonId,
           agencyDescription = it.otherPrisonerDetails.prisonName,
           assignedLivingUnitDescription = it.otherPrisonerDetails.cellLocation,

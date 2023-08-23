@@ -70,10 +70,14 @@ class NonAssociation(
       id = id!!,
       firstPrisonerNumber = firstPrisonerNumber,
       firstPrisonerRole = firstPrisonerRole,
+      firstPrisonerRoleDescription = firstPrisonerRole.description,
       secondPrisonerNumber = secondPrisonerNumber,
       secondPrisonerRole = secondPrisonerRole,
+      secondPrisonerRoleDescription = secondPrisonerRole.description,
       reason = reason,
+      reasonDescription = reason.description,
       restrictionType = restrictionType,
+      restrictionTypeDescription = restrictionType.description,
       comment = comment,
       // TODO: Do we need to do anything special with this?
       //       This field being optional in NOMIS/Prison API

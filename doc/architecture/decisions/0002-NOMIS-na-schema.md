@@ -14,7 +14,7 @@ This illustrates the key fields that NOMIS holds on non-associations
 
 ```mermaid
 ---
-title: Non Associations NOMIS ER Diagram
+title: Non-associations NOMIS ER Diagram
 ---
 
 classDiagram
@@ -55,7 +55,7 @@ class OFFENDER_NA_DETAILS {
 
 ```mermaid
 ---
-title: Gang Non Associations NOMIS ER Diagram
+title: Gang Non-associations NOMIS ER Diagram
 ---
 
 classDiagram

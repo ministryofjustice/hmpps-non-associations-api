@@ -1,4 +1,4 @@
-# 1. Mastering and Synchronisation of Non Associations data with NOMIS
+# 1. Mastering and Synchronisation of Non-associations data with NOMIS
 
 [Next >>](9999-end.md)
 
