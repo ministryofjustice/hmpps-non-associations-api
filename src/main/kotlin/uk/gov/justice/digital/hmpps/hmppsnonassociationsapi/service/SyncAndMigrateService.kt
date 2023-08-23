@@ -11,7 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateSyncReques
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.MigrateRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.UpdateSyncRequest
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.translateToReason
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.translateToRolesAndReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAnyBetweenPrisonerNumbers
 
@@ -49,11 +49,12 @@ class SyncAndMigrateService(
     val nonAssociation = nonAssociationsRepository.findById(updateSyncRequest.id)
       .orElseThrow { EntityNotFoundException(updateSyncRequest.id.toString()) }
 
+    val (firstPrisonerRoleUpdate, secondPrisonerRoleUpdate, reasonUpdate) = translateToRolesAndReason(updateSyncRequest.firstPrisonerReason, updateSyncRequest.secondPrisonerReason)
     val na = with(nonAssociation) {
       restrictionType = updateSyncRequest.restrictionType.toRestrictionType()
-      firstPrisonerRole = updateSyncRequest.firstPrisonerReason.toRole()
-      secondPrisonerRole = updateSyncRequest.secondPrisonerReason.toRole()
-      reason = translateToReason(updateSyncRequest.firstPrisonerReason, updateSyncRequest.secondPrisonerReason)
+      firstPrisonerRole = firstPrisonerRoleUpdate
+      secondPrisonerRole = secondPrisonerRoleUpdate
+      reason = reasonUpdate
       // TODO: can we have a better fall back message?
       comment = updateSyncRequest.comment ?: "No comment provided"
       authorisedBy = updateSyncRequest.authorisedBy

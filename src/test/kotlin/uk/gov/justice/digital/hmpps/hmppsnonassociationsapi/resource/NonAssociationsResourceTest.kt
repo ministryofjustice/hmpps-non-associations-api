@@ -11,6 +11,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.reactive.server.returnResult
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteNonAssociationRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
@@ -25,7 +26,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchP
 import java.lang.String.format
 import java.time.Clock
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
 // language=text
@@ -495,8 +495,113 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
   @Nested
   inner class `Get a legacy non-association` {
+    @Test
+    fun `without a valid token responds 401 Unauthorized`() {
+      val nonAssociation = createNonAssociation()
 
-    private lateinit var dtFormat: DateTimeFormatter
+      webTestClient.get()
+        .uri("/legacy/api/non-associations/${nonAssociation.id}")
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `without the correct role responds 403 Forbidden`() {
+      val nonAssociation = createNonAssociation()
+
+      webTestClient.get()
+        .uri("/legacy/api/non-associations/${nonAssociation.id}")
+        .headers(setAuthorisation(roles = listOf("ROLE_SOMETHING_ELSE")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `when the non-association doesn't exist responds 404 Not Found`() {
+      webTestClient.get()
+        .uri("/legacy/api/non-associations/101")
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isNotFound
+    }
+
+    @Test
+    fun `when an open non-association exists returns it`() {
+      val nonAssociation = createNonAssociation()
+
+      webTestClient.get()
+        .uri("/legacy/api/non-associations/${nonAssociation.id}")
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+          {
+            "id": ${nonAssociation.id},
+            "offenderNo": "${nonAssociation.firstPrisonerNumber}",
+            "reasonCode": "BUL",
+            "reasonDescription": "Anti Bullying Strategy",
+            "typeCode": "CELL",
+            "typeDescription": "Do Not Locate in Same Cell",
+            "expiryDate": null,
+            "authorisedBy": "USER_1",
+            "comments": "They keep fighting",
+            "offenderNonAssociation": {
+              "offenderNo": "${nonAssociation.secondPrisonerNumber}",
+              "reasonCode": "BUL",
+              "reasonDescription": "Anti Bullying Strategy"
+            }
+          }
+          """,
+          false,
+        )
+    }
+
+    @Test
+    fun `when a closed non-association exists returns it`() {
+      val nonAssociation = createNonAssociation(isClosed = true)
+
+      webTestClient.get()
+        .uri("/legacy/api/non-associations/${nonAssociation.id}")
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+          {
+            "id": ${nonAssociation.id},
+            "offenderNo": "${nonAssociation.firstPrisonerNumber}",
+            "reasonCode": "BUL",
+            "reasonDescription": "Anti Bullying Strategy",
+            "typeCode": "CELL",
+            "typeDescription": "Do Not Locate in Same Cell",
+            "expiryDate": "${nonAssociation.closedAt?.format(dtFormat)}",
+            "authorisedBy": "USER_1",
+            "comments": "They keep fighting",
+            "offenderNonAssociation": {
+              "offenderNo": "${nonAssociation.secondPrisonerNumber}",
+              "reasonCode": "BUL",
+              "reasonDescription": "Anti Bullying Strategy"
+            }
+          }
+          """,
+          false,
+        )
+    }
+  }
+
+  @Nested
+  inner class `Get legacy non-associations list` {
     private lateinit var prisonerJohn: OffenderSearchPrisoner
     private lateinit var prisonerMerlin: OffenderSearchPrisoner
     private lateinit var prisonerJosh: OffenderSearchPrisoner
@@ -504,6 +609,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     private lateinit var openNonAssociation: NonAssociationJPA
     private lateinit var closedNa: NonAssociationJPA
     private lateinit var otherPrisonNa: NonAssociationJPA
+    private lateinit var openNonAssociationLegacyReasons: Pair<LegacyReason, LegacyReason>
+    private lateinit var closedNaLegacyReasons: Pair<LegacyReason, LegacyReason>
+    private lateinit var otherPrisonNaLegacyReasons: Pair<LegacyReason, LegacyReason>
 
     @BeforeEach
     fun setup() {
@@ -520,6 +628,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         prisonerMerlin.prisonerNumber,
         isClosed = false,
       )
+      openNonAssociationLegacyReasons = LegacyReason.BUL to LegacyReason.BUL
 
       // closed non-association
       closedNa = createNonAssociation(
@@ -530,6 +639,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         firstPrisonerRole = Role.NOT_RELEVANT,
         secondPrisonerRole = Role.PERPETRATOR,
       )
+      closedNaLegacyReasons = LegacyReason.BUL to LegacyReason.BUL
 
       // non-association with someone in a different prison
       otherPrisonNa = createNonAssociation(
@@ -538,14 +648,13 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         firstPrisonerRole = Role.VICTIM,
         secondPrisonerRole = Role.UNKNOWN,
       )
+      otherPrisonNaLegacyReasons = LegacyReason.BUL to LegacyReason.BUL
 
       val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
       offenderSearchMockServer.stubSearchByPrisonerNumbers(
         prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
         prisoners,
       )
-
-      dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
     }
 
     @Test
@@ -570,8 +679,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "assignedLivingUnitDescription": "${prisonerMerlin.cellLocation}",
             "nonAssociations": [
               {
-                "reasonCode": "${otherPrisonNa.secondPrisonerRole.toLegacyRole()}",
-                "reasonDescription": "${otherPrisonNa.secondPrisonerRole.toLegacyRole().description}",
+                "reasonCode": "${otherPrisonNaLegacyReasons.second}",
+                "reasonDescription": "${otherPrisonNaLegacyReasons.second.description}",
                 "typeCode": "${otherPrisonNa.restrictionType.toLegacyRestrictionType()}",
                 "typeDescription": "${otherPrisonNa.restrictionType.toLegacyRestrictionType().description}",
                 "effectiveDate": "${otherPrisonNa.whenCreated.format(dtFormat)}",
@@ -582,15 +691,15 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "offenderNo": "${prisonerEdward.prisonerNumber}",
                   "firstName": "${prisonerEdward.firstName}",
                   "lastName": "${prisonerEdward.lastName}",
-                  "reasonCode": "${otherPrisonNa.firstPrisonerRole.toLegacyRole()}",
-                  "reasonDescription": "${otherPrisonNa.firstPrisonerRole.toLegacyRole().description}",
+                  "reasonCode": "${otherPrisonNaLegacyReasons.first}",
+                  "reasonDescription": "${otherPrisonNaLegacyReasons.first.description}",
                   "agencyDescription": "${prisonerEdward.prisonName}",
                   "assignedLivingUnitDescription": "${prisonerEdward.cellLocation}"
                 }
               },
               {
-                "reasonCode": "${closedNa.firstPrisonerRole.toLegacyRole()}",
-                "reasonDescription": "${closedNa.firstPrisonerRole.toLegacyRole().description}",
+                "reasonCode": "${closedNaLegacyReasons.first}",
+                "reasonDescription": "${closedNaLegacyReasons.first.description}",
                 "typeCode": "${closedNa.restrictionType.toLegacyRestrictionType()}",
                 "typeDescription": "${closedNa.restrictionType.toLegacyRestrictionType().description}",
                 "effectiveDate": "${closedNa.whenCreated.format(dtFormat)}",
@@ -601,15 +710,15 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "offenderNo": "${prisonerJosh.prisonerNumber}",
                   "firstName": "${prisonerJosh.firstName}",
                   "lastName": "${prisonerJosh.lastName}",
-                  "reasonCode": "${closedNa.secondPrisonerRole.toLegacyRole()}",
-                  "reasonDescription": "${closedNa.secondPrisonerRole.toLegacyRole().description}",
+                  "reasonCode": "${closedNaLegacyReasons.second}",
+                  "reasonDescription": "${closedNaLegacyReasons.second.description}",
                   "agencyDescription": "${prisonerJosh.prisonName}",
                   "assignedLivingUnitDescription": "${prisonerJosh.cellLocation}"
                 }
               },
               {
-                "reasonCode": "${openNonAssociation.secondPrisonerRole.toLegacyRole()}",
-                "reasonDescription": "${openNonAssociation.secondPrisonerRole.toLegacyRole().description}",
+                "reasonCode": "${openNonAssociationLegacyReasons.second}",
+                "reasonDescription": "${openNonAssociationLegacyReasons.second.description}",
                 "typeCode": "${openNonAssociation.restrictionType.toLegacyRestrictionType()}",
                 "typeDescription": "${openNonAssociation.restrictionType.toLegacyRestrictionType().description}",
                 "effectiveDate": "${openNonAssociation.whenCreated.format(dtFormat)}",
@@ -620,8 +729,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "offenderNo": "${prisonerJohn.prisonerNumber}",
                   "firstName": "${prisonerJohn.firstName}",
                   "lastName": "${prisonerJohn.lastName}",
-                  "reasonCode": "${openNonAssociation.firstPrisonerRole.toLegacyRole()}",
-                  "reasonDescription": "${openNonAssociation.firstPrisonerRole.toLegacyRole().description}",
+                  "reasonCode": "${openNonAssociationLegacyReasons.first}",
+                  "reasonDescription": "${openNonAssociationLegacyReasons.first.description}",
                   "agencyDescription": "${prisonerJohn.prisonName}",
                   "assignedLivingUnitDescription": "${prisonerJohn.cellLocation}"
                 }
@@ -655,8 +764,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "assignedLivingUnitDescription": "${prisonerMerlin.cellLocation}",
             "nonAssociations": [
               {
-                "reasonCode": "${otherPrisonNa.secondPrisonerRole.toLegacyRole()}",
-                "reasonDescription": "${otherPrisonNa.secondPrisonerRole.toLegacyRole().description}",
+                "reasonCode": "${otherPrisonNaLegacyReasons.second}",
+                "reasonDescription": "${otherPrisonNaLegacyReasons.second.description}",
                 "typeCode": "${otherPrisonNa.restrictionType.toLegacyRestrictionType()}",
                 "typeDescription": "${otherPrisonNa.restrictionType.toLegacyRestrictionType().description}",
                 "effectiveDate": "${otherPrisonNa.whenCreated.format(dtFormat)}",
@@ -667,15 +776,15 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "offenderNo": "${prisonerEdward.prisonerNumber}",
                   "firstName": "${prisonerEdward.firstName}",
                   "lastName": "${prisonerEdward.lastName}",
-                  "reasonCode": "${otherPrisonNa.firstPrisonerRole.toLegacyRole()}",
-                  "reasonDescription": "${otherPrisonNa.firstPrisonerRole.toLegacyRole().description}",
+                  "reasonCode": "${otherPrisonNaLegacyReasons.first}",
+                  "reasonDescription": "${otherPrisonNaLegacyReasons.first.description}",
                   "agencyDescription": "${prisonerEdward.prisonName}",
                   "assignedLivingUnitDescription": "${prisonerEdward.cellLocation}"
                 }
               },
               {
-                "reasonCode": "${openNonAssociation.secondPrisonerRole.toLegacyRole()}",
-                "reasonDescription": "${openNonAssociation.secondPrisonerRole.toLegacyRole().description}",
+                "reasonCode": "${openNonAssociationLegacyReasons.second}",
+                "reasonDescription": "${openNonAssociationLegacyReasons.second.description}",
                 "typeCode": "${openNonAssociation.restrictionType.toLegacyRestrictionType()}",
                 "typeDescription": "${openNonAssociation.restrictionType.toLegacyRestrictionType().description}",
                 "effectiveDate": "${openNonAssociation.whenCreated.format(dtFormat)}",
@@ -686,8 +795,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "offenderNo": "${prisonerJohn.prisonerNumber}",
                   "firstName": "${prisonerJohn.firstName}",
                   "lastName": "${prisonerJohn.lastName}",
-                  "reasonCode": "${openNonAssociation.firstPrisonerRole.toLegacyRole()}",
-                  "reasonDescription": "${openNonAssociation.firstPrisonerRole.toLegacyRole().description}",
+                  "reasonCode": "${openNonAssociationLegacyReasons.first}",
+                  "reasonDescription": "${openNonAssociationLegacyReasons.first.description}",
                   "agencyDescription": "${prisonerJohn.prisonName}",
                   "assignedLivingUnitDescription": "${prisonerJohn.cellLocation}"
                 }
@@ -721,8 +830,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "assignedLivingUnitDescription": "${prisonerMerlin.cellLocation}",
             "nonAssociations": [
               {
-                "reasonCode": "${openNonAssociation.secondPrisonerRole.toLegacyRole()}",
-                "reasonDescription": "${openNonAssociation.secondPrisonerRole.toLegacyRole().description}",
+                "reasonCode": "${openNonAssociationLegacyReasons.second}",
+                "reasonDescription": "${openNonAssociationLegacyReasons.second.description}",
                 "typeCode": "${openNonAssociation.restrictionType.toLegacyRestrictionType()}",
                 "typeDescription": "${openNonAssociation.restrictionType.toLegacyRestrictionType().description}",
                 "effectiveDate": "${openNonAssociation.whenCreated.format(dtFormat)}",
@@ -733,8 +842,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "offenderNo": "${prisonerJohn.prisonerNumber}",
                   "firstName": "${prisonerJohn.firstName}",
                   "lastName": "${prisonerJohn.lastName}",
-                  "reasonCode": "${openNonAssociation.firstPrisonerRole.toLegacyRole()}",
-                  "reasonDescription": "${openNonAssociation.firstPrisonerRole.toLegacyRole().description}",
+                  "reasonCode": "${openNonAssociationLegacyReasons.first}",
+                  "reasonDescription": "${openNonAssociationLegacyReasons.first.description}",
                   "agencyDescription": "${prisonerJohn.prisonName}",
                   "assignedLivingUnitDescription": "${prisonerJohn.cellLocation}"
                 }
@@ -768,8 +877,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "assignedLivingUnitDescription": "${prisonerMerlin.cellLocation}",
             "nonAssociations": [
               {
-                "reasonCode": "${closedNa.firstPrisonerRole.toLegacyRole()}",
-                "reasonDescription": "${closedNa.firstPrisonerRole.toLegacyRole().description}",
+                "reasonCode": "${closedNaLegacyReasons.first}",
+                "reasonDescription": "${closedNaLegacyReasons.first.description}",
                 "typeCode": "${closedNa.restrictionType.toLegacyRestrictionType()}",
                 "typeDescription": "${closedNa.restrictionType.toLegacyRestrictionType().description}",
                 "effectiveDate": "${closedNa.whenCreated.format(dtFormat)}",
@@ -780,15 +889,15 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "offenderNo": "${prisonerJosh.prisonerNumber}",
                   "firstName": "${prisonerJosh.firstName}",
                   "lastName": "${prisonerJosh.lastName}",
-                  "reasonCode": "${closedNa.secondPrisonerRole.toLegacyRole()}",
-                  "reasonDescription": "${closedNa.secondPrisonerRole.toLegacyRole().description}",
+                  "reasonCode": "${closedNaLegacyReasons.second}",
+                  "reasonDescription": "${closedNaLegacyReasons.second.description}",
                   "agencyDescription": "${prisonerJosh.prisonName}",
                   "assignedLivingUnitDescription": "${prisonerJosh.cellLocation}"
                 }
               },
               {
-                "reasonCode": "${openNonAssociation.secondPrisonerRole.toLegacyRole()}",
-                "reasonDescription": "${openNonAssociation.secondPrisonerRole.toLegacyRole().description}",
+                "reasonCode": "${openNonAssociationLegacyReasons.second}",
+                "reasonDescription": "${openNonAssociationLegacyReasons.second.description}",
                 "typeCode": "${openNonAssociation.restrictionType.toLegacyRestrictionType()}",
                 "typeDescription": "${openNonAssociation.restrictionType.toLegacyRestrictionType().description}",
                 "effectiveDate": "${openNonAssociation.whenCreated.format(dtFormat)}",
@@ -799,8 +908,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "offenderNo": "${prisonerJohn.prisonerNumber}",
                   "firstName": "${prisonerJohn.firstName}",
                   "lastName": "${prisonerJohn.lastName}",
-                  "reasonCode": "${openNonAssociation.firstPrisonerRole.toLegacyRole()}",
-                  "reasonDescription": "${openNonAssociation.firstPrisonerRole.toLegacyRole().description}",
+                  "reasonCode": "${openNonAssociationLegacyReasons.first}",
+                  "reasonDescription": "${openNonAssociationLegacyReasons.first.description}",
                   "agencyDescription": "${prisonerJohn.prisonName}",
                   "assignedLivingUnitDescription": "${prisonerJohn.cellLocation}"
                 }

@@ -47,13 +47,14 @@ data class MigrateRequest(
   val expiryDate: LocalDate? = null,
 ) {
   fun toNewEntity(): NonAssociation {
+    val (firstPrisonerRole, secondPrisonerRole, reason) = translateToRolesAndReason(firstPrisonerReason, secondPrisonerReason)
     return NonAssociation(
       id = null,
       firstPrisonerNumber = firstPrisonerNumber,
-      firstPrisonerRole = firstPrisonerReason.toRole(),
+      firstPrisonerRole = firstPrisonerRole,
       secondPrisonerNumber = secondPrisonerNumber,
-      secondPrisonerRole = secondPrisonerReason.toRole(),
-      reason = translateToReason(firstPrisonerReason, secondPrisonerReason),
+      secondPrisonerRole = secondPrisonerRole,
+      reason = reason,
       restrictionType = restrictionType.toRestrictionType(),
       comment = comment ?: "",
       authorisedBy = authorisedBy,

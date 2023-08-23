@@ -15,7 +15,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsInteg
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @WithMockUser(username = expectedUsername)
 class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
@@ -154,11 +153,11 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         """
         {
           "firstPrisonerNumber": "${request.firstPrisonerNumber}",
-          "firstPrisonerRole": "${request.firstPrisonerReason.toRole()}",
-          "firstPrisonerRoleDescription": "${request.firstPrisonerReason.toRole().description}",
+          "firstPrisonerRole": "VICTIM",
+          "firstPrisonerRoleDescription": "Victim",
           "secondPrisonerNumber": "${request.secondPrisonerNumber}",
-          "secondPrisonerRole": "${request.secondPrisonerReason.toRole()}",
-          "secondPrisonerRoleDescription": "${request.secondPrisonerReason.toRole().description}",
+          "secondPrisonerRole": "UNKNOWN",
+          "secondPrisonerRoleDescription": "Unknown",
           "reason": "${Reason.BULLYING}",
           "reasonDescription": "${Reason.BULLYING.description}",
           "restrictionType": "${request.restrictionType.toRestrictionType()}",
@@ -313,17 +312,16 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         active = false,
       )
 
-      val dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
       val expectedResponse =
         // language=json
         """
         {
           "firstPrisonerNumber": "${request.firstPrisonerNumber}",
-          "firstPrisonerRole": "${request.firstPrisonerReason.toRole()}",
-          "firstPrisonerRoleDescription": "${request.firstPrisonerReason.toRole().description}",
+          "firstPrisonerRole": "VICTIM",
+          "firstPrisonerRoleDescription": "Victim",
           "secondPrisonerNumber": "${request.secondPrisonerNumber}",
-          "secondPrisonerRole": "${request.secondPrisonerReason.toRole()}",
-          "secondPrisonerRoleDescription": "${request.secondPrisonerReason.toRole().description}",
+          "secondPrisonerRole": "PERPETRATOR",
+          "secondPrisonerRoleDescription": "Perpetrator",
           "reason": "OTHER",
           "reasonDescription": "Other",
           "restrictionType": "${request.restrictionType.toRestrictionType()}",
@@ -365,7 +363,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
       val request = UpdateSyncRequest(
         id = naUpdate.id!!,
         firstPrisonerReason = LegacyReason.RIV,
-        secondPrisonerReason = LegacyReason.BUL,
+        secondPrisonerReason = LegacyReason.RIV,
         restrictionType = LegacyRestrictionType.WING,
         expiryDate = LocalDate.now(clock),
         active = false,
@@ -373,18 +371,17 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         authorisedBy = "TEST",
       )
 
-      val dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
       val expectedResponse =
         // language=json
         """
         {
           "id": ${request.id},
           "firstPrisonerNumber": "C1234AA",
-          "firstPrisonerRole": "${request.firstPrisonerReason.toRole()}",
-          "firstPrisonerRoleDescription": "${request.firstPrisonerReason.toRole().description}",
+          "firstPrisonerRole": "NOT_RELEVANT",
+          "firstPrisonerRoleDescription": "Not relevant",
           "secondPrisonerNumber": "D1234AA",
-          "secondPrisonerRole": "${request.secondPrisonerReason.toRole()}",
-          "secondPrisonerRoleDescription": "${request.secondPrisonerReason.toRole().description}",
+          "secondPrisonerRole": "NOT_RELEVANT",
+          "secondPrisonerRoleDescription": "Not relevant",
           "reason": "GANG_RELATED",
           "reasonDescription": "Gang related",
           "restrictionType": "${request.restrictionType.toRestrictionType()}",
@@ -444,11 +441,11 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         {
           "id": ${request.id},
           "firstPrisonerNumber": "C1234AA",
-          "firstPrisonerRole": "${request.firstPrisonerReason.toRole()}",
-          "firstPrisonerRoleDescription": "${request.firstPrisonerReason.toRole().description}",
+          "firstPrisonerRole": "PERPETRATOR",
+          "firstPrisonerRoleDescription": "Perpetrator",
           "secondPrisonerNumber": "D1234AA",
-          "secondPrisonerRole": "${request.secondPrisonerReason.toRole()}",
-          "secondPrisonerRoleDescription": "${request.secondPrisonerReason.toRole().description}",
+          "secondPrisonerRole": "UNKNOWN",
+          "secondPrisonerRoleDescription": "Unknown",
           "reason": "BULLYING",
           "reasonDescription": "Bullying",
           "restrictionType": "${request.restrictionType.toRestrictionType()}",

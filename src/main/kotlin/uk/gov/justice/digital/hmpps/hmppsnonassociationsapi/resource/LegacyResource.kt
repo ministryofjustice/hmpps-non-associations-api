@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -14,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonapi.LegacyNonAssociationDetails
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyNonAssociation
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyPrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
 
 @RestController
@@ -23,8 +26,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociati
 @RequestMapping("/legacy/api", produces = [MediaType.APPLICATION_JSON_VALUE])
 @Tag(
   name = "Legacy non-associations-details",
-  description = "Mimics the Prison API interface for retrieving non-associations. " +
-    "Currently this is a façade that calls Prison API, but will in future use the non-associations database and yet maintain the Prison API contract.",
+  description = "Mimics the NOMIS/Prison API interface for retrieving non-associations",
 )
 class LegacyResource(
   val nonAssociationsService: NonAssociationsService,
@@ -32,7 +34,7 @@ class LegacyResource(
   @GetMapping("/offenders/{prisonerNumber}/non-association-details")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
-    summary = "Get non-associations by prisoner number",
+    summary = "Get non-associations by prisoner number in NOMIS/Prison API format",
     description = "Currently this is a façade that calls Prison API, but will in future use the non-associations database and yet maintain the Prison API contract.",
     responses = [
       ApiResponse(
@@ -71,7 +73,46 @@ class LegacyResource(
     )
     @RequestParam(value = "excludeInactive", required = false, defaultValue = "false")
     excludeInactive: Boolean,
-  ): LegacyNonAssociationDetails {
+  ): LegacyPrisonerNonAssociations {
     return nonAssociationsService.getLegacyDetails(prisonerNumber, currentPrisonOnly, excludeInactive)
+  }
+
+  @GetMapping("/non-associations/{id}")
+  @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS_SYNC')")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+    summary = "Get a non-association between two prisoners by ID in NOMIS/Prison API format",
+    description = "Requires NON_ASSOCIATIONS_SYNC role.",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returns the non-association",
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Missing required role. Requires the NON_ASSOCIATIONS_SYNC role",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Non-association not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun getLegacyById(
+    @Schema(description = "The non-association ID", example = "42", required = true)
+    @PathVariable
+    id: Long,
+  ): LegacyNonAssociation {
+    return nonAssociationsService.getLegacyById(id) ?: throw ResponseStatusException(
+      HttpStatus.NOT_FOUND,
+      "Non-association with ID $id not found",
+    )
   }
 }
