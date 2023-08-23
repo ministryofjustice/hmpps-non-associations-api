@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -22,7 +21,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociati
 @RestController
 @Validated
 @RequestMapping("/legacy/api", produces = [MediaType.APPLICATION_JSON_VALUE])
-@PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
 @Tag(
   name = "Legacy non-associations-details",
   description = "Mimics the Prison API interface for retrieving non-associations. " +
