@@ -118,9 +118,9 @@ class NonAssociationsService(
     }
 
     nonAssociation.close(
-      closedAt = closeRequest.dateOfClosure ?: LocalDateTime.now(clock),
-      closedBy = closeRequest.staffMemberRequestingClosure ?: authenticationFacade.currentUsername ?: throw UserInContextMissingException(),
-      closedReason = closeRequest.closureReason,
+      closedAt = closeRequest.closedAt ?: LocalDateTime.now(clock),
+      closedBy = closeRequest.closedBy ?: authenticationFacade.currentUsername ?: throw UserInContextMissingException(),
+      closedReason = closeRequest.closedReason,
     )
 
     log.info("Closed Non-association [$id]")

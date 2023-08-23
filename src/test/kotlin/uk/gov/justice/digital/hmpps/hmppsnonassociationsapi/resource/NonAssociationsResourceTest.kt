@@ -839,7 +839,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `without the correct role and scope responds 403 Forbidden`() {
       val request = CloseNonAssociationRequest(
-        closureReason = "Ok now",
+        closedReason = "Ok now",
       )
 
       // correct role, missing write scope
@@ -909,7 +909,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           ),
         )
         .header("Content-Type", "text/plain")
-        .bodyValue(jsonString("staffMemberRequestingClosure" to "TEST"))
+        .bodyValue(jsonString("closedBy" to "TEST"))
         .exchange()
         .expectStatus()
         .isBadRequest
@@ -918,8 +918,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `for a valid request closes the non-association`() {
       // language=text
-      val closureReasonComment = "All fine now"
-      val request = mapOf("closureReason" to closureReasonComment)
+      val closedReason = "All fine now"
+      val request = mapOf("closedReason" to closedReason)
 
       val expectedResponse =
         // language=json
@@ -939,7 +939,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           "authorisedBy": "${nonAssociation.authorisedBy}",
           "updatedBy": "$expectedUsername",
           "isClosed": true,
-          "closedReason": "$closureReasonComment",
+          "closedReason": "$closedReason",
           "closedBy": $expectedUsername,
           "closedAt": "${LocalDateTime.now(clock)}"
         }
@@ -970,9 +970,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `already closed non-association cannot be re-closed`() {
       val request = CloseNonAssociationRequest(
-        closureReason = "Please close again",
-        staffMemberRequestingClosure = "MWILLIS",
-        dateOfClosure = LocalDateTime.now(clock),
+        closedReason = "Please close again",
+        closedBy = "MWILLIS",
+        closedAt = LocalDateTime.now(clock),
       )
 
       webTestClient.put()
