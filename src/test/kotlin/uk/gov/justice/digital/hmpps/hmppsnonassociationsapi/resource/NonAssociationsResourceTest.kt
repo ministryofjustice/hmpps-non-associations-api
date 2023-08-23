@@ -544,7 +544,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     fun `a non-association that exists is returned in the legacy format for all NAs`() {
       webTestClient.get()
         .uri("/legacy/api/offenders/${prisonerMerlin.prisonerNumber}/non-association-details?currentPrisonOnly=false&excludeInactive=false")
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(
+          setAuthorisation(),
+        )
         .header("Content-Type", "application/json")
         .exchange()
         .expectStatus()
@@ -627,7 +629,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     fun `a non-association that exists is returned in the legacy format for active only NAs`() {
       webTestClient.get()
         .uri("/legacy/api/offenders/${prisonerMerlin.prisonerNumber}/non-association-details?currentPrisonOnly=false&excludeInactive=true")
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(
+          setAuthorisation(),
+        )
         .header("Content-Type", "application/json")
         .exchange()
         .expectStatus()
@@ -691,7 +695,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     fun `a non-association that exists is returned in the legacy format for current active prison only`() {
       webTestClient.get()
         .uri("/legacy/api/offenders/${prisonerMerlin.prisonerNumber}/non-association-details?currentPrisonOnly=true&excludeInactive=true")
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(
+          setAuthorisation(),
+        )
         .header("Content-Type", "application/json")
         .exchange()
         .expectStatus()
@@ -736,7 +742,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     fun `a non-association that exists is returned in the legacy format for all active and inactive current prison only`() {
       webTestClient.get()
         .uri("/legacy/api/offenders/${prisonerMerlin.prisonerNumber}/non-association-details?currentPrisonOnly=true&excludeInactive=false")
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(
+          setAuthorisation(),
+        )
         .header("Content-Type", "application/json")
         .exchange()
         .expectStatus()
