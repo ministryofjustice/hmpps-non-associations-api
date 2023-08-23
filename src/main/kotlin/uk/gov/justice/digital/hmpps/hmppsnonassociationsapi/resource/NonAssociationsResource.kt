@@ -38,7 +38,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociat
 @RestController
 @Validated
 @RequestMapping("/", produces = [MediaType.APPLICATION_JSON_VALUE])
-@Tag(name = "Non-Associations", description = "**IMPORTANT**: This is a work in progress API and it's subject to change, DO NOT USE.")
+@Tag(name = "Non-Associations", description = "<em>**IMPORTANT**</em>: This is a work in progress API and it's subject to change, DO NOT USE.")
 class NonAssociationsResource(
   private val nonAssociationsService: NonAssociationsService,
 ) : NonAssociationsBaseResource() {

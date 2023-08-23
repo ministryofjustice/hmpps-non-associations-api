@@ -5,13 +5,15 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.security.test.context.support.WithMockUser
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateSyncRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteSyncRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyRestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.MigrateRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.UpdateSyncRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.UpsertSyncRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NO_CLOSURE_REASON_PROVIDED
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NO_COMMENT_PROVIDED
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -185,9 +187,9 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
   }
 
   @Nested
-  inner class `Sync a non-association` {
+  inner class `Upsert Sync a non-association` {
 
-    private val url = "/sync"
+    private val url = "/sync/upsert"
 
     @Test
     fun `without a valid token responds 401 Unauthorized`() {
@@ -200,7 +202,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `without the correct role and scope responds 403 Forbidden`() {
-      val request = CreateSyncRequest(
+      val request = UpsertSyncRequest(
         firstPrisonerNumber = "A7777XX",
         firstPrisonerReason = LegacyReason.VIC,
         secondPrisonerNumber = "B7777XX",
@@ -211,7 +213,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
       )
 
       // correct role, missing write scope
-      webTestClient.post()
+      webTestClient.put()
         .uri(url)
         .headers(setAuthorisation(roles = listOf("ROLE_DUMMY")))
         .header("Content-Type", "application/json")
@@ -224,7 +226,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `without a valid request body responds 400 Bad Request`() {
       // no request body
-      webTestClient.post()
+      webTestClient.put()
         .uri(url)
         .headers(
           setAuthorisation(
@@ -237,7 +239,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         .isBadRequest
 
       // unsupported Content-Type
-      webTestClient.post()
+      webTestClient.put()
         .uri(url)
         .headers(
           setAuthorisation(
@@ -251,7 +253,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         .isBadRequest
 
       // request body missing some fields
-      webTestClient.post()
+      webTestClient.put()
         .uri(url)
         .headers(
           setAuthorisation(
@@ -266,7 +268,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `cannot sync non-association already in open state`() {
+    fun `can sync non-association in open state`() {
       repository.save(
         genNonAssociation(
           firstPrisonerNumber = "A7777XX",
@@ -274,7 +276,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           createTime = LocalDateTime.now(clock),
         ),
       )
-      val request = CreateSyncRequest(
+      val request = UpsertSyncRequest(
         firstPrisonerNumber = "A7777XX",
         firstPrisonerReason = LegacyReason.VIC,
         secondPrisonerNumber = "B7777XX",
@@ -284,7 +286,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         active = true,
       )
 
-      webTestClient.post()
+      webTestClient.put()
         .uri(url)
         .headers(
           setAuthorisation(
@@ -294,12 +296,12 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         .header("Content-Type", "application/json")
         .bodyValue(jsonString(request))
         .exchange()
-        .expectStatus().isBadRequest
+        .expectStatus().isOk
     }
 
     @Test
     fun `creating an non-association`() {
-      val request = CreateSyncRequest(
+      val request = UpsertSyncRequest(
         firstPrisonerNumber = "A7777XX",
         firstPrisonerReason = LegacyReason.VIC,
         secondPrisonerNumber = "B7777XX",
@@ -320,17 +322,17 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "secondPrisonerRole": "${request.secondPrisonerReason.toRole()}",
           "reason": "OTHER",
           "restrictionType": "${request.restrictionType.toRestrictionType()}",
-          "comment": "No comment provided",
+          "comment": "$NO_COMMENT_PROVIDED",
           "authorisedBy": "",
           "updatedBy": "$SYSTEM_USERNAME",
           "isClosed": true,
-          "closedReason": "UNDEFINED",
+          "closedReason": "$NO_CLOSURE_REASON_PROVIDED",
           "closedBy": "$SYSTEM_USERNAME",
           "closedAt": "${request.expiryDate?.atStartOfDay()?.format(dtFormat)}"
         }
         """
 
-      webTestClient.post()
+      webTestClient.put()
         .uri(url)
         .headers(
           setAuthorisation(
@@ -340,7 +342,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         .header("Content-Type", "application/json")
         .bodyValue(jsonString(request))
         .exchange()
-        .expectStatus().isCreated
+        .expectStatus().isOk
         .expectBody().json(expectedResponse, false)
     }
 
@@ -354,8 +356,9 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         ),
       )
 
-      val request = UpdateSyncRequest(
-        id = naUpdate.id!!,
+      val request = UpsertSyncRequest(
+        firstPrisonerNumber = "C1234AA",
+        secondPrisonerNumber = "D1234AA",
         firstPrisonerReason = LegacyReason.RIV,
         secondPrisonerReason = LegacyReason.BUL,
         restrictionType = LegacyRestrictionType.WING,
@@ -370,7 +373,6 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         // language=json
         """
         {
-          "id": ${request.id},
           "firstPrisonerNumber": "C1234AA",
           "firstPrisonerRole": "${request.firstPrisonerReason.toRole()}",
           "secondPrisonerNumber": "D1234AA",
@@ -381,7 +383,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "authorisedBy": "${request.authorisedBy}",
           "updatedBy": "$expectedUsername",
           "isClosed": true,
-          "closedReason": "No closure reason provided",
+          "closedReason": "$NO_CLOSURE_REASON_PROVIDED",
           "closedBy": "TEST",
           "closedAt": "${request.expiryDate?.atStartOfDay()?.format(dtFormat)}"
         }
@@ -400,23 +402,34 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         .expectStatus().isOk
         .expectBody().json(expectedResponse, false)
 
-      repository.deleteById(request.id)
+      repository.deleteById(naUpdate.id!!)
     }
 
     @Test
     fun `re-opening a non-association`() {
-      val naUpdate = repository.save(
+      val stayClosed = repository.save(
         genNonAssociation(
           firstPrisonerNumber = "C1234AA",
           secondPrisonerNumber = "D1234AA",
-          createTime = LocalDateTime.now(clock),
+          createTime = LocalDateTime.now(clock).minusDays(30),
           closed = true,
-          closedReason = "All fine now",
+          closedReason = "All fine now oldest",
         ),
       )
 
-      val request = UpdateSyncRequest(
-        id = naUpdate.id!!,
+      val reopened = repository.save(
+        genNonAssociation(
+          firstPrisonerNumber = "C1234AA",
+          secondPrisonerNumber = "D1234AA",
+          createTime = LocalDateTime.now(clock).minusHours(1),
+          closed = true,
+          closedReason = "All fine now newest",
+        ),
+      )
+
+      val request = UpsertSyncRequest(
+        firstPrisonerNumber = "C1234AA",
+        secondPrisonerNumber = "D1234AA",
         firstPrisonerReason = LegacyReason.PER,
         secondPrisonerReason = LegacyReason.BUL,
         restrictionType = LegacyRestrictionType.WING,
@@ -430,7 +443,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         // language=json
         """
         {
-          "id": ${request.id},
+          "id": ${reopened.id},
           "firstPrisonerNumber": "C1234AA",
           "firstPrisonerRole": "${request.firstPrisonerReason.toRole()}",
           "secondPrisonerNumber": "D1234AA",
@@ -460,23 +473,49 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         .expectStatus().isOk
         .expectBody().json(expectedResponse, false)
 
-      repository.deleteById(request.id)
+      assertThat(repository.findById(reopened.id!!).get().isClosed).isFalse()
+      assertThat(repository.findById(stayClosed.id!!).get().isClosed).isTrue()
+      repository.deleteById(reopened.id!!)
+    }
+  }
+
+  @Nested
+  inner class `Delete Sync a non-association` {
+
+    private val url = "/sync/delete"
+
+    @Test
+    fun `without a valid token responds 401 Unauthorized`() {
+      webTestClient.post()
+        .uri(url)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
     }
 
     @Test
-    fun `deleting a non-association`() {
-      val naDelete = repository.save(
-        genNonAssociation(
-          firstPrisonerNumber = "C1234AA",
-          secondPrisonerNumber = "D1234AA",
-          createTime = LocalDateTime.now(clock),
-          closedReason = "OK now",
-          authBy = "TEST",
-        ),
+    fun `without the correct role and scope responds 403 Forbidden`() {
+      val request = DeleteSyncRequest(
+        firstPrisonerNumber = "A7777XX",
+        secondPrisonerNumber = "B7777XX",
       )
 
-      webTestClient.delete()
-        .uri("$url/${naDelete.id}")
+      // correct role, missing write scope
+      webTestClient.put()
+        .uri(url)
+        .headers(setAuthorisation(roles = listOf("ROLE_DUMMY")))
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `without a valid request body responds 400 Bad Request`() {
+      // no request body
+      webTestClient.put()
+        .uri(url)
         .headers(
           setAuthorisation(
             roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC"),
@@ -484,9 +523,88 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         )
         .header("Content-Type", "application/json")
         .exchange()
+        .expectStatus()
+        .isBadRequest
+
+      // unsupported Content-Type
+      webTestClient.put()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC"),
+          ),
+        )
+        .header("Content-Type", "text/plain")
+        .bodyValue("{}")
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+
+      // request body missing some fields
+      webTestClient.put()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString("firstPrisonerNumber" to "A1234BC"))
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+    }
+
+    @Test
+    fun `deleting a non-association`() {
+      val naActive = repository.save(
+        genNonAssociation(
+          firstPrisonerNumber = "C1234AA",
+          secondPrisonerNumber = "D1234AA",
+          createTime = LocalDateTime.now(clock),
+          authBy = "TEST",
+        ),
+      )
+      val naClosed1 = repository.save(
+        genNonAssociation(
+          firstPrisonerNumber = "C1234AA",
+          secondPrisonerNumber = "D1234AA",
+          createTime = LocalDateTime.now(clock).minusDays(1),
+          closedReason = "OK now again",
+          closed = true,
+          authBy = "TEST",
+        ),
+      )
+      val naClosed2 = repository.save(
+        genNonAssociation(
+          firstPrisonerNumber = "C1234AA",
+          secondPrisonerNumber = "D1234AA",
+          createTime = LocalDateTime.now(clock).minusMonths(1),
+          closedReason = "OK now",
+          closed = true,
+          authBy = "TEST",
+        ),
+      )
+      val request = DeleteSyncRequest(
+        firstPrisonerNumber = "C1234AA",
+        secondPrisonerNumber = "D1234AA",
+      )
+
+      webTestClient.put()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC"),
+          ),
+        )
+        .bodyValue(jsonString(request))
+        .header("Content-Type", "application/json")
+        .exchange()
         .expectStatus().isNoContent
 
-      assertThat(repository.findById(naDelete.id!!)).isNotPresent
+      assertThat(repository.findById(naActive.id!!)).isNotPresent
+      assertThat(repository.findById(naClosed1.id!!)).isNotPresent
+      assertThat(repository.findById(naClosed2.id!!)).isNotPresent
     }
   }
 }
