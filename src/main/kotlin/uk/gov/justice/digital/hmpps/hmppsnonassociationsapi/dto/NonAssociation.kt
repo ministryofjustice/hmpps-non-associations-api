@@ -122,11 +122,11 @@ data class PatchNonAssociationRequest(
 @Schema(description = "Request to close a non-association")
 data class CloseNonAssociationRequest(
   @Schema(description = "Reason for closing the non-association", required = true, example = "They are friends now")
-  val closureReason: String,
+  val closedReason: String,
   @Schema(description = "Date and time of the closure, if not provided will default to today's time", required = false, example = "2023-06-07", defaultValue = "now")
-  val dateOfClosure: LocalDateTime? = null,
+  val closedAt: LocalDateTime? = null,
   @Schema(description = "The username of the member of staff requesting the closure, if not provided will use the user in the JWT access token", required = false, example = "ASMITH")
-  val staffMemberRequestingClosure: String? = null,
+  val closedBy: String? = null,
 )
 
 /**
