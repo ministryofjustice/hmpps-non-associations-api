@@ -170,14 +170,14 @@ class HmppsNonAssociationsApiExceptionHandler {
 
   @ExceptionHandler(OpenNonAssociationAlreadyExistsException::class)
   fun handleOpenNonAssociationAlreadyExistsException(e: OpenNonAssociationAlreadyExistsException): ResponseEntity<ErrorResponse?>? {
-    log.debug("Non association already exists for these prisoners that is open: {}", e.message)
+    log.debug("Non-association already exists for these prisoners that is open: {}", e.message)
     return ResponseEntity
       .status(HttpStatus.BAD_REQUEST)
       .body(
         ErrorResponse(
           status = HttpStatus.BAD_REQUEST,
           errorCode = ErrorCode.OpenNonAssociationAlreadyExist,
-          userMessage = "Non association already exists for these prisoners that is open: ${e.message}",
+          userMessage = "Non-association already exists for these prisoners that is open: ${e.message}",
           developerMessage = e.message,
         ),
       )

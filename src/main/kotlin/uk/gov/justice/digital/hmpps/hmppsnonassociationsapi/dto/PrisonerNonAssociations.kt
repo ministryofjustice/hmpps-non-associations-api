@@ -6,12 +6,9 @@ import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
 /**
- * Non-associations for a given prisoner
- *
- * TODO: This is WIP at the moment. It may share some similarities with the
- * format currently returned by NOMIS/Prison API but it's a distinct type
- * and will likely differ.
+ * A list of non-associations for a given prisoner
  */
+@Schema(description = "List of non-associations for a given prisoner")
 data class PrisonerNonAssociations(
   @Schema(description = "Prisoner number", required = true, example = "A1234BC")
   val prisonerNumber: String,
@@ -34,23 +31,24 @@ data class PrisonerNonAssociations(
 )
 
 /**
- * Details about a single non-association and link to the other prisoner involved
+ * Details about a single non-association in a list and link to the other prisoner involved
  */
+@Schema(description = "An item in a list of non-associations for a given prisoner")
 data class PrisonerNonAssociation(
   @Schema(description = "ID of the non-association", required = true, example = "42")
   val id: Long,
 
   @Schema(description = "This prisoner’s role code in the non-association", required = true, example = "VICTIM")
-  val roleCode: Role,
+  val role: Role,
   @Schema(description = "This prisoner’s role description in the non-association", required = true, example = "Victim")
   val roleDescription: String,
   @Schema(description = "Reason code why these prisoners should be kept apart", required = true, example = "BULLYING")
-  val reasonCode: Reason,
+  val reason: Reason,
   @Schema(description = "Reason description why these prisoners should be kept apart", required = true, example = "Bullying")
   val reasonDescription: String,
-  @Schema(description = "The non-association restriction type code", required = true, example = "CELL")
-  val restrictionTypeCode: RestrictionType,
-  @Schema(description = "The non-association restriction description", required = true, example = "Do Not Locate in Same Cell")
+  @Schema(description = "Location-based restriction code", required = true, example = "CELL")
+  val restrictionType: RestrictionType,
+  @Schema(description = "Location-based restriction description", required = true, example = "Cell only")
   val restrictionTypeDescription: String,
 
   @Schema(description = "Explanation of why prisoners are non-associated", required = true, example = "John and Luke always end up fighting")
@@ -83,11 +81,12 @@ data class PrisonerNonAssociation(
 /**
  * Details about the other prisoner to non-associate with
  */
+@Schema(description = "Other prisoner’s details for an item in a list of non-associations")
 data class OtherPrisonerDetails(
   @Schema(description = "Prisoner number", required = true, example = "D5678EF")
   val prisonerNumber: String,
   @Schema(description = "Other prisoner’s role code in the non-association", required = true, example = "PERPETRATOR")
-  val roleCode: Role,
+  val role: Role,
   @Schema(description = "Other prisoner’s role description in the non-association", required = true, example = "Perpetrator")
   val roleDescription: String,
   @Schema(description = "First name", required = true, example = "Joseph")
@@ -168,11 +167,11 @@ private fun List<NonAssociationJPA>.mapPrisonerNonAssociationItems(
 
     PrisonerNonAssociation(
       id = nonna.id ?: throw Exception("Only persisted non-associations can by used to build a PrisonerNonAssociations instance"),
-      roleCode = role,
+      role = role,
       roleDescription = role.description,
-      reasonCode = nonna.reason,
+      reason = nonna.reason,
       reasonDescription = nonna.reason.description,
-      restrictionTypeCode = nonna.restrictionType,
+      restrictionType = nonna.restrictionType,
       restrictionTypeDescription = nonna.restrictionType.description,
       comment = nonna.comment,
       authorisedBy = nonna.authorisedBy ?: "",
@@ -187,7 +186,7 @@ private fun List<NonAssociationJPA>.mapPrisonerNonAssociationItems(
 
       otherPrisonerDetails = OtherPrisonerDetails(
         prisonerNumber = otherPrisoner.prisonerNumber,
-        roleCode = otherRole,
+        role = otherRole,
         roleDescription = otherRole.description,
         firstName = otherPrisoner.firstName,
         lastName = otherPrisoner.lastName,

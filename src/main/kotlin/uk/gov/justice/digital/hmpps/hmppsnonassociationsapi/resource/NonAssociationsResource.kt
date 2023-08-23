@@ -345,7 +345,7 @@ class NonAssociationsResource(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Non association updated and returned",
+        description = "Non-association updated and returned",
       ),
       ApiResponse(
         responseCode = "401",
@@ -385,7 +385,7 @@ class NonAssociationsResource(
     responses = [
       ApiResponse(
         responseCode = "204",
-        description = "Non association deleted",
+        description = "Non-association deleted",
       ),
       ApiResponse(
         responseCode = "401",

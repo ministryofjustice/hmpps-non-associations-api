@@ -14,17 +14,25 @@ data class NonAssociation(
 
   @Schema(description = "Prisoner number to not associate", required = true, example = "A1234BC")
   val firstPrisonerNumber: String,
-  @Schema(description = "This prisoner’s role in the non-association", required = true, example = "VICTIM")
+  @Schema(description = "This prisoner’s role code in the non-association", required = true, example = "VICTIM")
   val firstPrisonerRole: Role,
+  @Schema(description = "This prisoner’s role description in the non-association", required = true, example = "Victim")
+  val firstPrisonerRoleDescription: String,
   @Schema(description = "Prisoner number to not associate", required = true, example = "D5678EF")
   val secondPrisonerNumber: String,
-  @Schema(description = "Other prisoner’s role in the non-association", required = true, example = "PERPETRATOR")
+  @Schema(description = "Other prisoner’s role code in the non-association", required = true, example = "PERPETRATOR")
   val secondPrisonerRole: Role,
+  @Schema(description = "Other prisoner’s role description in the non-association", required = true, example = "Perpetrator")
+  val secondPrisonerRoleDescription: String,
 
-  @Schema(description = "Reason why these prisoners should be kept apart", required = true, example = "BULLYING")
+  @Schema(description = "Reason code why these prisoners should be kept apart", required = true, example = "BULLYING")
   val reason: Reason,
-  @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "CELL")
+  @Schema(description = "Reason description why these prisoners should be kept apart", required = true, example = "Bullying")
+  val reasonDescription: String,
+  @Schema(description = "Location-based restriction code", required = true, example = "CELL")
   val restrictionType: RestrictionType,
+  @Schema(description = "Location-based restriction description", required = true, example = "Cell only")
+  val restrictionTypeDescription: String,
 
   @Schema(description = "Explanation of why prisoners are non-associated", required = true, example = "John and Luke always end up fighting")
   val comment: String,
@@ -67,7 +75,7 @@ data class CreateNonAssociationRequest(
 
   @Schema(description = "Reason why these prisoners should be kept apart", required = true, example = "BULLYING")
   val reason: Reason,
-  @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "CELL")
+  @Schema(description = "Location-based restriction code", required = true, example = "CELL")
   val restrictionType: RestrictionType,
 
   @Schema(description = "Explanation of why prisoners are non-associated", required = true, example = "John and Luke always end up fighting")
@@ -101,10 +109,10 @@ data class PatchNonAssociationRequest(
 
   @Schema(description = "Reason why these prisoners should be kept apart", required = true, example = "BULLYING")
   val reason: Reason? = null,
-  @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "CELL")
+  @Schema(description = "Location-based restriction code", required = true, example = "CELL")
   val restrictionType: RestrictionType? = null,
 
-  @Schema(description = "Type of restriction, e.g. don't locate in the same cell", required = true, example = "John and Luke always end up fighting")
+  @Schema(description = "Explanation of why prisoners are non-associated", required = true, example = "John and Luke always end up fighting")
   val comment: String? = null,
 )
 

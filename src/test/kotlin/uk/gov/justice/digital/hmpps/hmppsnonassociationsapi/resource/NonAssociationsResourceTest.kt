@@ -210,10 +210,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         {
           "firstPrisonerNumber": "${request.firstPrisonerNumber}",
           "firstPrisonerRole": "${request.firstPrisonerRole}",
+          "firstPrisonerRoleDescription": "${request.firstPrisonerRole.description}",
           "secondPrisonerNumber": "${request.secondPrisonerNumber}",
           "secondPrisonerRole": "${request.secondPrisonerRole}",
+          "secondPrisonerRoleDescription": "${request.secondPrisonerRole.description}",
           "reason": "${request.reason}",
+          "reasonDescription": "${request.reason.description}",
           "restrictionType": "${request.restrictionType}",
+          "restrictionTypeDescription": "${request.restrictionType.description}",
           "comment": "${request.comment}",
           "authorisedBy": "$expectedUsername",
           "updatedBy": "$expectedUsername",
@@ -448,10 +452,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         {
           "firstPrisonerNumber": "${nonAssociation.firstPrisonerNumber}",
           "firstPrisonerRole": "${nonAssociation.firstPrisonerRole}",
+          "firstPrisonerRoleDescription": "${nonAssociation.firstPrisonerRole.description}",
           "secondPrisonerNumber": "${nonAssociation.secondPrisonerNumber}",
           "secondPrisonerRole": "${nonAssociation.secondPrisonerRole}",
+          "secondPrisonerRoleDescription": "${nonAssociation.secondPrisonerRole.description}",
           "reason": "${nonAssociation.reason}",
+          "reasonDescription": "${nonAssociation.reason.description}",
           "restrictionType": "${nonAssociation.restrictionType}",
+          "restrictionTypeDescription": "${nonAssociation.restrictionType.description}",
           "comment": "$updatedComment",
           "authorisedBy": "${nonAssociation.authorisedBy}",
           "updatedBy": "$expectedUsername",
@@ -919,10 +927,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         {
           "firstPrisonerNumber": "${nonAssociation.firstPrisonerNumber}",
           "firstPrisonerRole": "${nonAssociation.firstPrisonerRole}",
+          "firstPrisonerRoleDescription": "${nonAssociation.firstPrisonerRole.description}",
           "secondPrisonerNumber": "${nonAssociation.secondPrisonerNumber}",
           "secondPrisonerRole": "${nonAssociation.secondPrisonerRole}",
+          "secondPrisonerRoleDescription": "${nonAssociation.secondPrisonerRole.description}",
           "reason": "${nonAssociation.reason}",
+          "reasonDescription": "${nonAssociation.reason.description}",
           "restrictionType": "${nonAssociation.restrictionType}",
+          "restrictionTypeDescription": "${nonAssociation.restrictionType.description}",
           "comment": "${nonAssociation.comment}",
           "authorisedBy": "${nonAssociation.authorisedBy}",
           "updatedBy": "$expectedUsername",
@@ -1158,9 +1170,12 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .jsonPath("id").isEqualTo(existingNonAssociation.id!!)
         .jsonPath("firstPrisonerNumber").isEqualTo(existingNonAssociation.firstPrisonerNumber)
         .jsonPath("firstPrisonerRole").isEqualTo(existingNonAssociation.firstPrisonerRole.toString())
+        .jsonPath("firstPrisonerRoleDescription").isEqualTo(existingNonAssociation.firstPrisonerRole.description)
         .jsonPath("secondPrisonerNumber").isEqualTo(existingNonAssociation.secondPrisonerNumber)
         .jsonPath("secondPrisonerRole").isEqualTo(existingNonAssociation.secondPrisonerRole.toString())
+        .jsonPath("secondPrisonerRoleDescription").isEqualTo(existingNonAssociation.secondPrisonerRole.description)
         .jsonPath("restrictionType").isEqualTo(existingNonAssociation.restrictionType.toString())
+        .jsonPath("restrictionTypeDescription").isEqualTo(existingNonAssociation.restrictionType.description)
         .jsonPath("comment").isEqualTo(existingNonAssociation.comment)
     }
   }
@@ -1307,11 +1322,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "nonAssociations": [
                 {
                   "id": ${openNonAssociation.id},
-                  "roleCode": "${openNonAssociation.secondPrisonerRole}",
+                  "role": "${openNonAssociation.secondPrisonerRole}",
                   "roleDescription": "${openNonAssociation.secondPrisonerRole.description}",
-                  "reasonCode": "${openNonAssociation.reason}",
+                  "reason": "${openNonAssociation.reason}",
                   "reasonDescription": "${openNonAssociation.reason.description}",
-                  "restrictionTypeCode": "${openNonAssociation.restrictionType}",
+                  "restrictionType": "${openNonAssociation.restrictionType}",
                   "restrictionTypeDescription": "${openNonAssociation.restrictionType.description}",
                   "comment": "${openNonAssociation.comment}",
                   "authorisedBy": "${openNonAssociation.authorisedBy}",
@@ -1322,7 +1337,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "closedAt": null,
                   "otherPrisonerDetails": {
                     "prisonerNumber": "${prisonerJohn.prisonerNumber}",
-                    "roleCode": "${openNonAssociation.firstPrisonerRole}",
+                    "role": "${openNonAssociation.firstPrisonerRole}",
                     "roleDescription": "${openNonAssociation.firstPrisonerRole.description}",
                     "firstName": "${prisonerJohn.firstName}",
                     "lastName": "${prisonerJohn.lastName}",
@@ -1395,11 +1410,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "nonAssociations": [
                 {
                   "id": ${openNonAssociation.id},
-                  "roleCode": "${openNonAssociation.secondPrisonerRole}",
+                  "role": "${openNonAssociation.secondPrisonerRole}",
                   "roleDescription": "${openNonAssociation.secondPrisonerRole.description}",
-                  "reasonCode": "${openNonAssociation.reason}",
+                  "reason": "${openNonAssociation.reason}",
                   "reasonDescription": "${openNonAssociation.reason.description}",
-                  "restrictionTypeCode": "${openNonAssociation.restrictionType}",
+                  "restrictionType": "${openNonAssociation.restrictionType}",
                   "restrictionTypeDescription": "${openNonAssociation.restrictionType.description}",
                   "comment": "${openNonAssociation.comment}",
                   "authorisedBy": "${openNonAssociation.authorisedBy}",
@@ -1410,7 +1425,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "closedAt": null,
                   "otherPrisonerDetails": {
                     "prisonerNumber": "${prisonerJohn.prisonerNumber}",
-                    "roleCode": "${openNonAssociation.firstPrisonerRole}",
+                    "role": "${openNonAssociation.firstPrisonerRole}",
                     "roleDescription": "${openNonAssociation.firstPrisonerRole.description}",
                     "firstName": "${prisonerJohn.firstName}",
                     "lastName": "${prisonerJohn.lastName}",
@@ -1421,11 +1436,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                 },
                 {
                   "id": ${closedNonAssociation.id},
-                  "roleCode": "${closedNonAssociation.firstPrisonerRole}",
+                  "role": "${closedNonAssociation.firstPrisonerRole}",
                   "roleDescription": "${closedNonAssociation.firstPrisonerRole.description}",
-                  "reasonCode": "${closedNonAssociation.reason}",
+                  "reason": "${closedNonAssociation.reason}",
                   "reasonDescription": "${closedNonAssociation.reason.description}",
-                  "restrictionTypeCode": "${closedNonAssociation.restrictionType}",
+                  "restrictionType": "${closedNonAssociation.restrictionType}",
                   "restrictionTypeDescription": "${closedNonAssociation.restrictionType.description}",
                   "comment": "${closedNonAssociation.comment}",
                   "authorisedBy": "${closedNonAssociation.authorisedBy}",
@@ -1435,7 +1450,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "closedBy": "CLOSE_USER",
                   "otherPrisonerDetails": {
                     "prisonerNumber": "${prisonerJosh.prisonerNumber}",
-                    "roleCode": "${closedNonAssociation.secondPrisonerRole}",
+                    "role": "${closedNonAssociation.secondPrisonerRole}",
                     "roleDescription": "${closedNonAssociation.secondPrisonerRole.description}",
                     "firstName": "${prisonerJosh.firstName}",
                     "lastName": "${prisonerJosh.lastName}",
@@ -1508,11 +1523,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "nonAssociations": [
                 {
                   "id": ${closedNonAssociation.id},
-                  "roleCode": "${closedNonAssociation.firstPrisonerRole}",
+                  "role": "${closedNonAssociation.firstPrisonerRole}",
                   "roleDescription": "${closedNonAssociation.firstPrisonerRole.description}",
-                  "reasonCode": "${closedNonAssociation.reason}",
+                  "reason": "${closedNonAssociation.reason}",
                   "reasonDescription": "${closedNonAssociation.reason.description}",
-                  "restrictionTypeCode": "${closedNonAssociation.restrictionType}",
+                  "restrictionType": "${closedNonAssociation.restrictionType}",
                   "restrictionTypeDescription": "${closedNonAssociation.restrictionType.description}",
                   "comment": "${closedNonAssociation.comment}",
                   "authorisedBy": "${closedNonAssociation.authorisedBy}",
@@ -1522,7 +1537,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "closedBy": "CLOSE_USER",
                   "otherPrisonerDetails": {
                     "prisonerNumber": "${prisonerJosh.prisonerNumber}",
-                    "roleCode": "${closedNonAssociation.secondPrisonerRole}",
+                    "role": "${closedNonAssociation.secondPrisonerRole}",
                     "roleDescription": "${closedNonAssociation.secondPrisonerRole.description}",
                     "firstName": "${prisonerJosh.firstName}",
                     "lastName": "${prisonerJosh.lastName}",
@@ -1595,11 +1610,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "nonAssociations": [
                 {
                   "id": ${openNonAssociation.id},
-                  "roleCode": "${openNonAssociation.secondPrisonerRole}",
+                  "role": "${openNonAssociation.secondPrisonerRole}",
                   "roleDescription": "${openNonAssociation.secondPrisonerRole.description}",
-                  "reasonCode": "${openNonAssociation.reason}",
+                  "reason": "${openNonAssociation.reason}",
                   "reasonDescription": "${openNonAssociation.reason.description}",
-                  "restrictionTypeCode": "${openNonAssociation.restrictionType}",
+                  "restrictionType": "${openNonAssociation.restrictionType}",
                   "restrictionTypeDescription": "${openNonAssociation.restrictionType.description}",
                   "comment": "${openNonAssociation.comment}",
                   "authorisedBy": "${openNonAssociation.authorisedBy}",
@@ -1610,7 +1625,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "closedAt": null,
                   "otherPrisonerDetails": {
                     "prisonerNumber": "${prisonerJohn.prisonerNumber}",
-                    "roleCode": "${openNonAssociation.firstPrisonerRole}",
+                    "role": "${openNonAssociation.firstPrisonerRole}",
                     "roleDescription": "${openNonAssociation.firstPrisonerRole.description}",
                     "firstName": "${prisonerJohn.firstName}",
                     "lastName": "${prisonerJohn.lastName}",
@@ -1621,11 +1636,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                 },
                 {
                   "id": ${otherPrisonNonAssociation.id},
-                  "roleCode": "${otherPrisonNonAssociation.secondPrisonerRole}",
+                  "role": "${otherPrisonNonAssociation.secondPrisonerRole}",
                   "roleDescription": "${otherPrisonNonAssociation.secondPrisonerRole.description}",
-                  "reasonCode": "${otherPrisonNonAssociation.reason}",
+                  "reason": "${otherPrisonNonAssociation.reason}",
                   "reasonDescription": "${otherPrisonNonAssociation.reason.description}",
-                  "restrictionTypeCode": "${otherPrisonNonAssociation.restrictionType}",
+                  "restrictionType": "${otherPrisonNonAssociation.restrictionType}",
                   "restrictionTypeDescription": "${otherPrisonNonAssociation.restrictionType.description}",
                   "comment": "${otherPrisonNonAssociation.comment}",
                   "authorisedBy": "${otherPrisonNonAssociation.authorisedBy}",
@@ -1636,7 +1651,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
                   "closedAt": null,
                   "otherPrisonerDetails": {
                     "prisonerNumber": "${prisonerEdward.prisonerNumber}",
-                    "roleCode": "${otherPrisonNonAssociation.firstPrisonerRole}",
+                    "role": "${otherPrisonNonAssociation.firstPrisonerRole}",
                     "roleDescription": "${otherPrisonNonAssociation.firstPrisonerRole.description}",
                     "firstName": "${prisonerEdward.firstName}",
                     "lastName": "${prisonerEdward.lastName}",
@@ -1818,10 +1833,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             {
               "firstPrisonerNumber": "A1234BC",
               "firstPrisonerRole": "VICTIM",
+              "firstPrisonerRoleDescription": "Victim",
               "secondPrisonerNumber": "D5678EF",
               "secondPrisonerRole": "PERPETRATOR",
+              "secondPrisonerRoleDescription": "Perpetrator",
               "reason": "BULLYING",
+              "reasonDescription": "Bullying",
               "restrictionType": "CELL",
+              "restrictionTypeDescription": "Cell only",
               "comment": "They keep fighting",
               "authorisedBy": "USER_1",
               "updatedBy": "A_TEST_USER",
@@ -1858,10 +1877,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             {
               "firstPrisonerNumber": "A1234BC",
               "firstPrisonerRole": "VICTIM",
+              "firstPrisonerRoleDescription": "Victim",
               "secondPrisonerNumber": "D5678EF",
               "secondPrisonerRole": "PERPETRATOR",
+              "secondPrisonerRoleDescription": "Perpetrator",
               "reason": "BULLYING",
+              "reasonDescription": "Bullying",
               "restrictionType": "CELL",
+              "restrictionTypeDescription": "Cell only",
               "comment": "They keep fighting",
               "authorisedBy": "USER_1",
               "updatedBy": "A_TEST_USER",
@@ -1873,10 +1896,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             {
               "firstPrisonerNumber": "A1234BC",
               "firstPrisonerRole": "VICTIM",
+              "firstPrisonerRoleDescription": "Victim",
               "secondPrisonerNumber": "D5678EF",
               "secondPrisonerRole": "PERPETRATOR",
+              "secondPrisonerRoleDescription": "Perpetrator",
               "reason": "BULLYING",
+              "reasonDescription": "Bullying",
               "restrictionType": "CELL",
+              "restrictionTypeDescription": "Cell only",
               "comment": "They keep fighting",
               "authorisedBy": "USER_1",
               "updatedBy": "A_TEST_USER",
@@ -1913,10 +1940,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             {
               "firstPrisonerNumber": "A1234BC",
               "firstPrisonerRole": "VICTIM",
+              "firstPrisonerRoleDescription": "Victim",
               "secondPrisonerNumber": "D5678EF",
               "secondPrisonerRole": "PERPETRATOR",
+              "secondPrisonerRoleDescription": "Perpetrator",
               "reason": "BULLYING",
+              "reasonDescription": "Bullying",
               "restrictionType": "CELL",
+              "restrictionTypeDescription": "Cell only",
               "comment": "They keep fighting",
               "authorisedBy": "USER_1",
               "updatedBy": "A_TEST_USER",
