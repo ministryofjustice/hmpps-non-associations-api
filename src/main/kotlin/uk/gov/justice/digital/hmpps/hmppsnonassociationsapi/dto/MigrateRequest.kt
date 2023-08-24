@@ -3,6 +3,8 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NO_CLOSURE_REASON_PROVIDED
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NO_COMMENT_PROVIDED
 import java.time.LocalDate
 
 @Schema(description = "Migrate Request")
@@ -56,12 +58,12 @@ data class MigrateRequest(
       secondPrisonerRole = secondPrisonerRole,
       reason = reason,
       restrictionType = restrictionType.toRestrictionType(),
-      comment = comment ?: "",
+      comment = comment ?: NO_COMMENT_PROVIDED,
       authorisedBy = authorisedBy,
       isClosed = !active,
       closedAt = if (active) { null } else { expiryDate?.atStartOfDay() }, // TODO: can this be in the future?
       closedBy = if (active) { null } else { SYSTEM_USERNAME },
-      closedReason = if (active) { null } else { "MIGRATION" },
+      closedReason = if (active) { null } else { NO_CLOSURE_REASON_PROVIDED },
       updatedBy = SYSTEM_USERNAME,
     )
   }
