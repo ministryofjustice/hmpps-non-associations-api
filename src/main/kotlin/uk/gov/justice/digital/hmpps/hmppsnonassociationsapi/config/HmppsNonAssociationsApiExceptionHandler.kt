@@ -204,9 +204,9 @@ enum class ErrorCode(val errorCode: Int) {
 data class ErrorResponse(
   @Schema(description = "HTTP status code", example = "500", required = true)
   val status: Int,
-  @Schema(description = "When present, uniquely identifies the type of error making it easier for clients to discriminate without relying on error description; see `uk.gov.justice.digital.hmpps.incentivesapi.config.ErrorResponse` enumeration in hmpps-incentives-api", example = "123", required = false)
+  @Schema(description = "When present, uniquely identifies the type of error making it easier for clients to discriminate without relying on error description; see `uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse` enumeration in hmpps-non-associations-api", example = "101", required = false)
   val errorCode: Int? = null,
-  @Schema(description = "User message for the error", example = "No incentive level found for code `ABC`", required = false)
+  @Schema(description = "User message for the error", example = "No non-association level found for ID `324234`", required = false)
   val userMessage: String? = null,
   @Schema(description = "More detailed error message", example = "[Details, sometimes a stack trace]", required = false)
   val developerMessage: String? = null,
