@@ -35,6 +35,7 @@ class NonAssociationMergeServiceIntTest : TestBase() {
         firstPrisonerNumber = "A1234AA",
         secondPrisonerNumber = "X1234AA",
         createTime = createTime,
+        clock = clock,
       ),
     )
     repository.save(
@@ -42,6 +43,7 @@ class NonAssociationMergeServiceIntTest : TestBase() {
         firstPrisonerNumber = "X1234AB",
         secondPrisonerNumber = "A1234AA",
         createTime = createTime,
+        clock = clock,
       ),
     )
     repository.save(
@@ -49,6 +51,7 @@ class NonAssociationMergeServiceIntTest : TestBase() {
         firstPrisonerNumber = "B1234AA",
         secondPrisonerNumber = "X1234AA",
         createTime = createTime,
+        clock = clock,
       ),
     )
     repository.save(
@@ -56,6 +59,7 @@ class NonAssociationMergeServiceIntTest : TestBase() {
         firstPrisonerNumber = "X1234AB",
         secondPrisonerNumber = "B1234AA",
         createTime = createTime,
+        clock = clock,
       ),
     )
     repository.save(
@@ -63,6 +67,7 @@ class NonAssociationMergeServiceIntTest : TestBase() {
         firstPrisonerNumber = "A1234AA",
         secondPrisonerNumber = "B1234AA",
         createTime = createTime,
+        clock = clock,
       ),
     )
     repository.save(
@@ -70,6 +75,7 @@ class NonAssociationMergeServiceIntTest : TestBase() {
         firstPrisonerNumber = "A1234AA",
         secondPrisonerNumber = "C1234FF",
         createTime = createTime,
+        clock = clock,
       ),
     )
     repository.save(
@@ -77,6 +83,7 @@ class NonAssociationMergeServiceIntTest : TestBase() {
         firstPrisonerNumber = "D1234RR",
         secondPrisonerNumber = "A1234AA",
         createTime = createTime,
+        clock = clock,
       ),
     )
     repository.save(
@@ -84,6 +91,7 @@ class NonAssociationMergeServiceIntTest : TestBase() {
         firstPrisonerNumber = "B1234AA",
         secondPrisonerNumber = "A1234AA",
         createTime = createTime,
+        clock = clock,
       ),
     )
 
@@ -91,10 +99,10 @@ class NonAssociationMergeServiceIntTest : TestBase() {
 
     assertThat(mergedAssociations.toSet()).isEqualTo(
       setOf(
-        genNonAssociation(firstPrisonerNumber = "B1234AA", secondPrisonerNumber = "X1234AA", createTime = createTime),
-        genNonAssociation(firstPrisonerNumber = "X1234AB", secondPrisonerNumber = "B1234AA", createTime = createTime),
-        genNonAssociation(firstPrisonerNumber = "B1234AA", secondPrisonerNumber = "C1234FF", createTime = createTime),
-        genNonAssociation(firstPrisonerNumber = "D1234RR", secondPrisonerNumber = "B1234AA", createTime = createTime),
+        genNonAssociation(firstPrisonerNumber = "B1234AA", secondPrisonerNumber = "X1234AA", createTime = createTime, clock = clock),
+        genNonAssociation(firstPrisonerNumber = "X1234AB", secondPrisonerNumber = "B1234AA", createTime = createTime, clock = clock),
+        genNonAssociation(firstPrisonerNumber = "B1234AA", secondPrisonerNumber = "C1234FF", createTime = createTime, clock = clock),
+        genNonAssociation(firstPrisonerNumber = "D1234RR", secondPrisonerNumber = "B1234AA", createTime = createTime, clock = clock),
       ),
     )
 

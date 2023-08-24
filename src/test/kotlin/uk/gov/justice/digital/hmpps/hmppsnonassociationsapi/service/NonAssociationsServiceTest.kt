@@ -16,14 +16,12 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssocia
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListOptions
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationsSort
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociation
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchPrisoners
-import java.time.Clock
-import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation as NonAssociationDTO
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
@@ -34,10 +32,7 @@ class NonAssociationsServiceTest {
   private val prisonApiService: PrisonApiService = mock()
   private val authenticationFacade: AuthenticationFacade = mock()
   private val telemetryClient: TelemetryClient = mock()
-  private val clock: Clock = Clock.fixed(
-    Instant.parse("2023-07-15T12:34:56+00:00"),
-    ZoneId.of("Europe/London"),
-  )
+
   private val featureFlagsConfig: FeatureFlagsConfig = mock()
   private val service = NonAssociationsService(
     nonAssociationsRepository,
@@ -46,7 +41,7 @@ class NonAssociationsServiceTest {
     prisonApiService,
     telemetryClient,
     featureFlagsConfig,
-    clock,
+    TestBase.clock,
   )
 
   @Test
@@ -99,7 +94,7 @@ class NonAssociationsServiceTest {
 
     @Test
     fun `by default order`() {
-      var createTime = LocalDateTime.now(clock)
+      var createTime = LocalDateTime.now(TestBase.clock)
       val nonAssociations = otherPrisoners.mapIndexed { index, otherPrisoner ->
         createTime = createTime.plusDays(1)
         genNonAssociation(
@@ -120,7 +115,7 @@ class NonAssociationsServiceTest {
 
     @Test
     fun `by updated date in default direction`() {
-      var createTime = LocalDateTime.now(clock)
+      var createTime = LocalDateTime.now(TestBase.clock)
       val nonAssociations = otherPrisoners.mapIndexed { index, otherPrisoner ->
         createTime = createTime.plusDays(1)
         genNonAssociation(
@@ -143,7 +138,7 @@ class NonAssociationsServiceTest {
 
     @Test
     fun `by updated date in specified direction`() {
-      var createTime = LocalDateTime.now(clock)
+      var createTime = LocalDateTime.now(TestBase.clock)
       val nonAssociations = otherPrisoners.mapIndexed { index, otherPrisoner ->
         createTime = createTime.plusDays(1)
         genNonAssociation(

@@ -26,7 +26,7 @@ class NonAssociationsMergeService(
     nonAssociationsRepository.findAllByPrisonerNumber(oldPrisonerNumber)
       .forEach { nonAssociation ->
 
-        log.debug("Looking at record $nonAssociation")
+        log.debug("Looking at record {}", nonAssociation)
         if (nonAssociation.firstPrisonerNumber == oldPrisonerNumber) {
           nonAssociationsRepository.findByFirstPrisonerNumberAndSecondPrisonerNumber(
             firstPrisonerNumber = newPrisonerNumber,

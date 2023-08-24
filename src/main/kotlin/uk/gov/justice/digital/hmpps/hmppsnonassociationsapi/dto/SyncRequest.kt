@@ -5,7 +5,9 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NO_CLOSURE_REASON_PROVIDED
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NO_COMMENT_PROVIDED
+import java.time.Clock
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Schema(description = "Upsert Sync Request")
 data class UpsertSyncRequest(
@@ -39,16 +41,13 @@ data class UpsertSyncRequest(
   @Schema(description = "Who authorised the non-association", required = false, example = "John Smith")
   val authorisedBy: String? = null,
 
-  @Schema(description = "Indicates that the NA is active", required = true, example = "false", defaultValue = "true")
-  val active: Boolean = true,
-
-  @Schema(description = "The date that the NA became active", required = false, example = "2023-05-09", defaultValue = "today")
-  val effectiveFromDate: LocalDate? = null,
+  @Schema(description = "The date that the NA became active", required = true, example = "2023-05-09", defaultValue = "today")
+  val effectiveFromDate: LocalDate,
 
   @Schema(description = "The date that the NA became inactive", required = false, example = "2026-05-09")
   val expiryDate: LocalDate? = null,
 ) {
-  fun toNewEntity(): NonAssociation {
+  fun toNewEntity(clock: Clock): NonAssociation {
     val (firstPrisonerRole, secondPrisonerRole, reason) = translateToRolesAndReason(firstPrisonerReason, secondPrisonerReason)
     return NonAssociation(
       id = null,
@@ -60,14 +59,26 @@ data class UpsertSyncRequest(
       restrictionType = restrictionType.toRestrictionType(),
       comment = comment ?: NO_COMMENT_PROVIDED,
       authorisedBy = authorisedBy,
-      isClosed = !active,
-      closedAt = if (active) { null } else { expiryDate?.atStartOfDay() }, // TODO: can this be in the future?
-      closedBy = if (active) { null } else { SYSTEM_USERNAME },
-      closedReason = if (active) { null } else { NO_CLOSURE_REASON_PROVIDED },
+      isClosed = isClosed(clock),
+      closedAt = if (isOpen(clock)) { null } else { expiryDate?.atStartOfDay() ?: LocalDateTime.now(clock) },
+      closedBy = if (isOpen(clock)) { null } else { authorisedBy ?: SYSTEM_USERNAME },
+      closedReason = if (isOpen(clock)) { null } else { NO_CLOSURE_REASON_PROVIDED },
+      whenCreated = effectiveFromDate.atStartOfDay(),
       updatedBy = SYSTEM_USERNAME,
     )
   }
 
+  fun isOpen(clock: Clock): Boolean {
+    return isWithinRange(LocalDate.now(clock), effectiveFromDate, expiryDate)
+  }
+
+  fun isClosed(clock: Clock): Boolean {
+    return !isOpen(clock)
+  }
+
+  private fun isWithinRange(testDate: LocalDate, startDate: LocalDate, endDate: LocalDate?): Boolean {
+    return testDate >= startDate && (endDate == null || testDate < endDate)
+  }
   override fun toString(): String {
     return "UpsertSyncRequest(firstPrisonerNumber='$firstPrisonerNumber', secondPrisonerNumber='$secondPrisonerNumber')"
   }

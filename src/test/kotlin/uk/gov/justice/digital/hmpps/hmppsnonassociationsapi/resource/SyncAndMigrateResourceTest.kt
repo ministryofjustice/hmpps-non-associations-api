@@ -8,7 +8,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteSyncRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyRestrictionType
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.MigrateRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.UpsertSyncRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
@@ -37,7 +36,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `without the correct role and scope responds 403 Forbidden`() {
-      val request = MigrateRequest(
+      val request = UpsertSyncRequest(
         firstPrisonerNumber = "C7777XX",
         firstPrisonerReason = LegacyReason.VIC,
         secondPrisonerNumber = "D7777XX",
@@ -45,7 +44,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         restrictionType = LegacyRestrictionType.CELL,
         comment = "They keep fighting",
         authorisedBy = "Me",
-        active = true,
+        effectiveFromDate = LocalDate.now(clock).minusDays(1),
       )
 
       // correct role, missing write scope
@@ -113,7 +112,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         ),
       )
 
-      val request = MigrateRequest(
+      val request = UpsertSyncRequest(
         firstPrisonerNumber = "C7777XX",
         firstPrisonerReason = LegacyReason.VIC,
         secondPrisonerNumber = "D7777XX",
@@ -121,7 +120,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         restrictionType = LegacyRestrictionType.CELL,
         comment = "This is a comment",
         authorisedBy = "Test",
-        active = true,
+        effectiveFromDate = LocalDate.now(clock).minusDays(1),
       )
 
       webTestClient.post()
@@ -139,7 +138,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `for a valid request migrates the non-association`() {
-      val request = MigrateRequest(
+      val request = UpsertSyncRequest(
         firstPrisonerNumber = "C7777XX",
         firstPrisonerReason = LegacyReason.VIC,
         secondPrisonerNumber = "D7777XX",
@@ -147,7 +146,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         restrictionType = LegacyRestrictionType.CELL,
         comment = "This is a comment",
         authorisedBy = "Test",
-        active = true,
+        effectiveFromDate = LocalDate.now(clock).minusDays(1),
       )
 
       val expectedResponse =
@@ -213,6 +212,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         restrictionType = LegacyRestrictionType.CELL,
         comment = "They keep fighting",
         authorisedBy = "Me",
+        effectiveFromDate = LocalDate.now(clock).minusDays(1),
       )
 
       // correct role, missing write scope
@@ -286,7 +286,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         secondPrisonerReason = LegacyReason.PER,
         restrictionType = LegacyRestrictionType.CELL,
         expiryDate = LocalDate.now(clock).minusDays(4),
-        active = true,
+        effectiveFromDate = LocalDate.now(clock).minusDays(1),
       )
 
       webTestClient.put()
@@ -311,7 +311,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         secondPrisonerReason = LegacyReason.PER,
         restrictionType = LegacyRestrictionType.CELL,
         expiryDate = LocalDate.now(clock).minusDays(4),
-        active = false,
+        effectiveFromDate = LocalDate.now(clock).minusDays(5),
       )
 
       val expectedResponse =
@@ -369,7 +369,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         secondPrisonerReason = LegacyReason.RIV,
         restrictionType = LegacyRestrictionType.WING,
         expiryDate = LocalDate.now(clock),
-        active = false,
+        effectiveFromDate = LocalDate.now(clock).minusDays(5),
         comment = "Its ok now",
         authorisedBy = "TEST",
       )
@@ -442,8 +442,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         firstPrisonerReason = LegacyReason.PER,
         secondPrisonerReason = LegacyReason.BUL,
         restrictionType = LegacyRestrictionType.WING,
-        expiryDate = LocalDate.now(clock),
-        active = true,
+        effectiveFromDate = LocalDate.now(clock),
         comment = "Its kicked off again",
         authorisedBy = "STAFF1",
       )
