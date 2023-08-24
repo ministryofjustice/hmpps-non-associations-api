@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.MigrateRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.UpsertSyncRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.SyncAndMigrateService
 
 @RestController
@@ -56,7 +56,7 @@ class MigrateResource(
   )
   fun migrate(
     @Valid @RequestBody
-    migrateRequest: MigrateRequest,
+    migrateRequest: UpsertSyncRequest,
   ): NonAssociation {
     return syncAndMigrateService.migrate(migrateRequest)
   }

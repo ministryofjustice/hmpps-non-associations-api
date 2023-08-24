@@ -5,7 +5,9 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
+import java.time.Clock
 import java.time.LocalDateTime
 
 /**
@@ -19,6 +21,7 @@ fun genNonAssociation(
   closed: Boolean = false,
   closedReason: String? = "Ok Now",
   authBy: String? = "TEST",
+  clock: Clock = TestBase.clock,
 ) = NonAssociation(
   id = id,
   firstPrisonerNumber = firstPrisonerNumber,
@@ -33,7 +36,7 @@ fun genNonAssociation(
   whenCreated = createTime,
   updatedBy = authBy ?: "A_USER",
   isClosed = closed,
-  closedAt = if (closed) { LocalDateTime.now() } else { null },
+  closedAt = if (closed) { LocalDateTime.now(clock) } else { null },
   closedBy = if (closed) { "A USER" } else { null },
   closedReason = if (closed) { closedReason } else { null },
 )

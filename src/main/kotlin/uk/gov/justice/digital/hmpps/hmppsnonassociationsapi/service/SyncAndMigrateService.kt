@@ -5,15 +5,17 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.OpenNonAssociationAlreadyExistsException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteSyncRequest
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.MigrateRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListInclusion
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.UpsertSyncRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.translateToRolesAndReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAnyBetweenPrisonerNumbers
+import java.time.Clock
+import java.time.LocalDateTime
 
 const val NO_CLOSURE_REASON_PROVIDED = "No closure reason provided"
 const val NO_COMMENT_PROVIDED = "No comment provided"
@@ -23,6 +25,7 @@ const val NO_COMMENT_PROVIDED = "No comment provided"
 class SyncAndMigrateService(
   private val nonAssociationsRepository: NonAssociationsRepository,
   private val telemetryClient: TelemetryClient,
+  private val clock: Clock,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -46,27 +49,18 @@ class SyncAndMigrateService(
         firstPrisonerRole = firstPrisonerRoleUpdate
         secondPrisonerRole = secondPrisonerRoleUpdate
         reason = reasonUpdate
-        // TODO: can we have a better fall back message?
         comment = syncRequest.comment ?: NO_COMMENT_PROVIDED
         authorisedBy = syncRequest.authorisedBy
-        isClosed = !syncRequest.active
-        closedAt = if (!syncRequest.active) {
-          syncRequest.expiryDate?.atStartOfDay()
-        } else {
-          null
-        }
-        if (syncRequest.active) {
+        isClosed = syncRequest.isClosed(clock)
+
+        if (syncRequest.isOpen(clock)) {
           closedReason = null
           closedBy = null
+          closedAt = null
         } else {
-          if (closedReason == null) {
-            // TODO: can we have a better message?
-            closedReason = NO_CLOSURE_REASON_PROVIDED
-          }
-          if (closedBy == null) {
-            // TODO: perhaps system user would be more appropriate here
-            closedBy = syncRequest.authorisedBy
-          }
+          closedReason = NO_CLOSURE_REASON_PROVIDED
+          closedBy = syncRequest.authorisedBy ?: SYSTEM_USERNAME
+          closedAt = syncRequest.expiryDate?.atStartOfDay() ?: LocalDateTime.now(clock)
         }
         toDto().also {
           log.info("Updated Non-association [${it.id}] between ${it.firstPrisonerNumber} and ${it.secondPrisonerNumber}")
@@ -82,7 +76,7 @@ class SyncAndMigrateService(
         }
       }
     } else {
-      nonAssociationsRepository.save(syncRequest.toNewEntity()).toDto().also {
+      nonAssociationsRepository.save(syncRequest.toNewEntity(clock)).toDto().also {
         log.info("Created Non-association [${it.id}] between ${it.firstPrisonerNumber} and ${it.secondPrisonerNumber}")
         telemetryClient.trackEvent(
           "Sync (Create)",
@@ -117,8 +111,8 @@ class SyncAndMigrateService(
     )
   }
 
-  fun migrate(migrateRequest: MigrateRequest): NonAssociation {
-    if (migrateRequest.active) {
+  fun migrate(migrateRequest: UpsertSyncRequest): NonAssociation {
+    if (migrateRequest.isOpen(clock)) {
       val prisonersToKeepApart = listOf(
         migrateRequest.firstPrisonerNumber,
         migrateRequest.secondPrisonerNumber,
@@ -128,7 +122,7 @@ class SyncAndMigrateService(
       }
     }
 
-    return nonAssociationsRepository.save(migrateRequest.toNewEntity()).toDto().also {
+    return nonAssociationsRepository.save(migrateRequest.toNewEntity(clock)).toDto().also {
       log.info("Migrated Non-association [$migrateRequest]")
       telemetryClient.trackEvent(
         "Migrate",
