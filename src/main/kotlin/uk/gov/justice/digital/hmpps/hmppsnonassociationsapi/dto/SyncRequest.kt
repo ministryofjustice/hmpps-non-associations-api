@@ -11,6 +11,9 @@ import java.time.LocalDateTime
 
 @Schema(description = "Upsert Sync Request")
 data class UpsertSyncRequest(
+  @Schema(description = "ID of the non-association, if provided an update will be performed", required = false, example = "234233")
+  val id: Long? = null,
+
   @Schema(description = "Prisoner number to not associate", required = true, example = "A1234BC")
   val firstPrisonerNumber: String,
   @Schema(

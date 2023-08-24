@@ -16,6 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAs
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAnyBetweenPrisonerNumbers
 import java.time.Clock
 import java.time.LocalDateTime
+import kotlin.jvm.optionals.getOrNull
 
 const val NO_CLOSURE_REASON_PROVIDED = "No closure reason provided"
 const val NO_COMMENT_PROVIDED = "No comment provided"
@@ -36,50 +37,64 @@ class SyncAndMigrateService(
       syncRequest.firstPrisonerNumber,
       syncRequest.secondPrisonerNumber,
     )
-    val existingRecords =
-      nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonersToKeepApart, NonAssociationListInclusion.ALL)
-    val latestClosedRecord = existingRecords.filter { na -> na.isClosed }.maxByOrNull { na -> na.whenUpdated }
-    val recordToUpdate = existingRecords.firstOrNull { na -> na.isOpen } ?: latestClosedRecord
 
+    val recordToUpdate = if (syncRequest.id != null) {
+      nonAssociationsRepository.findById(syncRequest.id).getOrNull()
+    } else {
+      val existingRecords =
+        nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonersToKeepApart, NonAssociationListInclusion.ALL)
+      val latestClosedRecord = existingRecords.filter { na -> na.isClosed }.maxByOrNull { na -> na.whenUpdated }
+      existingRecords.firstOrNull { na -> na.isOpen } ?: latestClosedRecord
+    }
     return if (recordToUpdate != null) {
-      val (firstPrisonerRoleUpdate, secondPrisonerRoleUpdate, reasonUpdate) = translateToRolesAndReason(syncRequest.firstPrisonerReason, syncRequest.secondPrisonerReason)
-
-      with(recordToUpdate) {
-        restrictionType = syncRequest.restrictionType.toRestrictionType()
-        firstPrisonerRole = firstPrisonerRoleUpdate
-        secondPrisonerRole = secondPrisonerRoleUpdate
-        reason = reasonUpdate
-        comment = syncRequest.comment ?: NO_COMMENT_PROVIDED
-        authorisedBy = syncRequest.authorisedBy
-        isClosed = syncRequest.isClosed(clock)
-
-        if (syncRequest.isOpen(clock)) {
-          closedReason = null
-          closedBy = null
-          closedAt = null
-        } else {
-          closedReason = NO_CLOSURE_REASON_PROVIDED
-          closedBy = syncRequest.authorisedBy ?: SYSTEM_USERNAME
-          closedAt = syncRequest.expiryDate?.atStartOfDay() ?: LocalDateTime.now(clock)
-        }
-        toDto().also {
-          log.info("Updated Non-association [${it.id}] between ${it.firstPrisonerNumber} and ${it.secondPrisonerNumber}")
-          telemetryClient.trackEvent(
-            "Sync (Update)",
-            mapOf(
-              "id" to it.id.toString(),
-              "firstPrisonerNumber" to syncRequest.firstPrisonerNumber,
-              "secondPrisonerNumber" to syncRequest.secondPrisonerNumber,
-            ),
-            null,
-          )
-        }
-      }
+      updateRecord(syncRequest, recordToUpdate)
     } else {
       nonAssociationsRepository.save(syncRequest.toNewEntity(clock)).toDto().also {
         log.info("Created Non-association [${it.id}] between ${it.firstPrisonerNumber} and ${it.secondPrisonerNumber}")
         telemetryClient.trackEvent(
           "Sync (Create)",
+          mapOf(
+            "id" to it.id.toString(),
+            "firstPrisonerNumber" to syncRequest.firstPrisonerNumber,
+            "secondPrisonerNumber" to syncRequest.secondPrisonerNumber,
+          ),
+          null,
+        )
+      }
+    }
+  }
+
+  fun updateRecord(
+    syncRequest: UpsertSyncRequest,
+    recordToUpdate: uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation,
+  ): NonAssociation {
+    val (firstPrisonerRoleUpdate, secondPrisonerRoleUpdate, reasonUpdate) = translateToRolesAndReason(
+      syncRequest.firstPrisonerReason,
+      syncRequest.secondPrisonerReason,
+    )
+
+    return with(recordToUpdate) {
+      restrictionType = syncRequest.restrictionType.toRestrictionType()
+      firstPrisonerRole = firstPrisonerRoleUpdate
+      secondPrisonerRole = secondPrisonerRoleUpdate
+      reason = reasonUpdate
+      comment = syncRequest.comment ?: NO_COMMENT_PROVIDED
+      authorisedBy = syncRequest.authorisedBy
+      isClosed = syncRequest.isClosed(clock)
+
+      if (syncRequest.isOpen(clock)) {
+        closedReason = null
+        closedBy = null
+        closedAt = null
+      } else {
+        closedReason = NO_CLOSURE_REASON_PROVIDED
+        closedBy = syncRequest.authorisedBy ?: SYSTEM_USERNAME
+        closedAt = syncRequest.expiryDate?.atStartOfDay() ?: LocalDateTime.now(clock)
+      }
+      toDto().also {
+        log.info("Updated Non-association [${it.id}] between ${it.firstPrisonerNumber} and ${it.secondPrisonerNumber}")
+        telemetryClient.trackEvent(
+          "Sync (Update)",
           mapOf(
             "id" to it.id.toString(),
             "firstPrisonerNumber" to syncRequest.firstPrisonerNumber,
@@ -97,17 +112,18 @@ class SyncAndMigrateService(
       deleteSyncRequest.secondPrisonerNumber,
     )
     nonAssociationsRepository.deleteAll(
-      nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonersToKeepApart, NonAssociationListInclusion.ALL).also {
-        log.info("Deleted ${it.size} non-associations between ${deleteSyncRequest.firstPrisonerNumber} and ${deleteSyncRequest.secondPrisonerNumber}")
-        telemetryClient.trackEvent(
-          "Delete Sync",
-          mapOf(
-            "firstPrisonerNumber" to deleteSyncRequest.firstPrisonerNumber,
-            "secondPrisonerNumber" to deleteSyncRequest.secondPrisonerNumber,
-          ),
-          null,
-        )
-      },
+      nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonersToKeepApart, NonAssociationListInclusion.ALL)
+        .also {
+          log.info("Deleted ${it.size} non-associations between ${deleteSyncRequest.firstPrisonerNumber} and ${deleteSyncRequest.secondPrisonerNumber}")
+          telemetryClient.trackEvent(
+            "Delete Sync",
+            mapOf(
+              "firstPrisonerNumber" to deleteSyncRequest.firstPrisonerNumber,
+              "secondPrisonerNumber" to deleteSyncRequest.secondPrisonerNumber,
+            ),
+            null,
+          )
+        },
     )
   }
 
