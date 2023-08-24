@@ -8,7 +8,7 @@ enum class LegacyReason(val description: String) {
   PER("Perpetrator"),
   RIV("Rival Gang"),
   VIC("Victim"),
-  NOT_RELEVANT("Not relevant"),
+  NOT_REL("Not relevant"),
   UNKNOWN("Unknown"),
   ;
 }
@@ -53,10 +53,10 @@ fun translateToRolesAndReason(firstPrisonerReason: LegacyReason, secondPrisonerR
     secondPrisonerRole = Role.PERPETRATOR
   }
 
-  if (firstPrisonerReason == LegacyReason.NOT_RELEVANT) {
+  if (firstPrisonerReason == LegacyReason.NOT_REL) {
     firstPrisonerRole = Role.NOT_RELEVANT
   }
-  if (secondPrisonerReason == LegacyReason.NOT_RELEVANT) {
+  if (secondPrisonerReason == LegacyReason.NOT_REL) {
     secondPrisonerRole = Role.NOT_RELEVANT
   }
 
@@ -79,6 +79,6 @@ private fun Role.toLegacyRole() = when (this) {
   Role.PERPETRATOR -> LegacyReason.PER
 
   // following reasons need to be added into NOMIS reference data
-  Role.NOT_RELEVANT -> LegacyReason.NOT_RELEVANT
+  Role.NOT_RELEVANT -> LegacyReason.NOT_REL
   Role.UNKNOWN -> LegacyReason.UNKNOWN
 }

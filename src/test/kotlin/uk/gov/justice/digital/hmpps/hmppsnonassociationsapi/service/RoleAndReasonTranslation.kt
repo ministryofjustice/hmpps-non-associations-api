@@ -22,26 +22,26 @@ class RoleAndReasonTranslation {
     assertThatLegacyReasons(LegacyReason.BUL, LegacyReason.RIV).translateInto(Role.UNKNOWN, Role.NOT_RELEVANT, Reason.GANG_RELATED)
     assertThatLegacyReasons(LegacyReason.BUL, LegacyReason.PER).translateInto(Role.UNKNOWN, Role.PERPETRATOR, Reason.BULLYING)
     assertThatLegacyReasons(LegacyReason.BUL, LegacyReason.VIC).translateInto(Role.UNKNOWN, Role.VICTIM, Reason.BULLYING)
-    assertThatLegacyReasons(LegacyReason.BUL, LegacyReason.NOT_RELEVANT).translateInto(Role.UNKNOWN, Role.NOT_RELEVANT, Reason.BULLYING)
+    assertThatLegacyReasons(LegacyReason.BUL, LegacyReason.NOT_REL).translateInto(Role.UNKNOWN, Role.NOT_RELEVANT, Reason.BULLYING)
     assertThatLegacyReasons(LegacyReason.BUL, LegacyReason.UNKNOWN).translateInto(Role.UNKNOWN, Role.UNKNOWN, Reason.BULLYING)
 
     assertThatLegacyReasons(LegacyReason.PER, LegacyReason.PER).translateInto(Role.PERPETRATOR, Role.PERPETRATOR, Reason.OTHER)
     assertThatLegacyReasons(LegacyReason.PER, LegacyReason.RIV).translateInto(Role.PERPETRATOR, Role.NOT_RELEVANT, Reason.GANG_RELATED)
     assertThatLegacyReasons(LegacyReason.PER, LegacyReason.VIC).translateInto(Role.PERPETRATOR, Role.VICTIM, Reason.OTHER)
-    assertThatLegacyReasons(LegacyReason.PER, LegacyReason.NOT_RELEVANT).translateInto(Role.PERPETRATOR, Role.NOT_RELEVANT, Reason.OTHER)
+    assertThatLegacyReasons(LegacyReason.PER, LegacyReason.NOT_REL).translateInto(Role.PERPETRATOR, Role.NOT_RELEVANT, Reason.OTHER)
     assertThatLegacyReasons(LegacyReason.PER, LegacyReason.UNKNOWN).translateInto(Role.PERPETRATOR, Role.UNKNOWN, Reason.OTHER)
 
     assertThatLegacyReasons(LegacyReason.RIV, LegacyReason.RIV).translateInto(Role.NOT_RELEVANT, Role.NOT_RELEVANT, Reason.GANG_RELATED)
     assertThatLegacyReasons(LegacyReason.RIV, LegacyReason.VIC).translateInto(Role.NOT_RELEVANT, Role.VICTIM, Reason.GANG_RELATED)
-    assertThatLegacyReasons(LegacyReason.RIV, LegacyReason.NOT_RELEVANT).translateInto(Role.NOT_RELEVANT, Role.NOT_RELEVANT, Reason.GANG_RELATED)
+    assertThatLegacyReasons(LegacyReason.RIV, LegacyReason.NOT_REL).translateInto(Role.NOT_RELEVANT, Role.NOT_RELEVANT, Reason.GANG_RELATED)
     assertThatLegacyReasons(LegacyReason.RIV, LegacyReason.UNKNOWN).translateInto(Role.NOT_RELEVANT, Role.UNKNOWN, Reason.GANG_RELATED)
 
     assertThatLegacyReasons(LegacyReason.VIC, LegacyReason.VIC).translateInto(Role.VICTIM, Role.VICTIM, Reason.OTHER)
-    assertThatLegacyReasons(LegacyReason.VIC, LegacyReason.NOT_RELEVANT).translateInto(Role.VICTIM, Role.NOT_RELEVANT, Reason.OTHER)
+    assertThatLegacyReasons(LegacyReason.VIC, LegacyReason.NOT_REL).translateInto(Role.VICTIM, Role.NOT_RELEVANT, Reason.OTHER)
     assertThatLegacyReasons(LegacyReason.VIC, LegacyReason.UNKNOWN).translateInto(Role.VICTIM, Role.UNKNOWN, Reason.OTHER)
 
-    assertThatLegacyReasons(LegacyReason.NOT_RELEVANT, LegacyReason.NOT_RELEVANT).translateInto(Role.NOT_RELEVANT, Role.NOT_RELEVANT, Reason.OTHER)
-    assertThatLegacyReasons(LegacyReason.NOT_RELEVANT, LegacyReason.UNKNOWN).translateInto(Role.NOT_RELEVANT, Role.UNKNOWN, Reason.OTHER)
+    assertThatLegacyReasons(LegacyReason.NOT_REL, LegacyReason.NOT_REL).translateInto(Role.NOT_RELEVANT, Role.NOT_RELEVANT, Reason.OTHER)
+    assertThatLegacyReasons(LegacyReason.NOT_REL, LegacyReason.UNKNOWN).translateInto(Role.NOT_RELEVANT, Role.UNKNOWN, Reason.OTHER)
 
     assertThatLegacyReasons(LegacyReason.UNKNOWN, LegacyReason.UNKNOWN).translateInto(Role.UNKNOWN, Role.UNKNOWN, Reason.OTHER)
   }
@@ -61,15 +61,15 @@ class RoleAndReasonTranslation {
 
     assertThatModernRolesForAllButBullyingAndGangRelatedReasons(Role.VICTIM, Role.VICTIM).translateInto(LegacyReason.VIC, LegacyReason.VIC)
     assertThatModernRolesForAllButBullyingAndGangRelatedReasons(Role.VICTIM, Role.PERPETRATOR).translateInto(LegacyReason.VIC, LegacyReason.PER)
-    assertThatModernRolesForAllButBullyingAndGangRelatedReasons(Role.VICTIM, Role.NOT_RELEVANT).translateInto(LegacyReason.VIC, LegacyReason.NOT_RELEVANT)
+    assertThatModernRolesForAllButBullyingAndGangRelatedReasons(Role.VICTIM, Role.NOT_RELEVANT).translateInto(LegacyReason.VIC, LegacyReason.NOT_REL)
     assertThatModernRolesForAllButBullyingAndGangRelatedReasons(Role.VICTIM, Role.UNKNOWN).translateInto(LegacyReason.VIC, LegacyReason.UNKNOWN)
 
     assertThatModernRolesForAllButBullyingAndGangRelatedReasons(Role.PERPETRATOR, Role.PERPETRATOR).translateInto(LegacyReason.PER, LegacyReason.PER)
-    assertThatModernRolesForAllButBullyingAndGangRelatedReasons(Role.PERPETRATOR, Role.NOT_RELEVANT).translateInto(LegacyReason.PER, LegacyReason.NOT_RELEVANT)
+    assertThatModernRolesForAllButBullyingAndGangRelatedReasons(Role.PERPETRATOR, Role.NOT_RELEVANT).translateInto(LegacyReason.PER, LegacyReason.NOT_REL)
     assertThatModernRolesForAllButBullyingAndGangRelatedReasons(Role.PERPETRATOR, Role.UNKNOWN).translateInto(LegacyReason.PER, LegacyReason.UNKNOWN)
 
-    assertThatModernRolesForAllButBullyingAndGangRelatedReasons(Role.NOT_RELEVANT, Role.NOT_RELEVANT).translateInto(LegacyReason.NOT_RELEVANT, LegacyReason.NOT_RELEVANT)
-    assertThatModernRolesForAllButBullyingAndGangRelatedReasons(Role.NOT_RELEVANT, Role.UNKNOWN).translateInto(LegacyReason.NOT_RELEVANT, LegacyReason.UNKNOWN)
+    assertThatModernRolesForAllButBullyingAndGangRelatedReasons(Role.NOT_RELEVANT, Role.NOT_RELEVANT).translateInto(LegacyReason.NOT_REL, LegacyReason.NOT_REL)
+    assertThatModernRolesForAllButBullyingAndGangRelatedReasons(Role.NOT_RELEVANT, Role.UNKNOWN).translateInto(LegacyReason.NOT_REL, LegacyReason.UNKNOWN)
 
     assertThatModernRolesForAllButBullyingAndGangRelatedReasons(Role.UNKNOWN, Role.UNKNOWN).translateInto(LegacyReason.UNKNOWN, LegacyReason.UNKNOWN)
 
@@ -105,15 +105,15 @@ class RoleAndReasonTranslation {
 
     assertThatLegacyReasons(LegacyReason.PER, LegacyReason.PER).translateBackToThemselves()
     assertThatLegacyReasons(LegacyReason.PER, LegacyReason.VIC).translateBackToThemselves()
-    assertThatLegacyReasons(LegacyReason.PER, LegacyReason.NOT_RELEVANT).translateBackToThemselves()
+    assertThatLegacyReasons(LegacyReason.PER, LegacyReason.NOT_REL).translateBackToThemselves()
     assertThatLegacyReasons(LegacyReason.PER, LegacyReason.UNKNOWN).translateBackToThemselves()
 
     assertThatLegacyReasons(LegacyReason.VIC, LegacyReason.VIC).translateBackToThemselves()
-    assertThatLegacyReasons(LegacyReason.VIC, LegacyReason.NOT_RELEVANT).translateBackToThemselves()
+    assertThatLegacyReasons(LegacyReason.VIC, LegacyReason.NOT_REL).translateBackToThemselves()
     assertThatLegacyReasons(LegacyReason.VIC, LegacyReason.UNKNOWN).translateBackToThemselves()
 
-    assertThatLegacyReasons(LegacyReason.NOT_RELEVANT, LegacyReason.NOT_RELEVANT).translateBackToThemselves()
-    assertThatLegacyReasons(LegacyReason.NOT_RELEVANT, LegacyReason.UNKNOWN).translateBackToThemselves()
+    assertThatLegacyReasons(LegacyReason.NOT_REL, LegacyReason.NOT_REL).translateBackToThemselves()
+    assertThatLegacyReasons(LegacyReason.NOT_REL, LegacyReason.UNKNOWN).translateBackToThemselves()
 
     assertThatLegacyReasons(LegacyReason.UNKNOWN, LegacyReason.UNKNOWN).translateBackToThemselves()
   }
