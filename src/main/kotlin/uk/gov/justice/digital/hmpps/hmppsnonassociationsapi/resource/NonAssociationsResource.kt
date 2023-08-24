@@ -32,6 +32,9 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationLi
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationsSort
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociationDomainEventType
 
@@ -484,4 +487,25 @@ class NonAssociationsResource(
       Pair(nonAssociationsService.deleteNonAssociation(id, deleteNonAssociationRequest), deleteNonAssociationRequest)
     }
   }
+
+  @GetMapping("/constants")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+    summary = "List codes and descriptions for enumerated field types",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returns codes and descriptions",
+      ),
+    ],
+  )
+  fun constants(): Map<String, List<Constant>> {
+    return mapOf(
+      "roles" to Role.entries.map { Constant(it.name, it.description) },
+      "reasons" to Reason.entries.map { Constant(it.name, it.description) },
+      "restrictionTypes" to RestrictionType.entries.map { Constant(it.name, it.description) },
+    )
+  }
 }
+
+data class Constant(val code: String, val description: String)

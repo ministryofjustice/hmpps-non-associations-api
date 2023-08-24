@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 
+import com.fasterxml.jackson.core.type.TypeReference
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -38,6 +39,39 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Primary
     @Bean
     fun fixedClock(): Clock = clock
+  }
+
+  @Nested
+  inner class `Constants and enumerations` {
+    private val url = "/constants"
+
+    @Test
+    fun `without a valid token responds 401 Unauthorized`() {
+      webTestClient.get()
+        .uri(url)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `returns all enumerations`() {
+      val expectedRoles = Role.entries.map { mapOf("code" to it.name, "description" to it.description) }
+      val expectedReasons = Reason.entries.map { mapOf("code" to it.name, "description" to it.description) }
+      val expectedRestrictionTypes = RestrictionType.entries.map { mapOf("code" to it.name, "description" to it.description) }
+
+      webTestClient.get()
+        .uri(url)
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().consumeWith { response ->
+          val body = objectMapper.readValue(response.responseBody, object : TypeReference<Map<String, List<Map<String, String>>>>() {})
+          assertThat(body["roles"]).isEqualTo(expectedRoles)
+          assertThat(body["reasons"]).isEqualTo(expectedReasons)
+          assertThat(body["restrictionTypes"]).isEqualTo(expectedRestrictionTypes)
+        }
+    }
   }
 
   @Nested
