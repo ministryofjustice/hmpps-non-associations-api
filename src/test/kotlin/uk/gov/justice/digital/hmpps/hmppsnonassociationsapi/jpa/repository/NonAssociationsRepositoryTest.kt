@@ -59,6 +59,32 @@ class NonAssociationsRepositoryTest : TestBase() {
     }
   }
 
+  @Test
+  fun findAllByFirstPrisonerNumberInOrSecondPrisonerNumberIn() {
+    repository.saveAll(
+      listOf(
+        nonAssociation("A1234CB", "X0123BB"),
+        nonAssociation("D5678EF", "A1234BC", true), // returned
+        nonAssociation("A1234BC", "D5678EG"),
+        nonAssociation("X0123AA", "X0123BB"),
+        nonAssociation("A1234BC", "G0011AA"), // returned
+        nonAssociation("G0022BB", "A1234BC"),
+      ),
+    )
+
+    val prisonerNumbers = listOf("D5678EF", "G0011AA")
+    val nonAssociations = repository.findAllByFirstPrisonerNumberInOrSecondPrisonerNumberIn(
+      prisonerNumbers,
+      prisonerNumbers,
+    )
+
+    assertThat(nonAssociations).hasSize(2)
+    assertThat(nonAssociations).allMatch { nonna ->
+      // All non-associations involve at least one of the required prisoners
+      prisonerNumbers.contains(nonna.firstPrisonerNumber) || prisonerNumbers.contains(nonna.secondPrisonerNumber)
+    }
+  }
+
   @Nested
   inner class findAnyBetweenPrisonerNumbers() {
     @Test
