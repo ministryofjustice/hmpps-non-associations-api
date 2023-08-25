@@ -30,6 +30,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.updateWith
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAllByPrisonerNumber
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAnyBetweenPrisonerNumbers
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAnyInvolvingPrisonerNumbers
 import java.time.Clock
 import java.time.LocalDateTime
 import kotlin.jvm.optionals.getOrNull
@@ -95,6 +96,17 @@ class NonAssociationsService(
     inclusion: NonAssociationListInclusion = NonAssociationListInclusion.OPEN_ONLY,
   ): List<NonAssociationDTO> {
     return nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonerNumbers, inclusion)
+      .map { it.toDto() }
+  }
+
+  /**
+   * Returns all non-associations involving any of the provided prisoners
+   */
+  fun getAnyInvolving(
+    prisonerNumbers: Collection<String>,
+    inclusion: NonAssociationListInclusion = NonAssociationListInclusion.OPEN_ONLY,
+  ): List<NonAssociationDTO> {
+    return nonAssociationsRepository.findAnyInvolvingPrisonerNumbers(prisonerNumbers, inclusion)
       .map { it.toDto() }
   }
 
