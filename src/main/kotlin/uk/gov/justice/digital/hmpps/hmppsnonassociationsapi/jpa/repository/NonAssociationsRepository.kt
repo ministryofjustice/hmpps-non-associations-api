@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListInclusion
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
@@ -18,6 +20,20 @@ interface NonAssociationsRepository : JpaRepository<NonAssociation, Long> {
 
   /** Use findAnyBetweenPrisonerNumbers convenience extension function instead */
   fun findAllByFirstPrisonerNumberInAndSecondPrisonerNumberInAndIsClosed(p1: Collection<String>, p2: Collection<String>, isClosed: Boolean): List<NonAssociation>
+
+  /** Use findAnyInvolvingPrisonerNumbers convenience extension function instead */
+  @Query(
+    value = """
+      SELECT n FROM NonAssociation n
+      WHERE n.isClosed = :isClosed AND (
+        n.firstPrisonerNumber IN (:p1) OR n.secondPrisonerNumber IN (:p2)
+      )""",
+  )
+  fun findAllByFirstPrisonerNumberInOrSecondPrisonerNumberInAndIsClosed(
+    @Param("p1") p1: Collection<String>,
+    @Param("p2") p2: Collection<String>,
+    @Param("isClosed") isClosed: Boolean,
+  ): List<NonAssociation>
 
   // TODO: Assumes that there can only be 1 non-association given a pair of prisoner numbers.
   //       In future, this will only be true for open non-associations.
@@ -38,4 +54,14 @@ fun NonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonerNumbers: Col
     NonAssociationListInclusion.OPEN_ONLY -> findAllByFirstPrisonerNumberInAndSecondPrisonerNumberInAndIsClosed(prisonerNumbers, prisonerNumbers, false)
     NonAssociationListInclusion.CLOSED_ONLY -> findAllByFirstPrisonerNumberInAndSecondPrisonerNumberInAndIsClosed(prisonerNumbers, prisonerNumbers, true)
     NonAssociationListInclusion.ALL -> findAllByFirstPrisonerNumberInAndSecondPrisonerNumberIn(prisonerNumbers, prisonerNumbers)
+  }
+
+/**
+ * Returns non-associations involving any prisoners in given prisoner numbers
+ */
+fun NonAssociationsRepository.findAnyInvolvingPrisonerNumbers(prisonerNumbers: Collection<String>, inclusion: NonAssociationListInclusion = NonAssociationListInclusion.OPEN_ONLY): List<NonAssociation> =
+  when (inclusion) {
+    NonAssociationListInclusion.OPEN_ONLY -> findAllByFirstPrisonerNumberInOrSecondPrisonerNumberInAndIsClosed(prisonerNumbers, prisonerNumbers, false)
+    NonAssociationListInclusion.CLOSED_ONLY -> findAllByFirstPrisonerNumberInOrSecondPrisonerNumberInAndIsClosed(prisonerNumbers, prisonerNumbers, true)
+    NonAssociationListInclusion.ALL -> findAllByFirstPrisonerNumberInOrSecondPrisonerNumberIn(prisonerNumbers, prisonerNumbers)
   }
