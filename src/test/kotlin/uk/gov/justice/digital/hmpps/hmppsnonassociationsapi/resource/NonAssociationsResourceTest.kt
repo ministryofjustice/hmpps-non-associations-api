@@ -1883,6 +1883,15 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .expectStatus()
         .isBadRequest
 
+      // empty list provided
+      webTestClient.post()
+        .uri(urlPath)
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .bodyValue(emptyList<String>())
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+
       // 1 prisoner provided
       webTestClient.post()
         .uri(urlPath)
