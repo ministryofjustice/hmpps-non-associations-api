@@ -12,7 +12,7 @@ interface NonAssociationsRepository : JpaRepository<NonAssociation, Long> {
   /** Use findAllByPrisonerNumber convenience extension function instead */
   fun findAllByFirstPrisonerNumberOrSecondPrisonerNumber(firstPrisonerNumber: String, secondPrisonerNumber: String): List<NonAssociation>
 
-  /** Use findAllByPrisonerNumbers convenience extension function instead */
+  /** Use findAnyInvolvingPrisonerNumbers convenience extension function instead */
   fun findAllByFirstPrisonerNumberInOrSecondPrisonerNumberIn(p1: Collection<String>, p2: Collection<String>): List<NonAssociation>
 
   /** Use findAnyBetweenPrisonerNumbers convenience extension function instead */
