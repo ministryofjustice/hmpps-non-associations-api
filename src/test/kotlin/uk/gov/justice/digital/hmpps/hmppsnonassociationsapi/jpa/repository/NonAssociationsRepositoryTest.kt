@@ -59,6 +59,32 @@ class NonAssociationsRepositoryTest : TestBase() {
     }
   }
 
+  @Test
+  fun findAllByFirstPrisonerNumberInOrSecondPrisonerNumberIn() {
+    repository.saveAll(
+      listOf(
+        nonAssociation("A1234CB", "X0123BB"),
+        nonAssociation("D5678EF", "A1234BC", true), // returned
+        nonAssociation("A1234BC", "D5678EG"),
+        nonAssociation("X0123AA", "X0123BB"),
+        nonAssociation("A1234BC", "G0011AA"), // returned
+        nonAssociation("G0022BB", "A1234BC"),
+      ),
+    )
+
+    val prisonerNumbers = listOf("D5678EF", "G0011AA")
+    val nonAssociations = repository.findAllByFirstPrisonerNumberInOrSecondPrisonerNumberIn(
+      prisonerNumbers,
+      prisonerNumbers,
+    )
+
+    assertThat(nonAssociations).hasSize(2)
+    assertThat(nonAssociations).allMatch { nonna ->
+      // All non-associations involve at least one of the required prisoners
+      prisonerNumbers.contains(nonna.firstPrisonerNumber) || prisonerNumbers.contains(nonna.secondPrisonerNumber)
+    }
+  }
+
   @Nested
   inner class findAnyBetweenPrisonerNumbers() {
     @Test
@@ -145,6 +171,105 @@ class NonAssociationsRepositoryTest : TestBase() {
           listOf("A0000AA", "A2222AA"),
           listOf("A1111AA", "A2222AA"),
           listOf("A0000AA", "A1111AA"),
+        ),
+      )
+    }
+  }
+
+  @Nested
+  inner class findAnyInvolvingPrisonerNumbers() {
+    @Test
+    fun openNonAssociations() {
+      repository.saveAll(
+        listOf(
+          nonAssociation("B0000BB", "A0000AA"), // returned
+          nonAssociation("A0000AA", "A1111AA"), // returned
+          nonAssociation("A1111AA", "B0000BB"), // returned
+          nonAssociation("A0000AA", "A2222AA", closed = true), // not returned
+          nonAssociation("A1111AA", "A2222AA"), // returned
+          nonAssociation("B0000BB", "B1111BB"), // not returned
+        ),
+      )
+
+      val prisonerNumbers = listOf("A0000AA", "A1111AA")
+      val nonAssociations = repository.findAnyInvolvingPrisonerNumbers(prisonerNumbers)
+      assertThat(nonAssociations).hasSize(4)
+      assertThat(nonAssociations).allMatch {
+        it.isOpen &&
+          (prisonerNumbers.contains(it.firstPrisonerNumber) || prisonerNumbers.contains(it.secondPrisonerNumber))
+      }
+      val nonAssociationPairs = nonAssociations.map { listOf(it.firstPrisonerNumber, it.secondPrisonerNumber) }
+      assertThat(nonAssociationPairs).isEqualTo(
+        listOf(
+          listOf("B0000BB", "A0000AA"),
+          listOf("A0000AA", "A1111AA"),
+          listOf("A1111AA", "B0000BB"),
+          listOf("A1111AA", "A2222AA"),
+
+        ),
+      )
+    }
+
+    @Test
+    fun closedNonAssociations() {
+      repository.saveAll(
+        listOf(
+          nonAssociation("B0000BB", "A0000AA"), // not returned
+          nonAssociation("A0000AA", "A1111AA", closed = true),
+          nonAssociation("A1111AA", "B0000BB"), // not returned
+          nonAssociation("A0000AA", "A2222AA", closed = true),
+          nonAssociation("A1111AA", "A2222AA"), // not returned
+          nonAssociation("B0000BB", "B1111BB", closed = true),
+          nonAssociation("A0000AA", "A1111AA"), // not returned
+          nonAssociation("B0000BB", "C3333CC", closed = true), // not returned
+        ),
+      )
+
+      val prisonerNumbers = listOf("A0000AA", "B1111BB")
+      val nonAssociations = repository.findAnyInvolvingPrisonerNumbers(prisonerNumbers, NonAssociationListInclusion.CLOSED_ONLY)
+      assertThat(nonAssociations).hasSize(3)
+      assertThat(nonAssociations).allMatch {
+        it.isClosed &&
+          (prisonerNumbers.contains(it.firstPrisonerNumber) || prisonerNumbers.contains(it.secondPrisonerNumber))
+      }
+      val nonAssociationPairs = nonAssociations.map { listOf(it.firstPrisonerNumber, it.secondPrisonerNumber) }
+      assertThat(nonAssociationPairs).isEqualTo(
+        listOf(
+          listOf("A0000AA", "A1111AA"),
+          listOf("A0000AA", "A2222AA"),
+          listOf("B0000BB", "B1111BB"),
+        ),
+      )
+    }
+
+    @Test
+    fun allNonAssociations() {
+      repository.saveAll(
+        listOf(
+          nonAssociation("B0000BB", "A0000AA"),
+          nonAssociation("A0000AA", "A1111AA", closed = true),
+          nonAssociation("A1111AA", "B0000BB"), // not returned
+          nonAssociation("A0000AA", "A2222AA", closed = true),
+          nonAssociation("A1111AA", "C3333CC"),
+          nonAssociation("B0000BB", "B1111BB", closed = true), // not returned
+          nonAssociation("D4444DD", "A1111AA"),
+        ),
+      )
+
+      val prisonerNumbers = listOf("A0000AA", "C3333CC", "D4444DD")
+      val nonAssociations = repository.findAnyInvolvingPrisonerNumbers(prisonerNumbers, NonAssociationListInclusion.ALL)
+      assertThat(nonAssociations).hasSize(5)
+      assertThat(nonAssociations).allMatch {
+        prisonerNumbers.contains(it.firstPrisonerNumber) || prisonerNumbers.contains(it.secondPrisonerNumber)
+      }
+      val nonAssociationPairs = nonAssociations.map { listOf(it.firstPrisonerNumber, it.secondPrisonerNumber) }
+      assertThat(nonAssociationPairs).isEqualTo(
+        listOf(
+          listOf("B0000BB", "A0000AA"),
+          listOf("A0000AA", "A1111AA"),
+          listOf("A0000AA", "A2222AA"),
+          listOf("A1111AA", "C3333CC"),
+          listOf("D4444DD", "A1111AA"),
         ),
       )
     }
