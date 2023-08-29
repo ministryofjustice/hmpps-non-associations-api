@@ -196,7 +196,7 @@ class NonAssociationsRepositoryTest : TestBase() {
       assertThat(nonAssociations).hasSize(4)
       assertThat(nonAssociations).allMatch {
         it.isOpen &&
-        (prisonerNumbers.contains(it.firstPrisonerNumber) || prisonerNumbers.contains(it.secondPrisonerNumber))
+          (prisonerNumbers.contains(it.firstPrisonerNumber) || prisonerNumbers.contains(it.secondPrisonerNumber))
       }
       val nonAssociationPairs = nonAssociations.map { listOf(it.firstPrisonerNumber, it.secondPrisonerNumber) }
       assertThat(nonAssociationPairs).isEqualTo(
@@ -230,7 +230,7 @@ class NonAssociationsRepositoryTest : TestBase() {
       assertThat(nonAssociations).hasSize(3)
       assertThat(nonAssociations).allMatch {
         it.isClosed &&
-        (prisonerNumbers.contains(it.firstPrisonerNumber) || prisonerNumbers.contains(it.secondPrisonerNumber))
+          (prisonerNumbers.contains(it.firstPrisonerNumber) || prisonerNumbers.contains(it.secondPrisonerNumber))
       }
       val nonAssociationPairs = nonAssociations.map { listOf(it.firstPrisonerNumber, it.secondPrisonerNumber) }
       assertThat(nonAssociationPairs).isEqualTo(
