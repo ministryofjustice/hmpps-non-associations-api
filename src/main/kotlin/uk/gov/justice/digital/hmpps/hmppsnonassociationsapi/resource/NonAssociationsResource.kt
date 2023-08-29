@@ -232,7 +232,7 @@ class NonAssociationsResource(
   @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
-    summary = "Get non-associations between two or more prisoners by prisoner number.",
+    summary = "Get non-associations between two or more prisoners by prisoner number. Both people in the non-associations must be in the provided list.",
     description = "Requires ROLE_NON_ASSOCIATIONS role.",
     responses = [
       ApiResponse(
@@ -300,7 +300,7 @@ class NonAssociationsResource(
   @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
-    summary = "Get non-associations involving any of the given prisoners.",
+    summary = "Get non-associations involving any of the given prisoners. Either person in the non-association must be in the provided list.",
     description = "Requires ROLE_NON_ASSOCIATIONS role.",
     responses = [
       ApiResponse(
