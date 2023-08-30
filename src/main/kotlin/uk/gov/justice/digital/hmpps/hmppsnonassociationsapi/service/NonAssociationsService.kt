@@ -90,24 +90,44 @@ class NonAssociationsService(
 
   /**
    * Returns all non-associations that exist amongst provided group of prisoners
+   *
+   * Optionally a prisonId can be provided to only return non-associations
+   * where both prisoners are at this given prison
    */
   fun getAnyBetween(
     prisonerNumbers: Collection<String>,
     inclusion: NonAssociationListInclusion = NonAssociationListInclusion.OPEN_ONLY,
+    prisonId: String? = null,
   ): List<NonAssociationDTO> {
-    return nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonerNumbers, inclusion)
-      .map { it.toDto() }
+    var nonAssociations = nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonerNumbers, inclusion)
+
+    // return only non-associations where both prisoners are in given prison
+    if (prisonId != null) {
+      nonAssociations = filterByPrisonId(nonAssociations, prisonId)
+    }
+
+    return nonAssociations.map(NonAssociationJPA::toDto)
   }
 
   /**
    * Returns all non-associations involving any of the provided prisoners
+   *
+   * Optionally a prisonId can be provided to only return non-associations
+   * where both prisoners are at this given prison
    */
   fun getAnyInvolving(
     prisonerNumbers: Collection<String>,
     inclusion: NonAssociationListInclusion = NonAssociationListInclusion.OPEN_ONLY,
+    prisonId: String? = null,
   ): List<NonAssociationDTO> {
-    return nonAssociationsRepository.findAnyInvolvingPrisonerNumbers(prisonerNumbers, inclusion)
-      .map { it.toDto() }
+    var nonAssociations = nonAssociationsRepository.findAnyInvolvingPrisonerNumbers(prisonerNumbers, inclusion)
+
+    // return only non-associations where both prisoners are in given prison
+    if (prisonId != null) {
+      nonAssociations = filterByPrisonId(nonAssociations, prisonId)
+    }
+
+    return nonAssociations.map(NonAssociationJPA::toDto)
   }
 
   fun updateNonAssociation(id: Long, update: PatchNonAssociationRequest): NonAssociationDTO {
@@ -213,6 +233,18 @@ class NonAssociationsService(
           NonAssociationListOptions(inclusion = inclusion, includeOtherPrisons = !currentPrisonOnly),
         ).toLegacy()
       }
+    }
+  }
+
+  private fun filterByPrisonId(nonAssociations: List<NonAssociationJPA>, prisonId: String): List<NonAssociationJPA> {
+    val prisonerNumbers = nonAssociations.map { nonna ->
+      listOf(nonna.firstPrisonerNumber, nonna.secondPrisonerNumber)
+    }.flatten()
+    val prisoners = offenderSearch.searchByPrisonerNumbers(prisonerNumbers)
+
+    return nonAssociations.filter { nonna ->
+      prisoners[nonna.firstPrisonerNumber]!!.prisonId == prisonId &&
+        prisoners[nonna.secondPrisonerNumber]!!.prisonId == prisonId
     }
   }
 
