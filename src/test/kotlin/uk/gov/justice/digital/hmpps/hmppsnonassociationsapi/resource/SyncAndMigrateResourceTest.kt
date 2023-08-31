@@ -334,7 +334,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           closed = true,
         ),
       )
-      val existingOpenNa = repository.save(
+      repository.save(
         genNonAssociation(
           firstPrisonerNumber = "A7777XT",
           secondPrisonerNumber = "B7777XT",
@@ -361,6 +361,31 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         .bodyValue(jsonString(request))
         .exchange()
         .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun `cannot sync non-association by ID that doesn't exist`() {
+      val request = UpsertSyncRequest(
+        id = -111111,
+        firstPrisonerNumber = "DUMMY",
+        firstPrisonerReason = LegacyReason.VIC,
+        secondPrisonerNumber = "DUMMY",
+        secondPrisonerReason = LegacyReason.PER,
+        restrictionType = LegacyRestrictionType.CELL,
+        effectiveFromDate = LocalDate.now(clock),
+      )
+
+      webTestClient.put()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isNotFound
     }
 
     @Test
