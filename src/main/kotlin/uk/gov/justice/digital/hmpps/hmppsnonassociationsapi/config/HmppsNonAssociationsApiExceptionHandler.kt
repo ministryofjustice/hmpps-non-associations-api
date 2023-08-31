@@ -110,6 +110,20 @@ class HmppsNonAssociationsApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(NonAssociationNotFoundException::class)
+  fun handleNonAssociationNotFound(e: NonAssociationNotFoundException): ResponseEntity<ErrorResponse?>? {
+    log.debug("Non-association not found exception caught: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.NOT_FOUND)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.NOT_FOUND,
+          userMessage = "Non-association not Found: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
   @ExceptionHandler(ResponseStatusException::class)
   fun handleResponseStatusException(e: ResponseStatusException): ResponseEntity<ErrorResponse?>? {
     log.debug("Response status exception caught: {}", e.message)
@@ -228,3 +242,5 @@ class NonAssociationAlreadyClosedException(id: Long) : Exception("Non-associatio
 class UserInContextMissingException : Exception("There is no user in context for this request")
 
 class OpenNonAssociationAlreadyExistsException(prisoners: List<String>) : Exception("Prisoners [$prisoners] already have open non-associations")
+
+class NonAssociationNotFoundException(id: Long) : Exception("There is no non-association found for ID = $id")

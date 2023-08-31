@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.OpenNonAssociationAlreadyExistsException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteSyncRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
@@ -39,7 +40,11 @@ class SyncAndMigrateService(
     )
 
     val recordToUpdate = if (syncRequest.id != null) {
-      nonAssociationsRepository.findById(syncRequest.id).getOrNull()
+      val existingOpenRecord = nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonersToKeepApart)
+      if (existingOpenRecord.isNotEmpty() && existingOpenRecord[0].id != syncRequest.id) {
+        throw OpenNonAssociationAlreadyExistsException(prisonersToKeepApart)
+      }
+      nonAssociationsRepository.findById(syncRequest.id).getOrNull() ?: throw NonAssociationNotFoundException(syncRequest.id)
     } else {
       val existingRecords =
         nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonersToKeepApart, NonAssociationListInclusion.ALL)
