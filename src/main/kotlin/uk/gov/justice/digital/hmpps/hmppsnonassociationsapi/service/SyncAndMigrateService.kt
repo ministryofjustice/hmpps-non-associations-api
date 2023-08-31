@@ -75,7 +75,7 @@ class SyncAndMigrateService(
     }
   }
 
-  fun updateRecord(
+  private fun updateRecord(
     syncRequest: UpsertSyncRequest,
     recordToUpdate: uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation,
   ): NonAssociation {
