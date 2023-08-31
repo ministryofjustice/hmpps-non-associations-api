@@ -34,20 +34,26 @@ class SyncAndMigrateService(
   }
 
   fun sync(syncRequest: UpsertSyncRequest): NonAssociation {
-    val prisonersToKeepApart = listOf(
-      syncRequest.firstPrisonerNumber,
-      syncRequest.secondPrisonerNumber,
-    )
-
     val recordToUpdate = if (syncRequest.id != null) {
-      val existingOpenRecord = nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonersToKeepApart)
-      if (existingOpenRecord.isNotEmpty() && existingOpenRecord[0].id != syncRequest.id) {
+      val existing = nonAssociationsRepository.findById(syncRequest.id).getOrNull() ?: throw NonAssociationNotFoundException(syncRequest.id)
+      val prisonersToKeepApart = listOf(
+        existing.firstPrisonerNumber,
+        existing.secondPrisonerNumber,
+      )
+      val existingOpenRecords = nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonersToKeepApart)
+      if (existingOpenRecords.isNotEmpty() && existingOpenRecords[0].id != existing.id) {
         throw OpenNonAssociationAlreadyExistsException(prisonersToKeepApart)
       }
-      nonAssociationsRepository.findById(syncRequest.id).getOrNull() ?: throw NonAssociationNotFoundException(syncRequest.id)
+      existing
     } else {
       val existingRecords =
-        nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonersToKeepApart, NonAssociationListInclusion.ALL)
+        nonAssociationsRepository.findAnyBetweenPrisonerNumbers(
+          listOf(
+            syncRequest.firstPrisonerNumber,
+            syncRequest.secondPrisonerNumber,
+          ),
+          NonAssociationListInclusion.ALL,
+        )
       val latestClosedRecord = existingRecords.filter { na -> na.isClosed }.maxByOrNull { na -> na.whenUpdated }
       existingRecords.firstOrNull { na -> na.isOpen } ?: latestClosedRecord
     }
@@ -102,8 +108,8 @@ class SyncAndMigrateService(
           "Sync (Update)",
           mapOf(
             "id" to it.id.toString(),
-            "firstPrisonerNumber" to syncRequest.firstPrisonerNumber,
-            "secondPrisonerNumber" to syncRequest.secondPrisonerNumber,
+            "firstPrisonerNumber" to recordToUpdate.firstPrisonerNumber,
+            "secondPrisonerNumber" to recordToUpdate.secondPrisonerNumber,
           ),
           null,
         )

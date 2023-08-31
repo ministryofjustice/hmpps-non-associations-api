@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util
 
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
@@ -7,6 +8,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NO_CLOSURE_REASON_PROVIDED
 import java.time.Clock
 import java.time.LocalDateTime
 
@@ -17,10 +19,10 @@ fun genNonAssociation(
   id: Long? = null,
   firstPrisonerNumber: String,
   secondPrisonerNumber: String,
-  createTime: LocalDateTime = LocalDateTime.now(),
+  createTime: LocalDateTime = LocalDateTime.now(TestBase.clock),
   closed: Boolean = false,
-  closedReason: String? = "Ok Now",
-  authBy: String? = "TEST",
+  closedReason: String? = NO_CLOSURE_REASON_PROVIDED,
+  authBy: String? = SYSTEM_USERNAME,
   clock: Clock = TestBase.clock,
 ) = NonAssociation(
   id = id,

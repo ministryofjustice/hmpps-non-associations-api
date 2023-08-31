@@ -14,7 +14,7 @@ data class UpsertSyncRequest(
   @Schema(description = "ID of the non-association, if provided an update will be performed", required = false, example = "234233")
   val id: Long? = null,
 
-  @Schema(description = "Prisoner number to not associate", required = true, example = "A1234BC")
+  @Schema(description = "Prisoner number to not associate, this is ignored if ID is provided", required = true, example = "A1234BC")
   val firstPrisonerNumber: String,
   @Schema(
     description = "Reason why this prisoner should be kept apart from the other",
@@ -22,7 +22,7 @@ data class UpsertSyncRequest(
     example = "VIC",
   )
   val firstPrisonerReason: LegacyReason,
-  @Schema(description = "Prisoner number to not associate", required = true, example = "D5678EF")
+  @Schema(description = "Prisoner number to not associate, this is ignored if ID is provided", required = true, example = "D5678EF")
   val secondPrisonerNumber: String,
   @Schema(
     description = "Reason why this prisoner should be kept apart from the other",
@@ -54,9 +54,9 @@ data class UpsertSyncRequest(
     val (firstPrisonerRole, secondPrisonerRole, reason) = translateToRolesAndReason(firstPrisonerReason, secondPrisonerReason)
     return NonAssociation(
       id = null,
-      firstPrisonerNumber = firstPrisonerNumber,
+      firstPrisonerNumber = firstPrisonerNumber!!,
       firstPrisonerRole = firstPrisonerRole,
-      secondPrisonerNumber = secondPrisonerNumber,
+      secondPrisonerNumber = secondPrisonerNumber!!,
       secondPrisonerRole = secondPrisonerRole,
       reason = reason,
       restrictionType = restrictionType.toRestrictionType(),

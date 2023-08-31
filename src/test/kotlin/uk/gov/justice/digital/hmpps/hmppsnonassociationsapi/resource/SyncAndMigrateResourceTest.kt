@@ -108,7 +108,6 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         genNonAssociation(
           firstPrisonerNumber = "D7777XX",
           secondPrisonerNumber = "C7777XX",
-          createTime = LocalDateTime.now(clock),
         ),
       )
 
@@ -271,12 +270,105 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
+    fun `can sync non-association by ID`() {
+      val existingNa = repository.save(
+        genNonAssociation(
+          firstPrisonerNumber = "A7777XT",
+          secondPrisonerNumber = "B7777XT",
+        ),
+      )
+      val request = UpsertSyncRequest(
+        id = existingNa.id,
+        firstPrisonerNumber = "DUMMY",
+        firstPrisonerReason = LegacyReason.VIC,
+        secondPrisonerNumber = "DUMMY",
+        secondPrisonerReason = LegacyReason.PER,
+        restrictionType = LegacyRestrictionType.CELL,
+        effectiveFromDate = LocalDate.now(clock).minusDays(10),
+      )
+
+      val expectedResponse =
+        // language=json
+        """
+        {
+          "firstPrisonerNumber": "${existingNa.firstPrisonerNumber}",
+          "firstPrisonerRole": "VICTIM",
+          "firstPrisonerRoleDescription": "Victim",
+          "secondPrisonerNumber": "${existingNa.secondPrisonerNumber}",
+          "secondPrisonerRole": "PERPETRATOR",
+          "secondPrisonerRoleDescription": "Perpetrator",
+          "reason": "OTHER",
+          "reasonDescription": "Other",
+          "restrictionType": "${request.restrictionType.toRestrictionType()}",
+          "restrictionTypeDescription": "${request.restrictionType.toRestrictionType().description}",
+          "comment": "$NO_COMMENT_PROVIDED",
+          "authorisedBy": "",
+          "updatedBy": "$expectedUsername",
+          "isClosed": false,
+          "closedReason": null,
+          "closedBy": null,
+          "closedAt": null
+        }
+        """
+
+      webTestClient.put()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(expectedResponse, false)
+    }
+
+    @Test
+    fun `cannot sync open non-association by ID when another exists that is open`() {
+      val existingClosedNa = repository.save(
+        genNonAssociation(
+          firstPrisonerNumber = "A7777XT",
+          secondPrisonerNumber = "B7777XT",
+          closed = true,
+        ),
+      )
+      val existingOpenNa = repository.save(
+        genNonAssociation(
+          firstPrisonerNumber = "A7777XT",
+          secondPrisonerNumber = "B7777XT",
+        ),
+      )
+      val request = UpsertSyncRequest(
+        id = existingClosedNa.id,
+        firstPrisonerNumber = "DUMMY",
+        firstPrisonerReason = LegacyReason.VIC,
+        secondPrisonerNumber = "DUMMY",
+        secondPrisonerReason = LegacyReason.PER,
+        restrictionType = LegacyRestrictionType.CELL,
+        effectiveFromDate = LocalDate.now(clock).minusDays(2),
+      )
+
+      webTestClient.put()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isBadRequest
+    }
+
+    @Test
     fun `can sync non-association in open state`() {
       repository.save(
         genNonAssociation(
           firstPrisonerNumber = "A7777XX",
           secondPrisonerNumber = "B7777XX",
-          createTime = LocalDateTime.now(clock),
         ),
       )
       val request = UpsertSyncRequest(
@@ -286,7 +378,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         secondPrisonerReason = LegacyReason.PER,
         restrictionType = LegacyRestrictionType.CELL,
         expiryDate = LocalDate.now(clock).minusDays(4),
-        effectiveFromDate = LocalDate.now(clock).minusDays(1),
+        effectiveFromDate = LocalDate.now(clock).minusDays(10),
       )
 
       webTestClient.put()
@@ -358,7 +450,6 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         genNonAssociation(
           firstPrisonerNumber = "C1234AA",
           secondPrisonerNumber = "D1234AA",
-          createTime = LocalDateTime.now(clock),
         ),
       )
 
@@ -573,7 +664,6 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         genNonAssociation(
           firstPrisonerNumber = "C1234AA",
           secondPrisonerNumber = "D1234AA",
-          createTime = LocalDateTime.now(clock),
           authBy = "TEST",
         ),
       )
