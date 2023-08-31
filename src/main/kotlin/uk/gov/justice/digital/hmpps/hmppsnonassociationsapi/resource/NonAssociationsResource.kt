@@ -32,6 +32,9 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationLi
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationsSort
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociationDomainEventType
 
@@ -232,7 +235,7 @@ class NonAssociationsResource(
   @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
-    summary = "Get non-associations between two or more prisoners by prisoner number.",
+    summary = "Get non-associations between two or more prisoners by prisoner number. Both people in the non-associations must be in the provided list.",
     description = "Requires ROLE_NON_ASSOCIATIONS role.",
     responses = [
       ApiResponse(
@@ -294,6 +297,74 @@ class NonAssociationsResource(
       ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
 
     return nonAssociationsService.getAnyBetween(prisonerNumbers, inclusion)
+  }
+
+  @PostMapping("/non-associations/involving")
+  @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+    summary = "Get non-associations involving any of the given prisoners. Either person in the non-association must be in the provided list.",
+    description = "Requires ROLE_NON_ASSOCIATIONS role.",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returns the non-associations",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "When fewer than one distinct prisoner numbers are provided or neither open nor closed non-associations are included",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Missing required role. Requires the NON_ASSOCIATIONS role",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun getNonAssociationsInvolvingPrisoners(
+    @ArraySchema(
+      arraySchema = Schema(description = "One or more distinct prisoner numbers"),
+      schema = Schema(description = "Prisoner number", required = true, example = "A1234BC", type = "string"),
+      minItems = 1,
+      uniqueItems = true,
+    )
+    @RequestBody
+    @Validated
+    prisonerNumbers: List<String>?,
+
+    @Schema(
+      description = "Whether to include open non-associations or not",
+      required = false,
+      defaultValue = "true",
+      example = "false",
+    )
+    @RequestParam(required = false, defaultValue = "true")
+    includeOpen: Boolean = true,
+
+    @Schema(
+      description = "Whether to include closed non-associations or not",
+      required = false,
+      defaultValue = "false",
+      example = "true",
+    )
+    @RequestParam(required = false, defaultValue = "false")
+    includeClosed: Boolean = false,
+  ): List<NonAssociation> {
+    val distinctPrisonerNumbers = prisonerNumbers?.toSet()?.filter { it.isNotEmpty() }
+    if (distinctPrisonerNumbers.isNullOrEmpty()) {
+      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "One or more distinct prisoner numbers are required")
+    }
+
+    val inclusion = NonAssociationListInclusion.of(includeOpen, includeClosed)
+      ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
+
+    return nonAssociationsService.getAnyInvolving(prisonerNumbers, inclusion)
   }
 
   @PatchMapping("/non-associations/{id}")
@@ -416,4 +487,25 @@ class NonAssociationsResource(
       Pair(nonAssociationsService.deleteNonAssociation(id, deleteNonAssociationRequest), deleteNonAssociationRequest)
     }
   }
+
+  @GetMapping("/constants")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+    summary = "List codes and descriptions for enumerated field types",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returns codes and descriptions",
+      ),
+    ],
+  )
+  fun constants(): Map<String, List<Constant>> {
+    return mapOf(
+      "roles" to Role.entries.map { Constant(it.name, it.description) },
+      "reasons" to Reason.entries.map { Constant(it.name, it.description) },
+      "restrictionTypes" to RestrictionType.entries.map { Constant(it.name, it.description) },
+    )
+  }
 }
+
+data class Constant(val code: String, val description: String)
