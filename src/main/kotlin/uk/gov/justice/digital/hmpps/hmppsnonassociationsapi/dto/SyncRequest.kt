@@ -54,9 +54,9 @@ data class UpsertSyncRequest(
     val (firstPrisonerRole, secondPrisonerRole, reason) = translateToRolesAndReason(firstPrisonerReason, secondPrisonerReason)
     return NonAssociation(
       id = null,
-      firstPrisonerNumber = firstPrisonerNumber!!,
+      firstPrisonerNumber = firstPrisonerNumber,
       firstPrisonerRole = firstPrisonerRole,
-      secondPrisonerNumber = secondPrisonerNumber!!,
+      secondPrisonerNumber = secondPrisonerNumber,
       secondPrisonerRole = secondPrisonerRole,
       reason = reason,
       restrictionType = restrictionType.toRestrictionType(),

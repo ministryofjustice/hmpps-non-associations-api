@@ -108,8 +108,8 @@ class SyncAndMigrateService(
           "Sync (Update)",
           mapOf(
             "id" to it.id.toString(),
-            "firstPrisonerNumber" to recordToUpdate.firstPrisonerNumber,
-            "secondPrisonerNumber" to recordToUpdate.secondPrisonerNumber,
+            "firstPrisonerNumber" to it.firstPrisonerNumber,
+            "secondPrisonerNumber" to it.secondPrisonerNumber,
           ),
           null,
         )
