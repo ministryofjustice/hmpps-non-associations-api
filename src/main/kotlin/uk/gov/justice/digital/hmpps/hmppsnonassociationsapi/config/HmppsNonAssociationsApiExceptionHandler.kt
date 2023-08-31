@@ -110,6 +110,20 @@ class HmppsNonAssociationsApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(NonAssociationNotFoundException::class)
+  fun handleNonAssociationNotFound(e: NonAssociationNotFoundException): ResponseEntity<ErrorResponse?>? {
+    log.debug("Non-association not found exception caught: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.NOT_FOUND)
+      .body(
+        ErrorResponse(
+          status = HttpStatus.NOT_FOUND,
+          userMessage = "Non-association not Found: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
   @ExceptionHandler(ResponseStatusException::class)
   fun handleResponseStatusException(e: ResponseStatusException): ResponseEntity<ErrorResponse?>? {
     log.debug("Response status exception caught: {}", e.message)
@@ -172,10 +186,10 @@ class HmppsNonAssociationsApiExceptionHandler {
   fun handleOpenNonAssociationAlreadyExistsException(e: OpenNonAssociationAlreadyExistsException): ResponseEntity<ErrorResponse?>? {
     log.debug("Non-association already exists for these prisoners that is open: {}", e.message)
     return ResponseEntity
-      .status(HttpStatus.BAD_REQUEST)
+      .status(BAD_REQUEST)
       .body(
         ErrorResponse(
-          status = HttpStatus.BAD_REQUEST,
+          status = BAD_REQUEST,
           errorCode = ErrorCode.OpenNonAssociationAlreadyExist,
           userMessage = "Non-association already exists for these prisoners that is open: ${e.message}",
           developerMessage = e.message,
@@ -204,9 +218,9 @@ enum class ErrorCode(val errorCode: Int) {
 data class ErrorResponse(
   @Schema(description = "HTTP status code", example = "500", required = true)
   val status: Int,
-  @Schema(description = "When present, uniquely identifies the type of error making it easier for clients to discriminate without relying on error description; see `uk.gov.justice.digital.hmpps.incentivesapi.config.ErrorResponse` enumeration in hmpps-incentives-api", example = "123", required = false)
+  @Schema(description = "When present, uniquely identifies the type of error making it easier for clients to discriminate without relying on error description; see `uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse` enumeration in hmpps-non-associations-api", example = "101", required = false)
   val errorCode: Int? = null,
-  @Schema(description = "User message for the error", example = "No incentive level found for code `ABC`", required = false)
+  @Schema(description = "User message for the error", example = "No non-association level found for ID `324234`", required = false)
   val userMessage: String? = null,
   @Schema(description = "More detailed error message", example = "[Details, sometimes a stack trace]", required = false)
   val developerMessage: String? = null,
@@ -225,6 +239,8 @@ data class ErrorResponse(
 
 class NonAssociationAlreadyClosedException(id: Long) : Exception("Non-association [ID=$id] already closed")
 
-class UserInContextMissingException() : Exception("There is no user in context for this request")
+class UserInContextMissingException : Exception("There is no user in context for this request")
 
 class OpenNonAssociationAlreadyExistsException(prisoners: List<String>) : Exception("Prisoners [$prisoners] already have open non-associations")
+
+class NonAssociationNotFoundException(id: Long) : Exception("There is no non-association found for ID = $id")
