@@ -2217,7 +2217,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         prisonerMerlin.prisonerNumber,
         prisonerJosh.prisonerNumber,
         prisonerEdward.prisonerNumber,
-        prisonerJosh.prisonerNumber,
       )
       val prisoners = listOf(
         prisonerMerlin,
@@ -2596,7 +2595,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         prisonerMerlin.prisonerNumber,
         prisonerJosh.prisonerNumber,
         prisonerEdward.prisonerNumber,
-        prisonerJosh.prisonerNumber,
       )
       val prisoners = listOf(
         prisonerMerlin,
