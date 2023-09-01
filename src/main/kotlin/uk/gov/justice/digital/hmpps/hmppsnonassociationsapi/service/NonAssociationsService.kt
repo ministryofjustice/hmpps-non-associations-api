@@ -178,6 +178,8 @@ class NonAssociationsService(
     var nonAssociations = nonAssociationsRepository.findAllByPrisonerNumber(prisonerNumber)
 
     // load all prisoner mentioned in any non-association
+    // note that we always want to retrieve the information about the key
+    // prisoner, even if they don't have any non-associations
     val prisonerNumbers = nonAssociations.flatMapTo(mutableSetOf(prisonerNumber)) {
       listOf(it.firstPrisonerNumber, it.secondPrisonerNumber)
     }
