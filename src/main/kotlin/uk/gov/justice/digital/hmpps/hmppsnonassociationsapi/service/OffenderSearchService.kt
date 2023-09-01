@@ -26,7 +26,7 @@ class OffenderSearchService(
     prisonerNumbers: Collection<String>,
     useClientCredentials: Boolean = true,
   ): Map<String, OffenderSearchPrisoner> {
-    val requestBody = mapOf("prisonerNumbers" to prisonerNumbers)
+    val requestBody = mapOf("prisonerNumbers" to prisonerNumbers.toSet())
 
     val foundPrisoners = getClient(useClientCredentials)
       .post()
