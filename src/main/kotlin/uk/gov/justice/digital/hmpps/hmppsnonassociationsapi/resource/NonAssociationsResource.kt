@@ -257,6 +257,11 @@ class NonAssociationsResource(
         description = "Missing required role. Requires the NON_ASSOCIATIONS role",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Any of the prisoners could not be found.",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
     ],
   )
   fun getNonAssociationsBetweenPrisoners(
@@ -287,6 +292,15 @@ class NonAssociationsResource(
     )
     @RequestParam(required = false, defaultValue = "false")
     includeClosed: Boolean = false,
+
+    @Schema(
+      description = "When provided return only non-associations where both prisoners are in the given prison",
+      required = false,
+      defaultValue = "null",
+      example = "MDI",
+    )
+    @RequestParam(required = false)
+    prisonId: String? = null,
   ): List<NonAssociation> {
     val distinctPrisonerNumbers = prisonerNumbers?.toSet()?.filter { it.isNotEmpty() }
     if (distinctPrisonerNumbers == null || distinctPrisonerNumbers.size < 2) {
@@ -296,7 +310,7 @@ class NonAssociationsResource(
     val inclusion = NonAssociationListInclusion.of(includeOpen, includeClosed)
       ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
 
-    return nonAssociationsService.getAnyBetween(prisonerNumbers, inclusion)
+    return nonAssociationsService.getAnyBetween(prisonerNumbers, inclusion, prisonId)
   }
 
   @PostMapping("/non-associations/involving")
@@ -323,6 +337,11 @@ class NonAssociationsResource(
       ApiResponse(
         responseCode = "403",
         description = "Missing required role. Requires the NON_ASSOCIATIONS role",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Any of the prisoners could not be found.",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],
@@ -355,6 +374,15 @@ class NonAssociationsResource(
     )
     @RequestParam(required = false, defaultValue = "false")
     includeClosed: Boolean = false,
+
+    @Schema(
+      description = "When provided return only non-associations where both prisoners are in the given prison",
+      required = false,
+      defaultValue = "null",
+      example = "MDI",
+    )
+    @RequestParam(required = false)
+    prisonId: String? = null,
   ): List<NonAssociation> {
     val distinctPrisonerNumbers = prisonerNumbers?.toSet()?.filter { it.isNotEmpty() }
     if (distinctPrisonerNumbers.isNullOrEmpty()) {
@@ -364,7 +392,7 @@ class NonAssociationsResource(
     val inclusion = NonAssociationListInclusion.of(includeOpen, includeClosed)
       ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
 
-    return nonAssociationsService.getAnyInvolving(prisonerNumbers, inclusion)
+    return nonAssociationsService.getAnyInvolving(prisonerNumbers, inclusion, prisonId)
   }
 
   @PatchMapping("/non-associations/{id}")

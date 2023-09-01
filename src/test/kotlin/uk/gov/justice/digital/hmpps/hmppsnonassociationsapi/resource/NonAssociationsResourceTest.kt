@@ -2197,6 +2197,62 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           false,
         )
     }
+
+    @Test
+    fun `when prisonId is provided`() {
+      // prisoners in MDI
+      val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
+      val prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
+      val prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
+      // prisoner in another prison
+      val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
+
+      // only non-associations between provided prisoners are returned
+      createNonAssociation(prisonerMerlin.prisonerNumber, prisonerJosh.prisonerNumber) // returned
+      createNonAssociation(prisonerJosh.prisonerNumber, prisonerJohn.prisonerNumber) // not returned (other prisoner)
+      createNonAssociation(prisonerEdward.prisonerNumber, prisonerJosh.prisonerNumber) // not returned (other prison)
+
+      // Stub Offender Search API request
+      val prisonerNumbers = listOf(
+        prisonerMerlin.prisonerNumber,
+        prisonerJosh.prisonerNumber,
+        prisonerEdward.prisonerNumber,
+        prisonerJosh.prisonerNumber,
+      )
+      val prisoners = listOf(
+        prisonerMerlin,
+        prisonerJosh,
+        prisonerEdward,
+      )
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers,
+        prisoners,
+      )
+
+      webTestClient.post()
+        .uri {
+          it.path(urlPath)
+            .queryParam("prisonId", "MDI")
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .bodyValue(listOf(prisonerMerlin.prisonerNumber, prisonerEdward.prisonerNumber, prisonerJosh.prisonerNumber))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+          [
+            {
+              "firstPrisonerNumber": "${prisonerMerlin.prisonerNumber}",
+              "secondPrisonerNumber": "${prisonerJosh.prisonerNumber}",
+              "isClosed": false
+            }
+          ]
+          """,
+          false,
+        )
+    }
   }
 
   @Nested
@@ -2513,6 +2569,63 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               "firstPrisonerNumber": "A4444AA",
               "secondPrisonerNumber": "A2222AA",
               "isClosed": true
+            }
+          ]
+          """,
+          false,
+        )
+    }
+
+    @Test
+    fun `when prisonId is provided`() {
+      // prisoners in MDI
+      val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
+      val prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
+      val prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
+      // prisoner in another prison
+      val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
+
+      // only non-associations involving any of the provided prisoners are returned
+      createNonAssociation(prisonerMerlin.prisonerNumber, prisonerJosh.prisonerNumber) // returned
+      createNonAssociation(prisonerJohn.prisonerNumber, prisonerMerlin.prisonerNumber, true) // not returned
+      createNonAssociation(prisonerJosh.prisonerNumber, prisonerJohn.prisonerNumber) // not returned (other prisoners)
+      createNonAssociation(prisonerEdward.prisonerNumber, prisonerJosh.prisonerNumber) // not returned (other prison)
+
+      // Stub Offender Search API request
+      val prisonerNumbers = listOf(
+        prisonerMerlin.prisonerNumber,
+        prisonerJosh.prisonerNumber,
+        prisonerEdward.prisonerNumber,
+        prisonerJosh.prisonerNumber,
+      )
+      val prisoners = listOf(
+        prisonerMerlin,
+        prisonerJosh,
+        prisonerEdward,
+      )
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers,
+        prisoners,
+      )
+
+      webTestClient.post()
+        .uri {
+          it.path(urlPath)
+            .queryParam("prisonId", "MDI")
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .bodyValue(listOf(prisonerMerlin.prisonerNumber, prisonerEdward.prisonerNumber))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+          [
+            {
+              "firstPrisonerNumber": "${prisonerMerlin.prisonerNumber}",
+              "secondPrisonerNumber": "${prisonerJosh.prisonerNumber}",
+              "isClosed": false
             }
           ]
           """,
