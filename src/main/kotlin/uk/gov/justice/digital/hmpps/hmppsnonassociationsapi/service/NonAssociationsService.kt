@@ -237,9 +237,9 @@ class NonAssociationsService(
   }
 
   private fun filterByPrisonId(nonAssociations: List<NonAssociationJPA>, prisonId: String): List<NonAssociationJPA> {
-    val prisonerNumbers = nonAssociations.map { nonna ->
+    val prisonerNumbers = nonAssociations.flatMap { nonna ->
       listOf(nonna.firstPrisonerNumber, nonna.secondPrisonerNumber)
-    }.flatten()
+    }
     val prisoners = offenderSearch.searchByPrisonerNumbers(prisonerNumbers)
 
     return nonAssociations.filter { nonna ->
