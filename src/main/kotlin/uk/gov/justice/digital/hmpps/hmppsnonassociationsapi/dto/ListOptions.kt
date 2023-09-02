@@ -49,6 +49,9 @@ data class NonAssociationListOptions(
         NonAssociationsSort.LAST_NAME -> compareBy { nonna -> nonna.otherPrisonerDetails.lastName }
         NonAssociationsSort.FIRST_NAME -> compareBy { nonna -> nonna.otherPrisonerDetails.firstName }
         NonAssociationsSort.PRISONER_NUMBER -> compareBy { nonna -> nonna.otherPrisonerDetails.prisonerNumber }
+        NonAssociationsSort.PRISON_ID -> compareBy { nonna -> nonna.otherPrisonerDetails.prisonId }
+        NonAssociationsSort.PRISON_NAME -> compareBy { nonna -> nonna.otherPrisonerDetails.prisonName }
+        NonAssociationsSort.CELL_LOCATION -> compareBy { nonna -> nonna.otherPrisonerDetails.cellLocation }
       }.run {
         if (sortDirection == Sort.Direction.DESC) reversed() else this
       }
@@ -61,4 +64,7 @@ enum class NonAssociationsSort(val defaultSortDirection: Sort.Direction) {
   LAST_NAME(Sort.Direction.ASC),
   FIRST_NAME(Sort.Direction.ASC),
   PRISONER_NUMBER(Sort.Direction.ASC),
+  PRISON_ID(Sort.Direction.ASC),
+  PRISON_NAME(Sort.Direction.ASC),
+  CELL_LOCATION(Sort.Direction.ASC),
 }
