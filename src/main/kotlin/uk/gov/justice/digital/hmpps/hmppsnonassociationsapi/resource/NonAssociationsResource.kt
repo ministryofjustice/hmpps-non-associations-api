@@ -78,7 +78,7 @@ class NonAssociationsResource(
       ),
     ],
   )
-  fun getDetailsByPrisonerNumber(
+  fun getPrisonerNonAssociations(
     @Schema(description = "The offender prisoner number", example = "A1234BC", required = true)
     @PathVariable
     prisonerNumber: String,
@@ -121,6 +121,9 @@ class NonAssociationsResource(
         "LAST_NAME",
         "FIRST_NAME",
         "PRISONER_NUMBER",
+        "PRISON_ID",
+        "PRISON_NAME",
+        "CELL_LOCATION",
       ],
     )
     @RequestParam(required = false)
