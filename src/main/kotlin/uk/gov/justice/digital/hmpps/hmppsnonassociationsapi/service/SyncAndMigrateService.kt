@@ -35,7 +35,10 @@ class SyncAndMigrateService(
 
   fun sync(syncRequest: UpsertSyncRequest): NonAssociation {
     val recordToUpdate = if (syncRequest.id != null) {
-      val existing = nonAssociationsRepository.findById(syncRequest.id).getOrNull() ?: throw NonAssociationNotFoundException(syncRequest.id)
+      val existing =
+        nonAssociationsRepository.findById(syncRequest.id).getOrNull() ?: throw NonAssociationNotFoundException(
+          syncRequest.id,
+        )
       val prisonersToKeepApart = listOf(
         existing.firstPrisonerNumber,
         existing.secondPrisonerNumber,
@@ -117,13 +120,15 @@ class SyncAndMigrateService(
     }
   }
 
-  fun sync(deleteSyncRequest: DeleteSyncRequest) {
-    val prisonersToKeepApart = listOf(
-      deleteSyncRequest.firstPrisonerNumber,
-      deleteSyncRequest.secondPrisonerNumber,
-    )
+  fun delete(deleteSyncRequest: DeleteSyncRequest) {
     nonAssociationsRepository.deleteAll(
-      nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonersToKeepApart, NonAssociationListInclusion.ALL)
+      nonAssociationsRepository.findAnyBetweenPrisonerNumbers(
+        listOf(
+          deleteSyncRequest.firstPrisonerNumber,
+          deleteSyncRequest.secondPrisonerNumber,
+        ),
+        NonAssociationListInclusion.ALL,
+      )
         .also {
           log.info("Deleted ${it.size} non-associations between ${deleteSyncRequest.firstPrisonerNumber} and ${deleteSyncRequest.secondPrisonerNumber}")
           telemetryClient.trackEvent(
@@ -135,6 +140,21 @@ class SyncAndMigrateService(
             null,
           )
         },
+    )
+  }
+
+  fun delete(id: Long) {
+    val naToDelete = nonAssociationsRepository.findById(id).getOrNull() ?: throw NonAssociationNotFoundException(id)
+    nonAssociationsRepository.delete(naToDelete)
+    log.info("Deleted non-association [ID=$id between ${naToDelete.firstPrisonerNumber} and ${naToDelete.secondPrisonerNumber}")
+    telemetryClient.trackEvent(
+      "Delete Sync",
+      mapOf(
+        "id" to id.toString(),
+        "firstPrisonerNumber" to naToDelete.firstPrisonerNumber,
+        "secondPrisonerNumber" to naToDelete.secondPrisonerNumber,
+      ),
+      null,
     )
   }
 

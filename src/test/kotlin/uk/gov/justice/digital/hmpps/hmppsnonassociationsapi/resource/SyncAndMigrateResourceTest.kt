@@ -733,5 +733,29 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
       assertThat(repository.findById(naClosed1.id!!)).isNotPresent
       assertThat(repository.findById(naClosed2.id!!)).isNotPresent
     }
+
+    @Test
+    fun `deleting a non-association by ID`() {
+      val toDelete = repository.save(
+        genNonAssociation(
+          firstPrisonerNumber = "C1234AA",
+          secondPrisonerNumber = "D1234AA",
+          authBy = "TEST",
+        ),
+      )
+
+      webTestClient.delete()
+        .uri("/sync/${toDelete.id}")
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isNoContent
+
+      assertThat(repository.findById(toDelete.id!!)).isNotPresent
+    }
   }
 }
