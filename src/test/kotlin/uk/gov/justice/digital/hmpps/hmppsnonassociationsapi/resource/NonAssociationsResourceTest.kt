@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 
 import com.fasterxml.jackson.core.type.TypeReference
+import io.swagger.v3.oas.annotations.media.Schema
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -14,6 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociat
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationsSort
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
@@ -1325,8 +1327,16 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
   @Nested
   inner class `Get non-associations lists for a prisoner` {
-
     private val prisonerNumber = "A1234BC"
+
+    @Test
+    fun `list endpoint documents all sorting options`() {
+      val sortByParameter = NonAssociationsResource::getPrisonerNonAssociations.parameters.find { it.name == "sortBy" }!!
+      val schemaAnnotation = sortByParameter.annotations.filterIsInstance<Schema>()[0]
+      assertThat(NonAssociationsSort.entries).allMatch {
+        schemaAnnotation.allowableValues.contains(it.name)
+      }
+    }
 
     @Test
     fun `without a valid token responds 401 Unauthorized`() {
