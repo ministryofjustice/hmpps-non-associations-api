@@ -89,8 +89,8 @@ data class UpsertSyncRequest(
 
 @Schema(description = "Delete Sync Request")
 data class DeleteSyncRequest(
-  @Schema(description = "Prisoner number to not associate, this is ignored if ID is provided", required = true, example = "A1234BC")
+  @Schema(description = "Prisoner number to not associate", required = true, example = "A1234BC")
   val firstPrisonerNumber: String,
-  @Schema(description = "Prisoner number to not associate, this is ignored if ID is provided", required = true, example = "D5678EF")
+  @Schema(description = "Prisoner number to not associate", required = true, example = "D5678EF")
   val secondPrisonerNumber: String,
 )
