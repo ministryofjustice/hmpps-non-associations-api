@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -88,5 +90,33 @@ class SyncResource(
     @Valid @RequestBody
     syncRequest: DeleteSyncRequest,
   ) =
-    syncAndMigrateService.sync(syncRequest)
+    syncAndMigrateService.delete(syncRequest)
+
+  @DeleteMapping("/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @Operation(
+    summary = "Delete a non-association by ID",
+    description = "Will delete a non-association for the given ID. Requires ROLE_NON_ASSOCIATIONS_SYNC role.",
+    responses = [
+      ApiResponse(
+        responseCode = "204",
+        description = "Non-association removed",
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Missing required role. Requires the ROLE_NON_ASSOCIATIONS_SYNC role",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun delete(
+    @Schema(description = "The non-association ID", example = "42", required = true)
+    @PathVariable
+    id: Long,
+  ) = syncAndMigrateService.delete(id)
 }
