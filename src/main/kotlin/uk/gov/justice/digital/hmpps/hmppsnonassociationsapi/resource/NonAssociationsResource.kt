@@ -46,11 +46,11 @@ class NonAssociationsResource(
   private val nonAssociationsService: NonAssociationsService,
 ) : NonAssociationsBaseResource() {
   @GetMapping("/prisoner/{prisonerNumber}/non-associations")
-  @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
+  @PreAuthorize("hasRole('ROLE_READ_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
     summary = "Get non-associations by prisoner number",
-    description = "Requires ROLE_NON_ASSOCIATIONS role.",
+    description = "Requires READ_NON_ASSOCIATIONS role.",
     responses = [
       ApiResponse(
         responseCode = "200",
@@ -154,11 +154,11 @@ class NonAssociationsResource(
   }
 
   @PostMapping("/non-associations")
-  @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS') and hasAuthority('SCOPE_write')")
+  @PreAuthorize("hasRole('ROLE_WRITE_NON_ASSOCIATIONS') and hasAuthority('SCOPE_write')")
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(
     summary = "Creates a non-association between two prisoners.",
-    description = "Requires ROLE_NON_ASSOCIATIONS role with write scope.",
+    description = "Requires WRITE_NON_ASSOCIATIONS role with write scope.",
     responses = [
       ApiResponse(
         responseCode = "201",
@@ -196,11 +196,11 @@ class NonAssociationsResource(
     }
 
   @GetMapping("/non-associations/{id}")
-  @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
+  @PreAuthorize("hasRole('ROLE_READ_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
     summary = "Get a non-association between two prisoners by ID.",
-    description = "Requires ROLE_NON_ASSOCIATIONS role.",
+    description = "Requires READ_NON_ASSOCIATIONS role.",
     responses = [
       ApiResponse(
         responseCode = "200",
@@ -235,11 +235,11 @@ class NonAssociationsResource(
   }
 
   @PostMapping("/non-associations/between")
-  @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
+  @PreAuthorize("hasRole('ROLE_READ_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
     summary = "Get non-associations between two or more prisoners by prisoner number. Both people in the non-associations must be in the provided list.",
-    description = "Requires ROLE_NON_ASSOCIATIONS role.",
+    description = "Requires READ_NON_ASSOCIATIONS role.",
     responses = [
       ApiResponse(
         responseCode = "200",
@@ -317,11 +317,11 @@ class NonAssociationsResource(
   }
 
   @PostMapping("/non-associations/involving")
-  @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS')")
+  @PreAuthorize("hasRole('ROLE_READ_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
     summary = "Get non-associations involving any of the given prisoners. Either person in the non-association must be in the provided list.",
-    description = "Requires ROLE_NON_ASSOCIATIONS role.",
+    description = "Requires READ_NON_ASSOCIATIONS role.",
     responses = [
       ApiResponse(
         responseCode = "200",
@@ -399,11 +399,11 @@ class NonAssociationsResource(
   }
 
   @PatchMapping("/non-associations/{id}")
-  @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS') and hasAuthority('SCOPE_write')")
+  @PreAuthorize("hasRole('ROLE_WRITE_NON_ASSOCIATIONS') and hasAuthority('SCOPE_write')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
     summary = "Partial update of a non-association by ID.",
-    description = "Requires ROLE_NON_ASSOCIATIONS role with write scope.",
+    description = "Requires WRITE_NON_ASSOCIATIONS role with write scope.",
     responses = [
       ApiResponse(
         responseCode = "200",
@@ -439,11 +439,11 @@ class NonAssociationsResource(
     }
 
   @PutMapping("/non-associations/{id}/close")
-  @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS') and hasAuthority('SCOPE_write')")
+  @PreAuthorize("hasRole('ROLE_WRITE_NON_ASSOCIATIONS') and hasAuthority('SCOPE_write')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
     summary = "Close a non-association",
-    description = "Requires ROLE_NON_ASSOCIATIONS role with write scope.",
+    description = "Requires WRITE_NON_ASSOCIATIONS role with write scope.",
     responses = [
       ApiResponse(
         responseCode = "200",
