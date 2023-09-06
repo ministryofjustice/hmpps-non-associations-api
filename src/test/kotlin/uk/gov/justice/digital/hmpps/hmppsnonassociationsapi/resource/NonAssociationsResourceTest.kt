@@ -202,7 +202,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .uri(url)
         .headers(
           setAuthorisation(
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write", "read"),
           ),
         )
@@ -269,7 +269,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .headers(
           setAuthorisation(
             user = expectedUsername,
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write", "read"),
           ),
         )
@@ -314,7 +314,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .headers(
           setAuthorisation(
             user = expectedUsername,
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write", "read"),
           ),
         )
@@ -362,7 +362,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .headers(
           setAuthorisation(
             user = expectedUsername,
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write", "read"),
           ),
         )
@@ -511,7 +511,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .headers(
           setAuthorisation(
             user = expectedUsername,
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write", "read"),
           ),
         )
@@ -1095,7 +1095,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .headers(
           setAuthorisation(
             user = expectedUsername,
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write", "read"),
           ),
         )
@@ -1125,7 +1125,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .headers(
           setAuthorisation(
             user = "MWILLIS",
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write", "read"),
           ),
         )
@@ -1289,7 +1289,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     fun `when the non-association doesn't exist responds 404 Not Found`() {
       webTestClient.get()
         .uri("/non-associations/42")
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .header("Content-Type", "application/json")
         .exchange()
         .expectStatus()
@@ -1304,7 +1304,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .uri("/non-associations/${existingNonAssociation.id}")
         .headers(
           setAuthorisation(
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            roles = listOf("ROLE_READ_NON_ASSOCIATIONS"),
           ),
         )
         .header("Content-Type", "application/json")
@@ -1367,7 +1367,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
       webTestClient.get()
         .uri("/prisoner/$prisonerNumber/non-associations")
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus().isNotFound
         .expectBody()
@@ -1399,7 +1399,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
       webTestClient.get()
         .uri("/prisoner/$prisonerNumber/non-associations")
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus().isOk
         .expectBody().json(
@@ -1412,7 +1412,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     fun `respond with 400 if neither open nor closed non-associations are requested`() {
       webTestClient.get()
         .uri("/prisoner/$prisonerNumber/non-associations?includeOpen=false&includeClosed=false")
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus()
         .isBadRequest
@@ -1457,7 +1457,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       val url = "/prisoner/${prisonerMerlin.prisonerNumber}/non-associations"
       webTestClient.get()
         .uri(url)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus().isOk
         .expectBody().json(
@@ -1545,7 +1545,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       val url = "/prisoner/${prisonerMerlin.prisonerNumber}/non-associations?includeClosed=true"
       webTestClient.get()
         .uri(url)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus().isOk
         .expectBody().json(
@@ -1658,7 +1658,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       val url = "/prisoner/${prisonerMerlin.prisonerNumber}/non-associations?includeOpen=false&includeClosed=true"
       webTestClient.get()
         .uri(url)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus().isOk
         .expectBody().json(
@@ -1745,7 +1745,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       val url = "/prisoner/${prisonerMerlin.prisonerNumber}/non-associations?includeOtherPrisons=true"
       webTestClient.get()
         .uri(url)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus().isOk
         .expectBody().json(
@@ -1825,7 +1825,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       val url = "/prisoner/$prisonerNumber/non-associations?sortBy=InvalidField"
       webTestClient.get()
         .uri(url)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus().isBadRequest
     }
@@ -1869,7 +1869,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       val url = "/prisoner/${prisonerMerlin.prisonerNumber}/non-associations?includeOtherPrisons=true&includeClosed=true&sortBy=LAST_NAME&sortDirection=DESC"
       val prisonerNonAssociations = webTestClient.get()
         .uri(url)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus().isOk
         .returnResult<PrisonerNonAssociations>()
@@ -1922,7 +1922,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       // no prisoners provided
       webTestClient.post()
         .uri(urlPath)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus()
         .isBadRequest
@@ -1930,7 +1930,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       // empty list provided
       webTestClient.post()
         .uri(urlPath)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(emptyList<String>())
         .exchange()
         .expectStatus()
@@ -1939,7 +1939,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       // 1 prisoner provided
       webTestClient.post()
         .uri(urlPath)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf(prisonerJohnNumber))
         .exchange()
         .expectStatus()
@@ -1948,7 +1948,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       // 2 non-distinct prisoners provided
       webTestClient.post()
         .uri(urlPath)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf(prisonerJohnNumber, prisonerJohnNumber))
         .exchange()
         .expectStatus()
@@ -1957,7 +1957,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       // 1 non-blank prisoner provided
       webTestClient.post()
         .uri(urlPath)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf(prisonerJohnNumber, ""))
         .exchange()
         .expectStatus()
@@ -1970,7 +1970,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
       webTestClient.post()
         .uri(urlPath)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
@@ -1984,7 +1984,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
       webTestClient.post()
         .uri(urlPath)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
@@ -2028,7 +2028,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             .queryParam("includeClosed", true)
             .build()
         }
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
@@ -2091,7 +2091,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             .queryParam("includeClosed", true)
             .build()
         }
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
@@ -2135,7 +2135,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             .queryParam("includeClosed", false)
             .build()
         }
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isBadRequest
@@ -2160,7 +2160,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
       webTestClient.post()
         .uri(urlPath)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf("A0000AA", "A2222AA", "A4444AA", "B0000BB"))
         .exchange()
         .expectStatus().isOk
@@ -2184,7 +2184,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             .queryParam("includeClosed", true)
             .build()
         }
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf("A0000AA", "A2222AA", "A4444AA", "B0000BB"))
         .exchange()
         .expectStatus().isOk
@@ -2244,7 +2244,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             .queryParam("prisonId", "MDI")
             .build()
         }
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf(prisonerMerlin.prisonerNumber, prisonerEdward.prisonerNumber, prisonerJosh.prisonerNumber))
         .exchange()
         .expectStatus().isOk
@@ -2297,7 +2297,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       // no prisoners provided
       webTestClient.post()
         .uri(urlPath)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus()
         .isBadRequest
@@ -2305,7 +2305,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       // empty list of prisoners provided
       webTestClient.post()
         .uri(urlPath)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(emptyList<String>())
         .exchange()
         .expectStatus()
@@ -2314,7 +2314,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       // 1 blank prisoner provided
       webTestClient.post()
         .uri(urlPath)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf(""))
         .exchange()
         .expectStatus()
@@ -2327,7 +2327,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
       webTestClient.post()
         .uri(urlPath)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
@@ -2341,7 +2341,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
       webTestClient.post()
         .uri(urlPath)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
@@ -2385,7 +2385,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             .queryParam("includeClosed", true)
             .build()
         }
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
@@ -2448,7 +2448,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             .queryParam("includeClosed", true)
             .build()
         }
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
@@ -2492,7 +2492,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             .queryParam("includeClosed", false)
             .build()
         }
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isBadRequest
@@ -2517,7 +2517,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
       webTestClient.post()
         .uri(urlPath)
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf("A2222AA", "A4444AA", "B0000BB"))
         .exchange()
         .expectStatus().isOk
@@ -2551,7 +2551,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             .queryParam("includeClosed", true)
             .build()
         }
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf("A2222AA", "A4444AA", "B0000BB"))
         .exchange()
         .expectStatus().isOk
@@ -2622,7 +2622,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             .queryParam("prisonId", "MDI")
             .build()
         }
-        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf(prisonerMerlin.prisonerNumber, prisonerEdward.prisonerNumber))
         .exchange()
         .expectStatus().isOk
