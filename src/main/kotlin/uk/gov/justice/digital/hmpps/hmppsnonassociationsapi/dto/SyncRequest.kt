@@ -82,9 +82,11 @@ data class UpsertSyncRequest(
   private fun isWithinRange(testDate: LocalDate, startDate: LocalDate, endDate: LocalDate?): Boolean {
     return testDate >= startDate && (endDate == null || testDate < endDate)
   }
+
   override fun toString(): String {
-    return "UpsertSyncRequest(firstPrisonerNumber='$firstPrisonerNumber', secondPrisonerNumber='$secondPrisonerNumber')"
+    return "UpsertSyncRequest(id=$id, firstPrisonerNumber='$firstPrisonerNumber', firstPrisonerReason=$firstPrisonerReason, secondPrisonerNumber='$secondPrisonerNumber', secondPrisonerReason=$secondPrisonerReason, restrictionType=$restrictionType, comment=$comment, authorisedBy=$authorisedBy, effectiveFromDate=$effectiveFromDate, expiryDate=$expiryDate)"
   }
+
 }
 
 @Schema(description = "Delete Sync Request")
@@ -93,4 +95,10 @@ data class DeleteSyncRequest(
   val firstPrisonerNumber: String,
   @Schema(description = "Prisoner number to not associate", required = true, example = "D5678EF")
   val secondPrisonerNumber: String,
-)
+
+
+) {
+  override fun toString(): String {
+    return "DeleteSyncRequest(firstPrisonerNumber='$firstPrisonerNumber', secondPrisonerNumber='$secondPrisonerNumber')"
+  }
+}
