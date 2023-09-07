@@ -34,6 +34,8 @@ class SyncAndMigrateService(
   }
 
   fun sync(syncRequest: UpsertSyncRequest): NonAssociation {
+    log.info("Syncing $syncRequest")
+
     val recordToUpdate = if (syncRequest.id != null) {
       val existing =
         nonAssociationsRepository.findById(syncRequest.id).getOrNull() ?: throw NonAssociationNotFoundException(
@@ -121,6 +123,7 @@ class SyncAndMigrateService(
   }
 
   fun delete(deleteSyncRequest: DeleteSyncRequest) {
+    log.info("Deleting $deleteSyncRequest")
     nonAssociationsRepository.deleteAll(
       nonAssociationsRepository.findAnyBetweenPrisonerNumbers(
         listOf(
@@ -144,6 +147,7 @@ class SyncAndMigrateService(
   }
 
   fun delete(id: Long) {
+    log.info("Deleting non-association [ID=$id]")
     val naToDelete = nonAssociationsRepository.findById(id).getOrNull() ?: throw NonAssociationNotFoundException(id)
     nonAssociationsRepository.delete(naToDelete)
     log.info("Deleted non-association [ID=$id between ${naToDelete.firstPrisonerNumber} and ${naToDelete.secondPrisonerNumber}")
@@ -159,6 +163,7 @@ class SyncAndMigrateService(
   }
 
   fun migrate(migrateRequest: UpsertSyncRequest): NonAssociation {
+    log.info("Migrating $migrateRequest")
     if (migrateRequest.isOpen(clock)) {
       val prisonersToKeepApart = listOf(
         migrateRequest.firstPrisonerNumber,
