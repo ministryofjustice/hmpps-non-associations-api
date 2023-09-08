@@ -514,7 +514,7 @@ class NonAssociationsResource(
     @Validated
     deleteNonAssociationRequest: DeleteNonAssociationRequest,
   ) {
-    eventPublishWrapperAudit(NonAssociationDomainEventType.NON_ASSOCIATION_DELETED) {
+    deleteEventPublishWrapper {
       Pair(nonAssociationsService.deleteNonAssociation(id, deleteNonAssociationRequest), deleteNonAssociationRequest)
     }
   }

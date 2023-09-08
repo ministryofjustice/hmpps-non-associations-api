@@ -15,6 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.UpsertSyncReques
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.translateToRolesAndReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAnyBetweenPrisonerNumbers
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociationDomainEventType
 import java.time.Clock
 import java.time.LocalDateTime
 import kotlin.jvm.optionals.getOrNull
@@ -33,7 +34,7 @@ class SyncAndMigrateService(
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun sync(syncRequest: UpsertSyncRequest): NonAssociation {
+  fun sync(syncRequest: UpsertSyncRequest): Pair<NonAssociationDomainEventType, NonAssociation> {
     log.info("Syncing $syncRequest")
 
     val recordToUpdate = if (syncRequest.id != null) {
@@ -63,20 +64,23 @@ class SyncAndMigrateService(
       existingRecords.firstOrNull { na -> na.isOpen } ?: latestClosedRecord
     }
     return if (recordToUpdate != null) {
-      updateRecord(syncRequest, recordToUpdate).also { log.info("SYNC: Updating Non Association [$it]") }
+      Pair(NonAssociationDomainEventType.NON_ASSOCIATION_UPSERT, updateRecord(syncRequest, recordToUpdate).also { log.info("SYNC: Updating Non Association [$it]") })
     } else {
-      nonAssociationsRepository.save(syncRequest.toNewEntity(clock).also { log.info("SYNC: Creating Non Association [$it]") }).toDto().also {
-        log.info("Created Non-association [${it.id}] between ${it.firstPrisonerNumber} and ${it.secondPrisonerNumber}")
-        telemetryClient.trackEvent(
-          "Sync (Create)",
-          mapOf(
-            "id" to it.id.toString(),
-            "firstPrisonerNumber" to syncRequest.firstPrisonerNumber,
-            "secondPrisonerNumber" to syncRequest.secondPrisonerNumber,
-          ),
-          null,
-        )
-      }
+      Pair(
+        NonAssociationDomainEventType.NON_ASSOCIATION_CREATED,
+        nonAssociationsRepository.save(syncRequest.toNewEntity(clock).also { log.info("SYNC: Creating Non Association [$it]") }).toDto().also {
+          log.info("Created Non-association [${it.id}] between ${it.firstPrisonerNumber} and ${it.secondPrisonerNumber}")
+          telemetryClient.trackEvent(
+            "Sync (Create)",
+            mapOf(
+              "id" to it.id.toString(),
+              "firstPrisonerNumber" to syncRequest.firstPrisonerNumber,
+              "secondPrisonerNumber" to syncRequest.secondPrisonerNumber,
+            ),
+            null,
+          )
+        },
+      )
     }
   }
 
@@ -123,16 +127,17 @@ class SyncAndMigrateService(
     }
   }
 
-  fun delete(deleteSyncRequest: DeleteSyncRequest) {
+  fun delete(deleteSyncRequest: DeleteSyncRequest): List<NonAssociation> {
     log.info("Deleting $deleteSyncRequest")
+    val nonAssociations = nonAssociationsRepository.findAnyBetweenPrisonerNumbers(
+      listOf(
+        deleteSyncRequest.firstPrisonerNumber,
+        deleteSyncRequest.secondPrisonerNumber,
+      ),
+      NonAssociationListInclusion.ALL,
+    )
     nonAssociationsRepository.deleteAll(
-      nonAssociationsRepository.findAnyBetweenPrisonerNumbers(
-        listOf(
-          deleteSyncRequest.firstPrisonerNumber,
-          deleteSyncRequest.secondPrisonerNumber,
-        ),
-        NonAssociationListInclusion.ALL,
-      )
+      nonAssociations
         .also {
           log.info("Deleted ${it.size} non-associations between ${deleteSyncRequest.firstPrisonerNumber} and ${deleteSyncRequest.secondPrisonerNumber}")
           telemetryClient.trackEvent(
@@ -145,9 +150,10 @@ class SyncAndMigrateService(
           )
         },
     )
+    return nonAssociations.map { it.toDto() }
   }
 
-  fun delete(id: Long) {
+  fun delete(id: Long): NonAssociation {
     log.info("Deleting non-association [ID=$id]")
     val naToDelete = nonAssociationsRepository.findById(id).getOrNull() ?: throw NonAssociationNotFoundException(id)
     nonAssociationsRepository.delete(naToDelete)
@@ -161,6 +167,7 @@ class SyncAndMigrateService(
       ),
       null,
     )
+    return naToDelete.toDto()
   }
 
   fun migrate(migrateRequest: UpsertSyncRequest): NonAssociation {

@@ -21,7 +21,9 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteSyncRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.UpsertSyncRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.EventPublishService
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.SyncAndMigrateService
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociationDomainEventType
 
 @RestController
 @Validated
@@ -33,6 +35,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.SyncAndMigra
 @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS_SYNC')")
 class SyncResource(
   private val syncAndMigrateService: SyncAndMigrateService,
+  private val eventPublishService: EventPublishService,
 ) {
 
   @PutMapping("/upsert")
@@ -61,7 +64,10 @@ class SyncResource(
     @Valid @RequestBody
     syncRequest: UpsertSyncRequest,
   ): NonAssociation {
-    return syncAndMigrateService.sync(syncRequest)
+    val (_, nonAssociation) = syncAndMigrateService.sync(syncRequest).also { (event, nonAssociation) ->
+      eventPublishService.publishEvent(event, nonAssociation, syncRequest, "nomis")
+    }
+    return nonAssociation
   }
 
   @PutMapping("/delete")
@@ -86,11 +92,19 @@ class SyncResource(
       ),
     ],
   )
-  fun sync(
+  fun delete(
     @Valid @RequestBody
-    syncRequest: DeleteSyncRequest,
+    deleteRequest: DeleteSyncRequest,
   ) =
-    syncAndMigrateService.delete(syncRequest)
+    syncAndMigrateService.delete(deleteRequest)
+      .onEach { deletedNonAssociation ->
+        eventPublishService.publishEvent(
+          NonAssociationDomainEventType.NON_ASSOCIATION_DELETED,
+          deletedNonAssociation,
+          deleteRequest,
+          "nomis",
+        )
+      }
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -105,12 +119,22 @@ class SyncResource(
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Missing required role. Requires the ROLE_NON_ASSOCIATIONS_SYNC role",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
       ),
     ],
   )
@@ -118,5 +142,13 @@ class SyncResource(
     @Schema(description = "The non-association ID", example = "42", required = true)
     @PathVariable
     id: Long,
-  ) = syncAndMigrateService.delete(id)
+  ) =
+    syncAndMigrateService.delete(id).also { deletedNonAssociation ->
+      eventPublishService.publishEvent(
+        NonAssociationDomainEventType.NON_ASSOCIATION_DELETED,
+        deletedNonAssociation,
+        id,
+        "nomis",
+      )
+    }
 }
