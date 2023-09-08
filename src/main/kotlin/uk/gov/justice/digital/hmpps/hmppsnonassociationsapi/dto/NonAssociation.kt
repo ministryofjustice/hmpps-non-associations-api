@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
-import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Pattern
 import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
@@ -67,13 +66,11 @@ data class NonAssociation(
 @Schema(description = "Request format for creating a new, open, non-association between two prisoners")
 data class CreateNonAssociationRequest(
   @Schema(description = "Prisoner number to not associate", required = true, example = "A1234BC", maxLength = 10)
-  @field:Max(value = 10, message = "Prisoner number must be a maximum of 10 characters")
   @field:Pattern(regexp = "[a-zA-Z][0-9]{4}[a-zA-Z]{2}", message = "Prisoner number must be in the correct format")
   val firstPrisonerNumber: String,
   @Schema(description = "This prisoner’s role in the non-association", required = true, example = "VICTIM")
   val firstPrisonerRole: Role,
   @Schema(description = "Prisoner number to not associate", required = true, example = "D5678EF", maxLength = 10)
-  @field:Max(value = 10, message = "Prisoner number must be a maximum of 10 characters")
   @field:Pattern(regexp = "[a-zA-Z][0-9]{4}[a-zA-Z]{2}", message = "Prisoner number must be in the correct format")
   val secondPrisonerNumber: String,
   @Schema(description = "Other prisoner’s role in the non-association", required = true, example = "PERPETRATOR")

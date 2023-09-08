@@ -279,9 +279,9 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
       )
       val request = UpsertSyncRequest(
         id = existingNa.id,
-        firstPrisonerNumber = "DUMMY",
+        firstPrisonerNumber = "Z1111ZZ",
         firstPrisonerReason = LegacyReason.VIC,
-        secondPrisonerNumber = "DUMMY",
+        secondPrisonerNumber = "X1111XX",
         secondPrisonerReason = LegacyReason.PER,
         restrictionType = LegacyRestrictionType.CELL,
         effectiveFromDate = LocalDate.now(clock).minusDays(10),
@@ -342,9 +342,9 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
       )
       val request = UpsertSyncRequest(
         id = existingClosedNa.id,
-        firstPrisonerNumber = "DUMMY",
+        firstPrisonerNumber = "Z1111ZZ",
         firstPrisonerReason = LegacyReason.VIC,
-        secondPrisonerNumber = "DUMMY",
+        secondPrisonerNumber = "X1111XX",
         secondPrisonerReason = LegacyReason.PER,
         restrictionType = LegacyRestrictionType.CELL,
         effectiveFromDate = LocalDate.now(clock).minusDays(2),
@@ -367,9 +367,9 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
     fun `cannot sync non-association by ID that doesn't exist`() {
       val request = UpsertSyncRequest(
         id = -111111,
-        firstPrisonerNumber = "DUMMY",
+        firstPrisonerNumber = "Z1111ZZ",
         firstPrisonerReason = LegacyReason.VIC,
-        secondPrisonerNumber = "DUMMY",
+        secondPrisonerNumber = "X1111XX",
         secondPrisonerReason = LegacyReason.PER,
         restrictionType = LegacyRestrictionType.CELL,
         effectiveFromDate = LocalDate.now(clock),
