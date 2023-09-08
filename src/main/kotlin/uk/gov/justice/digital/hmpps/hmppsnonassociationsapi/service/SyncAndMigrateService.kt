@@ -63,9 +63,9 @@ class SyncAndMigrateService(
       existingRecords.firstOrNull { na -> na.isOpen } ?: latestClosedRecord
     }
     return if (recordToUpdate != null) {
-      updateRecord(syncRequest, recordToUpdate)
+      updateRecord(syncRequest, recordToUpdate).also { log.info("SYNC: Updating Non Association [$it]") }
     } else {
-      nonAssociationsRepository.save(syncRequest.toNewEntity(clock)).toDto().also {
+      nonAssociationsRepository.save(syncRequest.toNewEntity(clock).also { log.info("SYNC: Creating Non Association [$it]") }).toDto().also {
         log.info("Created Non-association [${it.id}] between ${it.firstPrisonerNumber} and ${it.secondPrisonerNumber}")
         telemetryClient.trackEvent(
           "Sync (Create)",
@@ -174,7 +174,7 @@ class SyncAndMigrateService(
       }
     }
 
-    return nonAssociationsRepository.save(migrateRequest.toNewEntity(clock)).toDto().also {
+    return nonAssociationsRepository.save(migrateRequest.toNewEntity(clock).also { log.info("MIGRATE: Creating Non Association [$it]") }).toDto().also {
       log.info("Migrated Non-association [$migrateRequest]")
       telemetryClient.trackEvent(
         "Migrate",
