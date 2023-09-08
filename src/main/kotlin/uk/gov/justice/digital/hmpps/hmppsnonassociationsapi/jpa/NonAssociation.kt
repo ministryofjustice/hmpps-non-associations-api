@@ -121,6 +121,4 @@ class NonAssociation(
   override fun toString(): String {
     return "NonAssociation(id=$id, firstPrisonerNumber='$firstPrisonerNumber', firstPrisonerRole=$firstPrisonerRole, secondPrisonerNumber='$secondPrisonerNumber', secondPrisonerRole=$secondPrisonerRole, reason=$reason, restrictionType=$restrictionType, comment='$comment', authorisedBy=$authorisedBy, isClosed=$isClosed, closedBy=$closedBy, closedReason=$closedReason, closedAt=$closedAt, whenCreated=$whenCreated, whenUpdated=$whenUpdated, updatedBy='$updatedBy')"
   }
-
-
 }
