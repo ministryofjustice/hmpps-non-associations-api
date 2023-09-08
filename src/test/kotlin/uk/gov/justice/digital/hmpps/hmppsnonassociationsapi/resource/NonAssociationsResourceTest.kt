@@ -178,7 +178,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `when any of the prisoners can't be found in OffenderSearch responds 404 Not Found`() {
       val foundPrisoner = offenderSearchPrisoners["A1234BC"]!!
-      val notFoundPrisonerNumber = "NOT-FOUND-PRISONER"
+      val notFoundPrisonerNumber = "X1111TT" // NOT FOUND
       val prisonerNumbers = listOf(
         foundPrisoner.prisonerNumber,
         notFoundPrisonerNumber,
@@ -212,7 +212,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .expectStatus().isNotFound
         .expectBody()
         .jsonPath("userMessage").isEqualTo(
-          "Could not find the following prisoners: [NOT-FOUND-PRISONER]",
+          "Could not find the following prisoners: [X1111TT]",
         )
     }
 

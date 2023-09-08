@@ -279,9 +279,9 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
       )
       val request = UpsertSyncRequest(
         id = existingNa.id,
-        firstPrisonerNumber = "DUMMY",
+        firstPrisonerNumber = "Z1111ZZ",
         firstPrisonerReason = LegacyReason.VIC,
-        secondPrisonerNumber = "DUMMY",
+        secondPrisonerNumber = "X1111XX",
         secondPrisonerReason = LegacyReason.PER,
         restrictionType = LegacyRestrictionType.CELL,
         effectiveFromDate = LocalDate.now(clock).minusDays(10),
@@ -303,7 +303,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "restrictionTypeDescription": "${request.restrictionType.toRestrictionType().description}",
           "comment": "$NO_COMMENT_PROVIDED",
           "authorisedBy": "",
-          "updatedBy": "$expectedUsername",
+          "updatedBy": "$SYSTEM_USERNAME",
           "isClosed": false,
           "closedReason": null,
           "closedBy": null,
@@ -342,9 +342,9 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
       )
       val request = UpsertSyncRequest(
         id = existingClosedNa.id,
-        firstPrisonerNumber = "DUMMY",
+        firstPrisonerNumber = "Z1111ZZ",
         firstPrisonerReason = LegacyReason.VIC,
-        secondPrisonerNumber = "DUMMY",
+        secondPrisonerNumber = "X1111XX",
         secondPrisonerReason = LegacyReason.PER,
         restrictionType = LegacyRestrictionType.CELL,
         effectiveFromDate = LocalDate.now(clock).minusDays(2),
@@ -367,9 +367,9 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
     fun `cannot sync non-association by ID that doesn't exist`() {
       val request = UpsertSyncRequest(
         id = -111111,
-        firstPrisonerNumber = "DUMMY",
+        firstPrisonerNumber = "Z1111ZZ",
         firstPrisonerReason = LegacyReason.VIC,
-        secondPrisonerNumber = "DUMMY",
+        secondPrisonerNumber = "X1111XX",
         secondPrisonerReason = LegacyReason.PER,
         restrictionType = LegacyRestrictionType.CELL,
         effectiveFromDate = LocalDate.now(clock),
@@ -417,6 +417,56 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         .bodyValue(jsonString(request))
         .exchange()
         .expectStatus().isOk
+    }
+
+    @Test
+    fun `fails validation on an non-association too long`() {
+      val request = UpsertSyncRequest(
+        firstPrisonerNumber = "A7777XX",
+        firstPrisonerReason = LegacyReason.VIC,
+        secondPrisonerNumber = "B7777XX",
+        secondPrisonerReason = LegacyReason.PER,
+        restrictionType = LegacyRestrictionType.CELL,
+        authorisedBy = "1234567890123456789012345678901234567890123456789012345678901",
+        effectiveFromDate = LocalDate.now(clock).minusDays(5),
+      )
+
+      webTestClient.put()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun `fails validation on an non-association incorrect prisoner number format`() {
+      val request = UpsertSyncRequest(
+        firstPrisonerNumber = "A7777XX2",
+        firstPrisonerReason = LegacyReason.VIC,
+        secondPrisonerNumber = "B7777XX2342342342",
+        secondPrisonerReason = LegacyReason.PER,
+        restrictionType = LegacyRestrictionType.CELL,
+        authorisedBy = "HI",
+        effectiveFromDate = LocalDate.now(clock).minusDays(5),
+      )
+
+      webTestClient.put()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isBadRequest
     }
 
     @Test
@@ -506,10 +556,10 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "restrictionTypeDescription": "${request.restrictionType.toRestrictionType().description}",
           "comment": "${request.comment}",
           "authorisedBy": "${request.authorisedBy}",
-          "updatedBy": "$expectedUsername",
+          "updatedBy": "$SYSTEM_USERNAME",
           "isClosed": true,
           "closedReason": "$NO_CLOSURE_REASON_PROVIDED",
-          "closedBy": "TEST",
+          "closedBy": "$SYSTEM_USERNAME",
           "closedAt": "${request.expiryDate?.atStartOfDay()?.format(dtFormat)}"
         }
         """
@@ -580,7 +630,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "restrictionTypeDescription": "${request.restrictionType.toRestrictionType().description}",
           "comment": "${request.comment}",
           "authorisedBy": "${request.authorisedBy}",
-          "updatedBy": "$expectedUsername",
+          "updatedBy": "$SYSTEM_USERNAME",
           "isClosed": false,
           "closedReason": null,
           "closedBy": null,
