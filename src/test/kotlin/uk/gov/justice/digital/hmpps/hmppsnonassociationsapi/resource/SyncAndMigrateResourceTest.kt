@@ -303,7 +303,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "restrictionTypeDescription": "${request.restrictionType.toRestrictionType().description}",
           "comment": "$NO_COMMENT_PROVIDED",
           "authorisedBy": "",
-          "updatedBy": "$expectedUsername",
+          "updatedBy": "$SYSTEM_USERNAME",
           "isClosed": false,
           "closedReason": null,
           "closedBy": null,
@@ -556,10 +556,10 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "restrictionTypeDescription": "${request.restrictionType.toRestrictionType().description}",
           "comment": "${request.comment}",
           "authorisedBy": "${request.authorisedBy}",
-          "updatedBy": "$expectedUsername",
+          "updatedBy": "$SYSTEM_USERNAME",
           "isClosed": true,
           "closedReason": "$NO_CLOSURE_REASON_PROVIDED",
-          "closedBy": "TEST",
+          "closedBy": "$SYSTEM_USERNAME",
           "closedAt": "${request.expiryDate?.atStartOfDay()?.format(dtFormat)}"
         }
         """
@@ -630,7 +630,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "restrictionTypeDescription": "${request.restrictionType.toRestrictionType().description}",
           "comment": "${request.comment}",
           "authorisedBy": "${request.authorisedBy}",
-          "updatedBy": "$expectedUsername",
+          "updatedBy": "$SYSTEM_USERNAME",
           "isClosed": false,
           "closedReason": null,
           "closedBy": null,

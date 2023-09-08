@@ -97,6 +97,7 @@ class SyncAndMigrateService(
       comment = syncRequest.comment ?: NO_COMMENT_PROVIDED
       authorisedBy = syncRequest.authorisedBy
       isClosed = syncRequest.isClosed(clock)
+      updatedBy = SYSTEM_USERNAME
 
       if (syncRequest.isOpen(clock)) {
         closedReason = null
@@ -104,7 +105,7 @@ class SyncAndMigrateService(
         closedAt = null
       } else {
         closedReason = NO_CLOSURE_REASON_PROVIDED
-        closedBy = syncRequest.authorisedBy ?: SYSTEM_USERNAME
+        closedBy = SYSTEM_USERNAME
         closedAt = syncRequest.expiryDate?.atStartOfDay() ?: LocalDateTime.now(clock)
       }
       toDto().also {

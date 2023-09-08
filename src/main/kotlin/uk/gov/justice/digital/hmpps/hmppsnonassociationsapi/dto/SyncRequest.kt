@@ -69,7 +69,7 @@ data class UpsertSyncRequest(
       authorisedBy = authorisedBy,
       isClosed = isClosed(clock),
       closedAt = if (isOpen(clock)) { null } else { expiryDate?.atStartOfDay() ?: LocalDateTime.now(clock) },
-      closedBy = if (isOpen(clock)) { null } else { authorisedBy ?: SYSTEM_USERNAME },
+      closedBy = if (isOpen(clock)) { null } else { SYSTEM_USERNAME },
       closedReason = if (isOpen(clock)) { null } else { NO_CLOSURE_REASON_PROVIDED },
       whenCreated = effectiveFromDate.atStartOfDay(),
       updatedBy = SYSTEM_USERNAME,
