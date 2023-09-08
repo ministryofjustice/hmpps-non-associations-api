@@ -65,6 +65,7 @@ data class AdditionalInformation(
   val id: Long? = null,
   val nsPrisonerNumber1: String? = null,
   val nsPrisonerNumber2: String? = null,
+  val source: String? = null,
 )
 
 data class HMPPSDomainEvent(

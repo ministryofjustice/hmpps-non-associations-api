@@ -15,7 +15,12 @@ class EventPublishService(
   private val clock: Clock,
 ) {
 
-  fun publishEvent(event: NonAssociationDomainEventType, nonAssociation: NonAssociation, auditData: Any) {
+  fun publishEvent(
+    event: NonAssociationDomainEventType,
+    nonAssociation: NonAssociation,
+    auditData: Any,
+    source: String = "non-associations-api",
+  ) {
     snsService.publishDomainEvent(
       event,
       "${event.description} ${nonAssociation.id}",
@@ -24,6 +29,7 @@ class EventPublishService(
         id = nonAssociation.id,
         nsPrisonerNumber1 = nonAssociation.firstPrisonerNumber,
         nsPrisonerNumber2 = nonAssociation.secondPrisonerNumber,
+        source = source,
       ),
     )
 
