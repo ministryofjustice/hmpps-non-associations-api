@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Pattern
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NO_CLOSURE_REASON_PROVIDED
@@ -14,7 +16,9 @@ data class UpsertSyncRequest(
   @Schema(description = "ID of the non-association, if provided an update will be performed", required = false, example = "234233")
   val id: Long? = null,
 
-  @Schema(description = "Prisoner number to not associate, this is ignored if ID is provided", required = true, example = "A1234BC")
+  @Schema(description = "Prisoner number to not associate, this is ignored if ID is provided", required = true, example = "A1234BC", maxLength = 10)
+  @field:Max(value = 10, message = "Prisoner number must be a maximum of 10 characters")
+  @field:Pattern(regexp = "[a-zA-Z][0-9]{4}[a-zA-Z]{2}", message = "Prisoner number must be in the correct format")
   val firstPrisonerNumber: String,
   @Schema(
     description = "Reason why this prisoner should be kept apart from the other",
@@ -22,7 +26,9 @@ data class UpsertSyncRequest(
     example = "VIC",
   )
   val firstPrisonerReason: LegacyReason,
-  @Schema(description = "Prisoner number to not associate, this is ignored if ID is provided", required = true, example = "D5678EF")
+  @Schema(description = "Prisoner number to not associate, this is ignored if ID is provided", required = true, example = "D5678EF", maxLength = 10)
+  @field:Max(value = 10, message = "Prisoner number must be a maximum of 10 characters")
+  @field:Pattern(regexp = "[a-zA-Z][0-9]{4}[a-zA-Z]{2}", message = "Prisoner number must be in the correct format")
   val secondPrisonerNumber: String,
   @Schema(
     description = "Reason why this prisoner should be kept apart from the other",
@@ -41,7 +47,8 @@ data class UpsertSyncRequest(
   )
   val comment: String? = null,
 
-  @Schema(description = "Who authorised the non-association", required = false, example = "John Smith")
+  @Schema(description = "Who authorised the non-association", required = false, example = "John Smith", maxLength = 60)
+  @field:Max(value = 60, message = "Authorised by must be a maximum of 60 characters")
   val authorisedBy: String? = null,
 
   @Schema(description = "The date that the NA became active", required = true, example = "2023-05-09", defaultValue = "today")

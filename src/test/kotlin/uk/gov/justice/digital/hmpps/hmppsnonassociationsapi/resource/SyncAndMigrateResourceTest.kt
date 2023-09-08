@@ -420,6 +420,56 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
+    fun `fails validation on an non-association too long`() {
+      val request = UpsertSyncRequest(
+        firstPrisonerNumber = "A7777XX",
+        firstPrisonerReason = LegacyReason.VIC,
+        secondPrisonerNumber = "B7777XX",
+        secondPrisonerReason = LegacyReason.PER,
+        restrictionType = LegacyRestrictionType.CELL,
+        authorisedBy = "1234567890123456789012345678901234567890123456789012345678901",
+        effectiveFromDate = LocalDate.now(clock).minusDays(5),
+      )
+
+      webTestClient.put()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun `fails validation on an non-association incorrect prisoner number format`() {
+      val request = UpsertSyncRequest(
+        firstPrisonerNumber = "A7777XX2",
+        firstPrisonerReason = LegacyReason.VIC,
+        secondPrisonerNumber = "B7777XX2342342342",
+        secondPrisonerReason = LegacyReason.PER,
+        restrictionType = LegacyRestrictionType.CELL,
+        authorisedBy = "HI",
+        effectiveFromDate = LocalDate.now(clock).minusDays(5),
+      )
+
+      webTestClient.put()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isBadRequest
+    }
+
+    @Test
     fun `creating an non-association`() {
       val request = UpsertSyncRequest(
         firstPrisonerNumber = "A7777XX",

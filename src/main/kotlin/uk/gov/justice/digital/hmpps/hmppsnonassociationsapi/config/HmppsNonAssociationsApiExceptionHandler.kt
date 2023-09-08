@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.HttpMediaTypeNotSupportedException
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
@@ -182,6 +183,22 @@ class HmppsNonAssociationsApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(MethodArgumentNotValidException::class)
+  fun handleValidationException(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse>? {
+    log.debug("MethodArgumentNotValidException exception caught: {}", e.message)
+
+    return ResponseEntity
+      .status(BAD_REQUEST)
+      .body(
+        ErrorResponse(
+          status = BAD_REQUEST,
+          errorCode = ErrorCode.ValidationFailure,
+          userMessage = "Validation Failure: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
   @ExceptionHandler(OpenNonAssociationAlreadyExistsException::class)
   fun handleOpenNonAssociationAlreadyExistsException(e: OpenNonAssociationAlreadyExistsException): ResponseEntity<ErrorResponse?>? {
     log.debug("Non-association already exists for these prisoners that is open: {}", e.message)
@@ -212,6 +229,7 @@ enum class ErrorCode(val errorCode: Int) {
   NonAssociationAlreadyClosed(100),
   UserInContextMissing(401),
   OpenNonAssociationAlreadyExist(101),
+  ValidationFailure(102),
 }
 
 @Schema(description = "Error response")
