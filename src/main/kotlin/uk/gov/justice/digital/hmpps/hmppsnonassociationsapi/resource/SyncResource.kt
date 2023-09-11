@@ -22,6 +22,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteSyncReques
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.UpsertSyncRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.EventPublishService
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.InformationSource
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.SyncAndMigrateService
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociationDomainEventType
 
@@ -65,7 +66,7 @@ class SyncResource(
     syncRequest: UpsertSyncRequest,
   ): NonAssociation {
     val (_, nonAssociation) = syncAndMigrateService.sync(syncRequest).also { (event, nonAssociation) ->
-      eventPublishService.publishEvent(event, nonAssociation, syncRequest, "nomis")
+      eventPublishService.publishEvent(event, nonAssociation, syncRequest, InformationSource.NOMIS)
     }
     return nonAssociation
   }
@@ -102,7 +103,7 @@ class SyncResource(
           NonAssociationDomainEventType.NON_ASSOCIATION_DELETED,
           deletedNonAssociation,
           deleteRequest,
-          "nomis",
+          InformationSource.NOMIS,
         )
       }
 
@@ -148,7 +149,7 @@ class SyncResource(
         NonAssociationDomainEventType.NON_ASSOCIATION_DELETED,
         deletedNonAssociation,
         id,
-        "nomis",
+        InformationSource.NOMIS,
       )
     }
 }

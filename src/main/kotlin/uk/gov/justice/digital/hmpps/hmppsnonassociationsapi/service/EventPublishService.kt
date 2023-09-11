@@ -19,7 +19,7 @@ class EventPublishService(
     event: NonAssociationDomainEventType,
     nonAssociation: NonAssociation,
     auditData: Any,
-    source: String = "non-associations-api",
+    source: InformationSource = InformationSource.DPS,
   ) {
     snsService.publishDomainEvent(
       event,
@@ -39,4 +39,8 @@ class EventPublishService(
       auditData,
     )
   }
+}
+
+enum class InformationSource {
+  DPS, NOMIS
 }
