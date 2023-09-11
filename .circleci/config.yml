@@ -12,7 +12,7 @@ parameters:
     default: dps-releases
   java-version:
     type: string
-    default: "19.0"
+    default: "20.0"
   postgres-version:
     type: string
     default: "15"
@@ -154,5 +154,3 @@ workflows:
           context:
             - veracode-credentials
             - hmpps-common-vars
-
-
