@@ -1,6 +1,6 @@
 # 1. Non-associations Data Design
 
-[Next >>](0004-migration-and-sync-with-NOMIS.md)
+[Next >>](0004-sync.md)
 
 
 Date: 2023-06-13
@@ -108,4 +108,4 @@ CREATE TABLE reason_type
 )
 ```
 
-[Next >>](0004-migration-and-sync-with-NOMIS.md)
+[Next >>](0004-sync.md)
