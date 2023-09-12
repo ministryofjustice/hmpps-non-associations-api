@@ -45,12 +45,12 @@ data class UpsertSyncRequest(
   )
   val comment: String? = null,
 
-  @Schema(description = "Who authorised the non-association", required = false, example = "John Smith", maxLength = 60)
+  @Schema(description = "Who authorised the non-association", required = false, example = "John Smith", minLength = 1, maxLength = 60)
   @field:Size(min = 1, max = 60, message = "Authorised by must be a maximum of 60 characters")
   val authorisedBy: String? = null,
 
-  @Schema(description = "The last staff member who changed this record, username of 30 characters, if not provided the API credentials will be used", required = false, example = "JSMITH", maxLength = 30)
-  @field:Size(min = 1, max = 30, message = "Last modified by must be a maximum of 30 characters")
+  @Schema(description = "The last staff member who changed this record, username of 60 characters, if not provided the API credentials will be used", required = false, example = "JSMITH", minLength = 1, maxLength = 60)
+  @field:Size(min = 1, max = 60, message = "Last modified by must be a maximum of 60 characters")
   val lastModifiedByUsername: String? = null,
 
   @Schema(description = "The date that the NA became active", required = true, example = "2023-05-09", defaultValue = "today")
@@ -100,10 +100,11 @@ data class UpsertSyncRequest(
 @Schema(description = "Delete Sync Request")
 data class DeleteSyncRequest(
   @Schema(description = "Prisoner number to not associate", required = true, example = "A1234BC")
+  @field:Pattern(regexp = "[a-zA-Z][0-9]{4}[a-zA-Z]{2}", message = "Prisoner number must be in the correct format")
   val firstPrisonerNumber: String,
   @Schema(description = "Prisoner number to not associate", required = true, example = "D5678EF")
+  @field:Pattern(regexp = "[a-zA-Z][0-9]{4}[a-zA-Z]{2}", message = "Prisoner number must be in the correct format")
   val secondPrisonerNumber: String,
-
 ) {
   override fun toString(): String {
     return "DeleteSyncRequest(firstPrisonerNumber='$firstPrisonerNumber', secondPrisonerNumber='$secondPrisonerNumber')"
