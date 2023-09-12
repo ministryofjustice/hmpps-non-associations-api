@@ -49,6 +49,10 @@ data class UpsertSyncRequest(
   @field:Size(min = 1, max = 60, message = "Authorised by must be a maximum of 60 characters")
   val authorisedBy: String? = null,
 
+  @Schema(description = "The last staff member who changed this record, username of 30 characters, if not provided the API credentials will be used", required = false, example = "JSMITH", maxLength = 30)
+  @field:Size(min = 1, max = 30, message = "Authorised by must be a maximum of 60 characters")
+  val lastModifiedByUsername: String? = null,
+
   @Schema(description = "The date that the NA became active", required = true, example = "2023-05-09", defaultValue = "today")
   val effectiveFromDate: LocalDate,
 
@@ -69,10 +73,10 @@ data class UpsertSyncRequest(
       authorisedBy = authorisedBy,
       isClosed = isClosed(clock),
       closedAt = if (isOpen(clock)) { null } else { expiryDate?.atStartOfDay() ?: LocalDateTime.now(clock) },
-      closedBy = if (isOpen(clock)) { null } else { SYSTEM_USERNAME },
+      closedBy = if (isOpen(clock)) { null } else { lastModifiedByUsername ?: SYSTEM_USERNAME },
       closedReason = if (isOpen(clock)) { null } else { NO_CLOSURE_REASON_PROVIDED },
       whenCreated = effectiveFromDate.atStartOfDay(),
-      updatedBy = SYSTEM_USERNAME,
+      updatedBy = lastModifiedByUsername ?: SYSTEM_USERNAME,
     )
   }
 

@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import org.hibernate.Hibernate
 import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.annotation.LastModifiedBy
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
@@ -40,7 +39,7 @@ class NonAssociation(
   var restrictionType: RestrictionType,
   var comment: String,
 
-  var authorisedBy: String? = null,
+  var authorisedBy: String? = null, // This is stored for legacy reasons - the data is not returned in the API except on the legacy endpoints
 
   // Non-associations can be closed (with details of who/why/when)
   var isClosed: Boolean = false,
@@ -52,7 +51,7 @@ class NonAssociation(
   var whenCreated: LocalDateTime = LocalDateTime.now(),
   @LastModifiedDate
   var whenUpdated: LocalDateTime = LocalDateTime.now(),
-  @LastModifiedBy
+
   var updatedBy: String,
 ) {
   fun close(closedBy: String, closedReason: String, closedAt: LocalDateTime) {
@@ -60,6 +59,7 @@ class NonAssociation(
     this.closedBy = closedBy
     this.closedReason = closedReason
     this.closedAt = closedAt
+    this.updatedBy = closedBy
   }
 
   val isOpen: Boolean
@@ -79,10 +79,6 @@ class NonAssociation(
       restrictionType = restrictionType,
       restrictionTypeDescription = restrictionType.description,
       comment = comment,
-      // TODO: Do we need to do anything special with this?
-      //       This field being optional in NOMIS/Prison API
-      //       It may be one of the things we make mandatory after migration?
-      authorisedBy = authorisedBy ?: "",
       whenCreated = whenCreated,
       whenUpdated = whenUpdated,
       updatedBy = updatedBy,

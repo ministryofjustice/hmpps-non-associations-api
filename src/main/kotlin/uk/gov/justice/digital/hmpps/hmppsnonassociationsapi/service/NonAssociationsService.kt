@@ -66,7 +66,7 @@ class NonAssociationsService(
     offenderSearch.searchByPrisonerNumbers(prisonersToKeepApart)
 
     val nonAssociationJpa = createNonAssociationRequest.toNewEntity(
-      authorisedBy = authenticationFacade.currentUsername
+      updatedBy = authenticationFacade.currentUsername
         ?: throw UserInContextMissingException(),
     )
     val nonAssociation = persistNonAssociation(nonAssociationJpa).toDto()
@@ -136,7 +136,7 @@ class NonAssociationsService(
       "Non-association with ID $id not found",
     )
 
-    nonAssociation.updateWith(update)
+    nonAssociation.updateWith(update, authenticationFacade.getUserOrSystemInContext())
 
     log.info("Updated Non-association [$id]")
     return nonAssociation.toDto()
@@ -218,7 +218,7 @@ class NonAssociationsService(
   }
 
   fun getLegacyById(id: Long): LegacyNonAssociation? {
-    return getById(id)?.toLegacy()
+    return nonAssociationsRepository.findById(id).getOrNull()?.toLegacy()
   }
 
   fun getLegacyDetails(
@@ -255,11 +255,11 @@ class NonAssociationsService(
   }
 }
 
-private fun NonAssociationDTO.toLegacy(): LegacyNonAssociation {
+private fun NonAssociationJPA.toLegacy(): LegacyNonAssociation {
   val (firstPrisonerReason, secondPrisonerReason) = translateFromRolesAndReason(firstPrisonerRole, secondPrisonerRole, reason)
   val typeCode = restrictionType.toLegacyRestrictionType()
   return LegacyNonAssociation(
-    id = id,
+    id = id!!,
     offenderNo = firstPrisonerNumber,
     reasonCode = firstPrisonerReason,
     reasonDescription = firstPrisonerReason.description,

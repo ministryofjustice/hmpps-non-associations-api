@@ -22,8 +22,9 @@ fun genNonAssociation(
   createTime: LocalDateTime = LocalDateTime.now(TestBase.clock),
   closed: Boolean = false,
   closedReason: String? = NO_CLOSURE_REASON_PROVIDED,
-  authBy: String? = SYSTEM_USERNAME,
+  updatedBy: String? = SYSTEM_USERNAME,
   clock: Clock = TestBase.clock,
+  authorisedBy: String? = null,
 ) = NonAssociation(
   id = id,
   firstPrisonerNumber = firstPrisonerNumber,
@@ -33,13 +34,13 @@ fun genNonAssociation(
   comment = "Comment",
   reason = Reason.BULLYING,
   restrictionType = RestrictionType.WING,
-  authorisedBy = authBy,
+  authorisedBy = authorisedBy,
   whenUpdated = createTime,
   whenCreated = createTime,
-  updatedBy = authBy ?: "A_USER",
+  updatedBy = updatedBy ?: "A_DPS_USER",
   isClosed = closed,
   closedAt = if (closed) { LocalDateTime.now(clock) } else { null },
-  closedBy = if (closed) { "A USER" } else { null },
+  closedBy = if (closed) { "A_DPS_USER" } else { null },
   closedReason = if (closed) { closedReason } else { null },
 )
 
