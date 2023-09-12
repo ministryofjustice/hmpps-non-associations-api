@@ -50,7 +50,7 @@ data class UpsertSyncRequest(
   val authorisedBy: String? = null,
 
   @Schema(description = "The last staff member who changed this record, username of 30 characters, if not provided the API credentials will be used", required = false, example = "JSMITH", maxLength = 30)
-  @field:Size(min = 1, max = 30, message = "Authorised by must be a maximum of 60 characters")
+  @field:Size(min = 1, max = 30, message = "Last modified by must be a maximum of 30 characters")
   val lastModifiedByUsername: String? = null,
 
   @Schema(description = "The date that the NA became active", required = true, example = "2023-05-09", defaultValue = "today")
