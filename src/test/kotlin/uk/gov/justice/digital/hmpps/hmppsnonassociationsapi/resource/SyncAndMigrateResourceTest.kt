@@ -144,8 +144,9 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         secondPrisonerReason = LegacyReason.BUL,
         restrictionType = LegacyRestrictionType.CELL,
         comment = "This is a comment",
-        authorisedBy = "Test",
+        authorisedBy = "The free text field for a staff name",
         effectiveFromDate = LocalDate.now(clock).minusDays(1),
+        lastModifiedByUsername = "A_NOMIS_USER",
       )
 
       val expectedResponse =
@@ -163,8 +164,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "restrictionType": "${request.restrictionType.toRestrictionType()}",
           "restrictionTypeDescription": "${request.restrictionType.toRestrictionType().description}",
           "comment": "${request.comment}",
-          "authorisedBy": "${request.authorisedBy}",
-          "updatedBy": "$SYSTEM_USERNAME",
+          "updatedBy": "${request.lastModifiedByUsername}",
           "isClosed": false,
           "closedReason": null,
           "closedBy": null,
@@ -285,6 +285,8 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         secondPrisonerReason = LegacyReason.PER,
         restrictionType = LegacyRestrictionType.CELL,
         effectiveFromDate = LocalDate.now(clock).minusDays(10),
+        authorisedBy = "The free text field for a staff name",
+        lastModifiedByUsername = "A_NOMIS_USER",
       )
 
       val expectedResponse =
@@ -302,8 +304,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "restrictionType": "${request.restrictionType.toRestrictionType()}",
           "restrictionTypeDescription": "${request.restrictionType.toRestrictionType().description}",
           "comment": "$NO_COMMENT_PROVIDED",
-          "authorisedBy": "",
-          "updatedBy": "$SYSTEM_USERNAME",
+          "updatedBy": "${request.lastModifiedByUsername}",
           "isClosed": false,
           "closedReason": null,
           "closedBy": null,
@@ -496,7 +497,6 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "restrictionType": "${request.restrictionType.toRestrictionType()}",
           "restrictionTypeDescription": "${request.restrictionType.toRestrictionType().description}",
           "comment": "$NO_COMMENT_PROVIDED",
-          "authorisedBy": "",
           "updatedBy": "$SYSTEM_USERNAME",
           "isClosed": true,
           "closedReason": "$NO_CLOSURE_REASON_PROVIDED",
@@ -538,6 +538,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         effectiveFromDate = LocalDate.now(clock).minusDays(5),
         comment = "Its ok now",
         authorisedBy = "TEST",
+        lastModifiedByUsername = "A_NOMIS_USER_THAT_CLOSES",
       )
 
       val expectedResponse =
@@ -555,11 +556,10 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "restrictionType": "${request.restrictionType.toRestrictionType()}",
           "restrictionTypeDescription": "${request.restrictionType.toRestrictionType().description}",
           "comment": "${request.comment}",
-          "authorisedBy": "${request.authorisedBy}",
-          "updatedBy": "$SYSTEM_USERNAME",
+          "updatedBy": "A_NOMIS_USER_THAT_CLOSES",
           "isClosed": true,
           "closedReason": "$NO_CLOSURE_REASON_PROVIDED",
-          "closedBy": "$SYSTEM_USERNAME",
+          "closedBy": "A_NOMIS_USER_THAT_CLOSES",
           "closedAt": "${request.expiryDate?.atStartOfDay()?.format(dtFormat)}"
         }
         """
@@ -610,7 +610,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         restrictionType = LegacyRestrictionType.WING,
         effectiveFromDate = LocalDate.now(clock),
         comment = "Its kicked off again",
-        authorisedBy = "STAFF1",
+        authorisedBy = "A free text field for staff name",
       )
 
       val expectedResponse =
@@ -629,7 +629,6 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "restrictionType": "${request.restrictionType.toRestrictionType()}",
           "restrictionTypeDescription": "${request.restrictionType.toRestrictionType().description}",
           "comment": "${request.comment}",
-          "authorisedBy": "${request.authorisedBy}",
           "updatedBy": "$SYSTEM_USERNAME",
           "isClosed": false,
           "closedReason": null,
@@ -739,7 +738,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         genNonAssociation(
           firstPrisonerNumber = "C1234AA",
           secondPrisonerNumber = "D1234AA",
-          authBy = "TEST",
+          updatedBy = "TEST",
         ),
       )
       val naClosed1 = repository.save(
@@ -749,7 +748,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           createTime = LocalDateTime.now(clock).minusDays(1),
           closedReason = "OK now again",
           closed = true,
-          authBy = "TEST",
+          updatedBy = "TEST",
         ),
       )
       val naClosed2 = repository.save(
@@ -759,7 +758,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           createTime = LocalDateTime.now(clock).minusMonths(1),
           closedReason = "OK now",
           closed = true,
-          authBy = "TEST",
+          updatedBy = "TEST",
         ),
       )
       val request = DeleteSyncRequest(
@@ -790,7 +789,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         genNonAssociation(
           firstPrisonerNumber = "C1234AA",
           secondPrisonerNumber = "D1234AA",
-          authBy = "TEST",
+          updatedBy = "TEST",
         ),
       )
 

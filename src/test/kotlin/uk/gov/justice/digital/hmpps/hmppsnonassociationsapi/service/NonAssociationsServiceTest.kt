@@ -49,8 +49,8 @@ class NonAssociationsServiceTest {
   fun createNonAssociation() {
     val createNonAssociationRequest: CreateNonAssociationRequest = createNonAssociationRequest()
 
-    val authorisedBy = "TEST_USER_GEN"
-    whenever(authenticationFacade.currentUsername).thenReturn(authorisedBy)
+    val updatedBy = "TEST_USER_GEN"
+    whenever(authenticationFacade.currentUsername).thenReturn(updatedBy)
 
     val expectedId = 42L
     val createdNonAssociationJPA = NonAssociationJPA(
@@ -62,12 +62,12 @@ class NonAssociationsServiceTest {
       comment = createNonAssociationRequest.comment,
       reason = createNonAssociationRequest.reason,
       restrictionType = createNonAssociationRequest.restrictionType,
-      authorisedBy = authorisedBy,
+      authorisedBy = updatedBy,
       isClosed = false,
       closedBy = null,
       closedReason = null,
       closedAt = null,
-      updatedBy = authorisedBy,
+      updatedBy = updatedBy,
     )
 
     whenever(nonAssociationsRepository.save(any()))

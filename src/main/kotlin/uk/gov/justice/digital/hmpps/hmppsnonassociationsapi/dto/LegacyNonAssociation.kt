@@ -23,7 +23,7 @@ data class LegacyNonAssociation(
   @Schema(description = "Date and time the non-association expires. In Europe/London (ISO 8601) format without timezone offset e.g. YYYY-MM-DDTHH:MM:SS.", required = false, example = "2021-07-05T00:00:00")
   val expiryDate: LocalDateTime?,
   @Schema(description = "The person who authorised the non-association (free text).", required = false, example = "Officer Alice B.")
-  val authorisedBy: String,
+  val authorisedBy: String?,
   @Schema(description = "Additional free text comments related to the non-association.", required = false, example = "Mr. Bloggs assaulted Mr. Hall")
   val comments: String,
 

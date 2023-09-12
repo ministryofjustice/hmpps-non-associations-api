@@ -26,7 +26,7 @@ import java.time.LocalDateTime
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(AuthenticationFacade::class, AuditorAwareImpl::class)
-@WithMockUser(username = "A_USER")
+@WithMockUser(username = "A_DPS_USER")
 @Transactional
 class NonAssociationsRepositoryTest : TestBase() {
 
@@ -384,8 +384,8 @@ class NonAssociationsRepositoryTest : TestBase() {
       reason = Reason.BULLYING,
       restrictionType = RestrictionType.CELL,
       comment = "John attacked Bob",
-      authorisedBy = "A_USER",
-      updatedBy = "A_USER",
+      authorisedBy = "A_DPS_USER",
+      updatedBy = "A_DPS_USER",
       isClosed = closed,
       closedAt = if (closed) { LocalDateTime.now() } else { null },
       closedBy = if (closed) { "A USER" } else { null },
