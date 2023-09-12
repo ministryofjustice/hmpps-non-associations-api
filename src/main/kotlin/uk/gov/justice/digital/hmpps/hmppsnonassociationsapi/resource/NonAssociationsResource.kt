@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.constraints.Pattern
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -81,6 +82,7 @@ class NonAssociationsResource(
   fun getPrisonerNonAssociations(
     @Schema(description = "The offender prisoner number", example = "A1234BC", required = true)
     @PathVariable
+    @Pattern(regexp = "[a-zA-Z][0-9]{4}[a-zA-Z]{2}", message = "Prisoner number must be in the correct format")
     prisonerNumber: String,
 
     @Schema(
@@ -276,7 +278,10 @@ class NonAssociationsResource(
     )
     @RequestBody
     @Validated
-    prisonerNumbers: List<String>?,
+    prisonerNumbers: List<
+      @Pattern(regexp = "[a-zA-Z][0-9]{4}[a-zA-Z]{2}", message = "Prisoner number must be in the correct format")
+      String,
+      >?,
 
     @Schema(
       description = "Whether to include open non-associations or not",
@@ -358,7 +363,10 @@ class NonAssociationsResource(
     )
     @RequestBody
     @Validated
-    prisonerNumbers: List<String>?,
+    prisonerNumbers: List<
+      @Pattern(regexp = "[a-zA-Z][0-9]{4}[a-zA-Z]{2}", message = "Prisoner number must be in the correct format")
+      String,
+      >?,
 
     @Schema(
       description = "Whether to include open non-associations or not",
