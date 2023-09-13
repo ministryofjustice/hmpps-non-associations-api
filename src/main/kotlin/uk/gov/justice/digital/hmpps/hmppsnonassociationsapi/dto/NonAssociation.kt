@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Size
 import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
@@ -79,7 +80,8 @@ data class CreateNonAssociationRequest(
   @Schema(description = "Location-based restriction code", required = true, example = "CELL")
   val restrictionType: RestrictionType,
 
-  @Schema(description = "Explanation of why prisoners are non-associated", required = true, example = "John and Luke always end up fighting")
+  @Schema(description = "Explanation of why prisoners are non-associated", required = true, example = "John and Luke always end up fighting", minLength = 1)
+  @field:Size(min = 1, message = "A comment is required")
   val comment: String,
 ) {
   fun toNewEntity(updatedBy: String): NonAssociationJPA {
@@ -102,17 +104,18 @@ data class CreateNonAssociationRequest(
  */
 @Schema(description = "Request format for updating a non-association between two prisoners")
 data class PatchNonAssociationRequest(
-  @Schema(description = "This prisoner’s role in the non-association", required = true, example = "VICTIM")
+  @Schema(description = "This prisoner’s role in the non-association", required = false, example = "VICTIM")
   val firstPrisonerRole: Role? = null,
-  @Schema(description = "Other prisoner’s role in the non-association", required = true, example = "PERPETRATOR")
+  @Schema(description = "Other prisoner’s role in the non-association", required = false, example = "PERPETRATOR")
   val secondPrisonerRole: Role? = null,
 
-  @Schema(description = "Reason why these prisoners should be kept apart", required = true, example = "BULLYING")
+  @Schema(description = "Reason why these prisoners should be kept apart", required = false, example = "BULLYING")
   val reason: Reason? = null,
-  @Schema(description = "Location-based restriction code", required = true, example = "CELL")
+  @Schema(description = "Location-based restriction code", required = false, example = "CELL")
   val restrictionType: RestrictionType? = null,
 
-  @Schema(description = "Explanation of why prisoners are non-associated", required = true, example = "John and Luke always end up fighting")
+  @Schema(description = "Explanation of why prisoners are non-associated", required = false, example = "John and Luke always end up fighting", minLength = 1)
+  @field:Size(min = 1, message = "Comment cannot be blank")
   val comment: String? = null,
 )
 
@@ -121,11 +124,13 @@ data class PatchNonAssociationRequest(
  */
 @Schema(description = "Request to close a non-association")
 data class CloseNonAssociationRequest(
-  @Schema(description = "Reason for closing the non-association", required = true, example = "They are friends now")
+  @Schema(description = "Reason for closing the non-association", required = true, example = "They are friends now", minLength = 1)
+  @field:Size(min = 1, message = "Comment cannot be blank")
   val closedReason: String,
   @Schema(description = "Date and time of the closure, if not provided will default to today's time", required = false, example = "2023-06-07", defaultValue = "now")
   val closedAt: LocalDateTime? = null,
-  @Schema(description = "The username of the member of staff requesting the closure, if not provided will use the user in the JWT access token", required = false, example = "ASMITH")
+  @Schema(description = "The username of the member of staff requesting the closure, if not provided will use the user in the JWT access token", required = false, example = "ASMITH", minLength = 1, maxLength = 60)
+  @field:Size(min = 1, max = 60, message = "Closed by must be a maximum of 60 characters")
   val closedBy: String? = null,
 )
 
@@ -134,9 +139,11 @@ data class CloseNonAssociationRequest(
  */
 @Schema(description = "Request to delete a non-association")
 data class DeleteNonAssociationRequest(
-  @Schema(description = "Reason for deleting the non-association", required = true, example = "Created in error and removed on requested from OMU team")
+  @Schema(description = "Reason for deleting the non-association", required = true, example = "Created in error and removed on requested from OMU team", minLength = 1)
+  @field:Size(min = 1, message = "Comment cannot be blank")
   val deletionReason: String,
-  @Schema(description = "The username of the member of staff requesting the deletion", required = true, example = "AJONES")
+  @Schema(description = "The username of the member of staff requesting the deletion", required = true, example = "AJONES", minLength = 1, maxLength = 60)
+  @field:Size(min = 1, max = 60, message = "Deleted by must be a maximum of 60 characters")
   val staffUserNameRequestingDeletion: String,
 )
 
