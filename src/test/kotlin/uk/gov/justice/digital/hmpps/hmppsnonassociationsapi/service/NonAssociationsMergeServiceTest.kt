@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAllByPrisonerNumber
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
@@ -13,7 +14,7 @@ class NonAssociationsMergeServiceTest {
 
   private val nonAssociationsRepository: NonAssociationsRepository = mock()
   private val service = NonAssociationsMergeService(
-    nonAssociationsRepository,
+    nonAssociationsRepository = nonAssociationsRepository, clock = TestBase.clock,
   )
 
   @Test

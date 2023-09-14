@@ -10,13 +10,14 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.transaction.TestTransaction
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuditorAwareImpl
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ClockConfiguration
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
 import java.time.LocalDateTime
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(AuthenticationFacade::class, AuditorAwareImpl::class, NonAssociationsMergeService::class)
+@Import(AuthenticationFacade::class, AuditorAwareImpl::class, NonAssociationsMergeService::class, ClockConfiguration::class)
 @WithMockUser(username = "A_DPS_USER")
 @DataJpaTest
 class NonAssociationMergeServiceIntTest : TestBase() {
@@ -100,6 +101,7 @@ class NonAssociationMergeServiceIntTest : TestBase() {
     assertThat(mergedAssociations.toSet()).isEqualTo(
       setOf(
         genNonAssociation(firstPrisonerNumber = "B1234AA", secondPrisonerNumber = "X1234AA", createTime = createTime, clock = clock),
+        genNonAssociation(firstPrisonerNumber = "B1234AA", secondPrisonerNumber = "B1234AA", createTime = createTime, clock = clock),
         genNonAssociation(firstPrisonerNumber = "X1234AB", secondPrisonerNumber = "B1234AA", createTime = createTime, clock = clock),
         genNonAssociation(firstPrisonerNumber = "B1234AA", secondPrisonerNumber = "C1234FF", createTime = createTime, clock = clock),
         genNonAssociation(firstPrisonerNumber = "D1234RR", secondPrisonerNumber = "B1234AA", createTime = createTime, clock = clock),
