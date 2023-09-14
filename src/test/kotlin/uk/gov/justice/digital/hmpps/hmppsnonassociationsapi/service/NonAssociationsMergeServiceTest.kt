@@ -14,7 +14,8 @@ class NonAssociationsMergeServiceTest {
 
   private val nonAssociationsRepository: NonAssociationsRepository = mock()
   private val service = NonAssociationsMergeService(
-    nonAssociationsRepository = nonAssociationsRepository, clock = TestBase.clock,
+    nonAssociationsRepository = nonAssociationsRepository,
+    clock = TestBase.clock,
   )
 
   @Test

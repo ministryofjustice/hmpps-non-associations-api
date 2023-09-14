@@ -11,8 +11,11 @@ import org.springframework.test.context.transaction.TestTransaction
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuditorAwareImpl
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ClockConfiguration
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListInclusion
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAllByPrisonerNumber
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAnyBetweenPrisonerNumbers
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
 import java.time.LocalDateTime
 
@@ -95,6 +98,11 @@ class NonAssociationMergeServiceIntTest : TestBase() {
         clock = clock,
       ),
     )
+    assertThat(repository.findAllByPrisonerNumber("A1234AA")).hasSize(6)
+    assertThat(repository.findAllByPrisonerNumber("B1234AA")).hasSize(4)
+
+    assertThat(repository.findAnyBetweenPrisonerNumbers(listOf("X1234AA", "A1234AA"), NonAssociationListInclusion.CLOSED_ONLY)).hasSize(0)
+    assertThat(repository.findAnyBetweenPrisonerNumbers(listOf("X1234AA", "B1234AA"), NonAssociationListInclusion.CLOSED_ONLY)).hasSize(0)
 
     val mergedAssociations = service.mergePrisonerNumbers("A1234AA", "B1234AA")
 
@@ -111,6 +119,11 @@ class NonAssociationMergeServiceIntTest : TestBase() {
     TestTransaction.flagForCommit()
     TestTransaction.end()
     TestTransaction.start()
+
+    assertThat(repository.findAllByPrisonerNumber("B1234AA")).hasSize(6)
+    assertThat(repository.findAllByPrisonerNumber("A1234AA")).hasSize(0)
+
+    assertThat(repository.findAnyBetweenPrisonerNumbers(listOf("X1234AA", "B1234AA"), NonAssociationListInclusion.CLOSED_ONLY)).hasSize(1)
 
     repository.deleteAll(mergedAssociations)
   }

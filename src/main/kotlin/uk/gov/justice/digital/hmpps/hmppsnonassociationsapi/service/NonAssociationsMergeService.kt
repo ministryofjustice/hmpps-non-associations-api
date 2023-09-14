@@ -75,13 +75,13 @@ class NonAssociationsMergeService(
     newPrisonerNumber: String,
     otherPrisonerNumber: String,
     primary: Boolean,
-  ) : NonAssociation {
-    log.info("Merge non-association record $nonAssociation")
+  ): NonAssociation {
     nonAssociation.updatePrisonerNumber(newPrisonerNumber, primary)
+    log.info("Merged non-association record $nonAssociation")
 
     if (duplicateRecord != null) {
-      log.info("Closing non-association record $nonAssociation - Duplicate")
       nonAssociation.close(SYSTEM_USERNAME, "MERGE", LocalDateTime.now(clock))
+      log.info("Closed non-association record $nonAssociation - Duplicate")
     } else if (newPrisonerNumber == otherPrisonerNumber) {
       log.info("Deleting non-association record $nonAssociation - same prisoner number")
       nonAssociationsRepository.delete(nonAssociation)
