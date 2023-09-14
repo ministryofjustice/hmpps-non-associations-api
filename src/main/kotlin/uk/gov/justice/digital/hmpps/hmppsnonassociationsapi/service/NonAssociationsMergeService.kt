@@ -4,14 +4,18 @@ import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAllByPrisonerNumber
+import java.time.Clock
+import java.time.LocalDateTime
 
 @Service
 @Transactional
 class NonAssociationsMergeService(
   private val nonAssociationsRepository: NonAssociationsRepository,
+  private val clock: Clock,
 ) {
 
   companion object {
@@ -38,7 +42,7 @@ class NonAssociationsMergeService(
               newPrisonerNumber,
               nonAssociation.secondPrisonerNumber,
               true,
-            )?.let { updatedRecord ->
+            ).let { updatedRecord ->
               updatedRecords.add(updatedRecord)
             }
           }
@@ -55,7 +59,7 @@ class NonAssociationsMergeService(
               newPrisonerNumber,
               nonAssociation.firstPrisonerNumber,
               false,
-            )?.let { updatedRecord ->
+            ).let { updatedRecord ->
               updatedRecords.add(updatedRecord)
             }
           }
@@ -71,19 +75,17 @@ class NonAssociationsMergeService(
     newPrisonerNumber: String,
     otherPrisonerNumber: String,
     primary: Boolean,
-  ) =
+  ): NonAssociation {
+    nonAssociation.updatePrisonerNumber(newPrisonerNumber, primary)
+    log.info("Merged non-association record $nonAssociation")
+
     if (duplicateRecord != null) {
-      log.info("Deleting non-association record $nonAssociation - Duplicate")
+      nonAssociation.close(SYSTEM_USERNAME, "MERGE", LocalDateTime.now(clock))
+      log.info("Closed non-association record $nonAssociation - Duplicate")
+    } else if (newPrisonerNumber == otherPrisonerNumber) {
+      log.info("Deleting non-association record $nonAssociation - same prisoner number")
       nonAssociationsRepository.delete(nonAssociation)
-      duplicateRecord
-    } else {
-      if (newPrisonerNumber == otherPrisonerNumber) {
-        log.info("Deleting non-association record $nonAssociation - same prisoner number")
-        nonAssociationsRepository.delete(nonAssociation)
-        null
-      } else {
-        log.info("Merge non-association record $nonAssociation")
-        nonAssociation.updatePrisonerNumber(newPrisonerNumber, primary)
-      }
     }
+    return nonAssociation
+  }
 }
