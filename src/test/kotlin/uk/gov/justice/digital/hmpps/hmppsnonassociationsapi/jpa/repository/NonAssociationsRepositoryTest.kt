@@ -13,7 +13,6 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.transaction.TestTransaction
 import org.springframework.transaction.annotation.Transactional
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuditorAwareImpl
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListInclusion
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
@@ -25,7 +24,7 @@ import java.time.LocalDateTime
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(AuthenticationFacade::class, AuditorAwareImpl::class)
+@Import(AuthenticationFacade::class)
 @WithMockUser(username = "A_DPS_USER")
 @Transactional
 class NonAssociationsRepositoryTest : TestBase() {
@@ -365,6 +364,7 @@ class NonAssociationsRepositoryTest : TestBase() {
     TestTransaction.start()
 
     created.comment = "John attacked Bob after being provoked"
+    created.whenUpdated = LocalDateTime.now(clock).plusMinutes(1)
     val updated = repository.save(created)
     TestTransaction.flagForCommit()
     TestTransaction.end()
@@ -376,6 +376,7 @@ class NonAssociationsRepositoryTest : TestBase() {
   }
 
   private fun nonAssociation(firstPrisonerNumber: String, secondPrisonerNumber: String, closed: Boolean = false): NonAssociation {
+    val now = LocalDateTime.now(clock)
     return NonAssociation(
       firstPrisonerNumber = firstPrisonerNumber,
       firstPrisonerRole = Role.VICTIM,
@@ -387,9 +388,13 @@ class NonAssociationsRepositoryTest : TestBase() {
       authorisedBy = "A_DPS_USER",
       updatedBy = "A_DPS_USER",
       isClosed = closed,
-      closedAt = if (closed) { LocalDateTime.now() } else { null },
+      closedAt = if (closed) {
+        now
+      } else { null },
       closedBy = if (closed) { "A USER" } else { null },
       closedReason = if (closed) { "Problems resolved" } else { null },
+      whenCreated = now,
+      whenUpdated = now,
     )
   }
 }

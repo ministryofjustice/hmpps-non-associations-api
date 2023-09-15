@@ -68,6 +68,7 @@ class NonAssociationsService(
     val nonAssociationJpa = createNonAssociationRequest.toNewEntity(
       updatedBy = authenticationFacade.currentUsername
         ?: throw UserInContextMissingException(),
+      clock = clock,
     )
     val nonAssociation = persistNonAssociation(nonAssociationJpa).toDto()
     log.info("Created Non-association [${nonAssociation.id}]")
@@ -136,7 +137,7 @@ class NonAssociationsService(
       "Non-association with ID $id not found",
     )
 
-    nonAssociation.updateWith(update, authenticationFacade.getUserOrSystemInContext())
+    nonAssociation.updateWith(update, authenticationFacade.getUserOrSystemInContext(), clock)
 
     log.info("Updated Non-association [$id]")
     return nonAssociation.toDto()
