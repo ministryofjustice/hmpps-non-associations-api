@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
+import org.springframework.http.HttpStatus.CONFLICT
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -203,10 +204,10 @@ class HmppsNonAssociationsApiExceptionHandler {
   fun handleOpenNonAssociationAlreadyExistsException(e: OpenNonAssociationAlreadyExistsException): ResponseEntity<ErrorResponse?>? {
     log.debug("Non-association already exists for these prisoners that is open: {}", e.message)
     return ResponseEntity
-      .status(BAD_REQUEST)
+      .status(CONFLICT)
       .body(
         ErrorResponse(
-          status = BAD_REQUEST,
+          status = CONFLICT,
           errorCode = ErrorCode.OpenNonAssociationAlreadyExist,
           userMessage = "Non-association already exists for these prisoners that is open: ${e.message}",
           developerMessage = e.message,

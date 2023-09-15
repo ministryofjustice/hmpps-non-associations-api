@@ -132,7 +132,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         .header("Content-Type", "application/json")
         .bodyValue(jsonString(request))
         .exchange()
-        .expectStatus().isBadRequest
+        .expectStatus().isEqualTo(409)
     }
 
     @Test
@@ -361,7 +361,7 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         .header("Content-Type", "application/json")
         .bodyValue(jsonString(request))
         .exchange()
-        .expectStatus().isBadRequest
+        .expectStatus().isEqualTo(409)
     }
 
     @Test

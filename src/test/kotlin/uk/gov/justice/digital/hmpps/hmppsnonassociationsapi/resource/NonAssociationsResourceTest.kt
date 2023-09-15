@@ -320,7 +320,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .header("Content-Type", "application/json")
         .bodyValue(jsonString(request))
         .exchange()
-        .expectStatus().isBadRequest
+        .expectStatus().isEqualTo(409)
     }
 
     @Test
