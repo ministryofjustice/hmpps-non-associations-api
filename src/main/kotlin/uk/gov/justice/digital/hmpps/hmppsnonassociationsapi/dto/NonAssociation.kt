@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
+import java.time.Clock
 import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
@@ -84,7 +85,7 @@ data class CreateNonAssociationRequest(
   @field:Size(min = 1, message = "A comment is required")
   val comment: String,
 ) {
-  fun toNewEntity(updatedBy: String): NonAssociationJPA {
+  fun toNewEntity(updatedBy: String, clock: Clock): NonAssociationJPA {
     return NonAssociationJPA(
       id = null,
       firstPrisonerNumber = firstPrisonerNumber,
@@ -95,6 +96,8 @@ data class CreateNonAssociationRequest(
       restrictionType = restrictionType,
       comment = comment,
       updatedBy = updatedBy,
+      whenCreated = LocalDateTime.now(clock),
+      whenUpdated = LocalDateTime.now(clock),
     )
   }
 }
@@ -147,13 +150,14 @@ data class DeleteNonAssociationRequest(
   val staffUserNameRequestingDeletion: String,
 )
 
-fun NonAssociationJPA.updateWith(patch: PatchNonAssociationRequest, updatedBy: String): NonAssociationJPA {
+fun NonAssociationJPA.updateWith(patch: PatchNonAssociationRequest, updatedBy: String, clock: Clock): NonAssociationJPA {
   this.firstPrisonerRole = patch.firstPrisonerRole ?: this.firstPrisonerRole
   this.secondPrisonerRole = patch.secondPrisonerRole ?: this.secondPrisonerRole
   this.reason = patch.reason ?: this.reason
   this.restrictionType = patch.restrictionType ?: this.restrictionType
   this.comment = patch.comment ?: this.comment
   this.updatedBy = updatedBy
+  this.whenUpdated = LocalDateTime.now(clock)
 
   return this
 }

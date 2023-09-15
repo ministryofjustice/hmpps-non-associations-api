@@ -76,6 +76,7 @@ data class UpsertSyncRequest(
       closedBy = if (isOpen(clock)) { null } else { lastModifiedByUsername ?: SYSTEM_USERNAME },
       closedReason = if (isOpen(clock)) { null } else { NO_CLOSURE_REASON_PROVIDED },
       whenCreated = effectiveFromDate.atStartOfDay(),
+      whenUpdated = effectiveFromDate.atStartOfDay(),
       updatedBy = lastModifiedByUsername ?: SYSTEM_USERNAME,
     )
   }

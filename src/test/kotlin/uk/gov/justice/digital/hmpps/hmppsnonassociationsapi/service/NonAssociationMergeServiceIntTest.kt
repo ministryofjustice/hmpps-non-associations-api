@@ -8,7 +8,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.transaction.TestTransaction
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuditorAwareImpl
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ClockConfiguration
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListInclusion
@@ -20,7 +19,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociati
 import java.time.LocalDateTime
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(AuthenticationFacade::class, AuditorAwareImpl::class, NonAssociationsMergeService::class, ClockConfiguration::class)
+@Import(AuthenticationFacade::class, NonAssociationsMergeService::class, ClockConfiguration::class)
 @WithMockUser(username = "A_DPS_USER")
 @DataJpaTest
 class NonAssociationMergeServiceIntTest : TestBase() {

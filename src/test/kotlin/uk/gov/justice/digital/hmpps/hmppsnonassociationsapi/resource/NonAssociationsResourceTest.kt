@@ -2633,6 +2633,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     firstPrisonerRole: Role = Role.VICTIM,
     secondPrisonerRole: Role = Role.PERPETRATOR,
   ): NonAssociationJPA {
+    val now = LocalDateTime.now(clock)
     val nonna = NonAssociationJPA(
       firstPrisonerNumber = firstPrisonerNumber,
       firstPrisonerRole = firstPrisonerRole,
@@ -2643,6 +2644,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       comment = "They keep fighting",
       authorisedBy = "Mr Bobby",
       updatedBy = "A_DPS_USER",
+      whenCreated = now,
+      whenUpdated = now,
     )
 
     if (isClosed) {
@@ -2650,7 +2653,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       nonna.isClosed = true
       nonna.closedReason = "They're friends now"
       nonna.closedBy = "CLOSE_USER"
-      nonna.closedAt = LocalDateTime.now(clock)
+      nonna.closedAt = now
     }
 
     return repository.save(nonna)

@@ -53,6 +53,7 @@ class NonAssociationsServiceTest {
     whenever(authenticationFacade.currentUsername).thenReturn(updatedBy)
 
     val expectedId = 42L
+    val now = LocalDateTime.now(TestBase.clock)
     val createdNonAssociationJPA = NonAssociationJPA(
       id = expectedId,
       firstPrisonerNumber = createNonAssociationRequest.firstPrisonerNumber,
@@ -68,6 +69,8 @@ class NonAssociationsServiceTest {
       closedReason = null,
       closedAt = null,
       updatedBy = updatedBy,
+      whenCreated = now,
+      whenUpdated = now,
     )
 
     whenever(nonAssociationsRepository.save(any()))
