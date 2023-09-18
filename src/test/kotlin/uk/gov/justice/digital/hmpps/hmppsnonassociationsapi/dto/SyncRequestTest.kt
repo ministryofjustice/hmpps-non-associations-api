@@ -58,7 +58,7 @@ class SyncRequestTest {
   }
 
   @Test
-  fun testClosedNonAssociationsInPast() {
+  fun testNonAssociationsWithFutureEffectiveDateAndFutureExpiryAreClosed() {
     val na = UpsertSyncRequest(
       firstPrisonerNumber = "C7777XX",
       firstPrisonerReason = LegacyReason.VIC,
@@ -72,6 +72,40 @@ class SyncRequestTest {
     )
 
     assertThat(na.isClosed(TestBase.clock)).isTrue()
+  }
+
+  @Test
+  fun testNonAssociationsWithFutureEffectiveDateAreMadeClosed() {
+    val na = UpsertSyncRequest(
+      firstPrisonerNumber = "C7777XX",
+      firstPrisonerReason = LegacyReason.VIC,
+      secondPrisonerNumber = "D7777XX",
+      secondPrisonerReason = LegacyReason.PER,
+      restrictionType = LegacyRestrictionType.CELL,
+      comment = "They keep fighting",
+      authorisedBy = "Me",
+      effectiveFromDate = LocalDate.now(TestBase.clock).plusDays(1),
+      expiryDate = null,
+    )
+
+    assertThat(na.isClosed(TestBase.clock)).isTrue()
+  }
+
+  @Test
+  fun testNonAssociationsWithFutureExpiryDateAreKeptOpen() {
+    val na = UpsertSyncRequest(
+      firstPrisonerNumber = "C7777XX",
+      firstPrisonerReason = LegacyReason.VIC,
+      secondPrisonerNumber = "D7777XX",
+      secondPrisonerReason = LegacyReason.PER,
+      restrictionType = LegacyRestrictionType.CELL,
+      comment = "They keep fighting",
+      authorisedBy = "Me",
+      effectiveFromDate = LocalDate.now(TestBase.clock).minusDays(1),
+      expiryDate = LocalDate.now(TestBase.clock).plusDays(1),
+    )
+
+    assertThat(na.isClosed(TestBase.clock)).isFalse()
   }
 
   @Test

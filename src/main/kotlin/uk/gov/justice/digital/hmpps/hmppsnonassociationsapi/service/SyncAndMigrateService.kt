@@ -12,11 +12,13 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteSyncReques
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListInclusion
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.UpsertSyncRequest
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.preventFutureDate
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.translateToRolesAndReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAnyBetweenPrisonerNumbers
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociationDomainEventType
 import java.time.Clock
+import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.jvm.optionals.getOrNull
 
@@ -102,15 +104,18 @@ class SyncAndMigrateService(
       authorisedBy = syncRequest.authorisedBy
       isClosed = syncRequest.isClosed(clock)
       updatedBy = syncRequest.lastModifiedByUsername ?: SYSTEM_USERNAME
+      whenCreated = preventFutureDate(syncRequest.effectiveFromDate, LocalDate.now(clock)).atStartOfDay()
 
       if (syncRequest.isOpen(clock)) {
         closedReason = null
         closedBy = null
         closedAt = null
+        whenUpdated = LocalDateTime.now(clock)
       } else {
         closedReason = NO_CLOSURE_REASON_PROVIDED
         closedBy = syncRequest.lastModifiedByUsername ?: SYSTEM_USERNAME
-        closedAt = syncRequest.expiryDate?.atStartOfDay() ?: LocalDateTime.now(clock)
+        closedAt = preventFutureDate(syncRequest.expiryDate, LocalDate.now(clock)).atStartOfDay()
+        whenUpdated = preventFutureDate(syncRequest.expiryDate, LocalDate.now(clock)).atStartOfDay()
       }
       toDto().also {
         log.info("Updated Non-association [${it.id}] between ${it.firstPrisonerNumber} and ${it.secondPrisonerNumber}")

@@ -9,7 +9,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NO_CLOSURE_R
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NO_COMMENT_PROVIDED
 import java.time.Clock
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 @Schema(description = "Upsert Sync Request")
 data class UpsertSyncRequest(
@@ -61,6 +60,7 @@ data class UpsertSyncRequest(
 ) {
   fun toNewEntity(clock: Clock): NonAssociation {
     val (firstPrisonerRole, secondPrisonerRole, reason) = translateToRolesAndReason(firstPrisonerReason, secondPrisonerReason)
+    val currentDate = LocalDate.now(clock)
     return NonAssociation(
       id = null,
       firstPrisonerNumber = firstPrisonerNumber,
@@ -72,11 +72,11 @@ data class UpsertSyncRequest(
       comment = comment ?: NO_COMMENT_PROVIDED,
       authorisedBy = authorisedBy,
       isClosed = isClosed(clock),
-      closedAt = if (isOpen(clock)) { null } else { expiryDate?.atStartOfDay() ?: LocalDateTime.now(clock) },
+      closedAt = if (isOpen(clock)) { null } else { preventFutureDate(expiryDate, currentDate).atStartOfDay() },
       closedBy = if (isOpen(clock)) { null } else { lastModifiedByUsername ?: SYSTEM_USERNAME },
       closedReason = if (isOpen(clock)) { null } else { NO_CLOSURE_REASON_PROVIDED },
-      whenCreated = effectiveFromDate.atStartOfDay(),
-      whenUpdated = effectiveFromDate.atStartOfDay(),
+      whenCreated = preventFutureDate(effectiveFromDate, currentDate).atStartOfDay(),
+      whenUpdated = if (isOpen(clock)) { preventFutureDate(effectiveFromDate, currentDate).atStartOfDay() } else { preventFutureDate(expiryDate, currentDate).atStartOfDay() },
       updatedBy = lastModifiedByUsername ?: SYSTEM_USERNAME,
     )
   }
@@ -111,3 +111,10 @@ data class DeleteSyncRequest(
     return "DeleteSyncRequest(firstPrisonerNumber='$firstPrisonerNumber', secondPrisonerNumber='$secondPrisonerNumber')"
   }
 }
+
+fun preventFutureDate(dateToCheck: LocalDate?, currentDate: LocalDate) =
+  if (dateToCheck == null || currentDate < dateToCheck) {
+    currentDate
+  } else {
+    dateToCheck
+  }

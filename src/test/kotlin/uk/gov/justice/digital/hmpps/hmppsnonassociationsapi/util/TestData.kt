@@ -19,7 +19,7 @@ fun genNonAssociation(
   id: Long? = null,
   firstPrisonerNumber: String,
   secondPrisonerNumber: String,
-  createTime: LocalDateTime = LocalDateTime.now(TestBase.clock),
+  createTime: LocalDateTime = LocalDateTime.now(TestBase.clock).minusDays(1),
   closed: Boolean = false,
   closedReason: String? = NO_CLOSURE_REASON_PROVIDED,
   updatedBy: String? = SYSTEM_USERNAME,
