@@ -10,6 +10,7 @@ import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
+import java.time.Clock
 import java.time.Instant
 
 @Service
@@ -20,6 +21,7 @@ class AuditService(
   private val telemetryClient: TelemetryClient,
   private val objectMapper: ObjectMapper,
   private val authenticationFacade: AuthenticationFacade,
+  private val clock: Clock,
 ) {
   private val auditQueue by lazy { hmppsQueueService.findByQueueId("audit") as HmppsQueue }
   private val auditSqsClient by lazy { auditQueue.sqsClient }
@@ -35,6 +37,7 @@ class AuditService(
       who = username ?: authenticationFacade.getUserOrSystemInContext(),
       service = serviceName,
       details = details.toJson(),
+      `when` = Instant.now(clock),
     )
     log.debug("Audit {} ", auditEvent)
 
@@ -58,7 +61,7 @@ class AuditService(
 
 data class AuditEvent(
   val what: String,
-  val `when`: Instant = Instant.now(),
+  val `when`: Instant,
   val who: String,
   val service: String,
   val details: String? = null,

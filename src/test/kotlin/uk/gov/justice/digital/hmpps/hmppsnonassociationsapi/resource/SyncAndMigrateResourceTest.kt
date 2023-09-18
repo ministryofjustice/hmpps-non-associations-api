@@ -3,6 +3,9 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Primary
 import org.springframework.security.test.context.support.WithMockUser
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteSyncRequest
@@ -14,15 +17,22 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsInteg
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NO_CLOSURE_REASON_PROVIDED
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NO_COMMENT_PROVIDED
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
+import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @WithMockUser(username = expectedUsername)
 class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
+  @TestConfiguration
+  class FixedClockConfig {
+    @Primary
+    @Bean
+    fun fixedClock(): Clock = clock
+  }
 
   @Nested
   inner class `Migrate a non-association` {
-
+    private val today = LocalDate.now(clock).atStartOfDay()
     private val url = "/migrate"
 
     @Test
@@ -185,11 +195,118 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
         .expectStatus().isCreated
         .expectBody().json(expectedResponse, false)
     }
+
+    @Test
+    fun `for a valid request migrates the non-association as closed`() {
+      val request = UpsertSyncRequest(
+        firstPrisonerNumber = "C7777XU",
+        firstPrisonerReason = LegacyReason.VIC,
+        secondPrisonerNumber = "D7777XU",
+        secondPrisonerReason = LegacyReason.BUL,
+        restrictionType = LegacyRestrictionType.CELL,
+        comment = "This is a comment, closed now",
+        authorisedBy = "The free text field for a staff name",
+        effectiveFromDate = LocalDate.now(clock).minusDays(10),
+        lastModifiedByUsername = "A_NOMIS_USER",
+        expiryDate = LocalDate.now(clock),
+      )
+
+      val expectedResponse =
+        // language=json
+        """
+        {
+          "firstPrisonerNumber": "${request.firstPrisonerNumber}",
+          "firstPrisonerRole": "VICTIM",
+          "firstPrisonerRoleDescription": "Victim",
+          "secondPrisonerNumber": "${request.secondPrisonerNumber}",
+          "secondPrisonerRole": "UNKNOWN",
+          "secondPrisonerRoleDescription": "Unknown",
+          "reason": "${Reason.BULLYING}",
+          "reasonDescription": "${Reason.BULLYING.description}",
+          "restrictionType": "${request.restrictionType.toRestrictionType()}",
+          "restrictionTypeDescription": "${request.restrictionType.toRestrictionType().description}",
+          "comment": "${request.comment}",
+          "updatedBy": "${request.lastModifiedByUsername}",
+          "isClosed": true,
+          "closedReason": "$NO_CLOSURE_REASON_PROVIDED",
+          "closedBy": "A_NOMIS_USER",
+          "closedAt": "${request.expiryDate?.atStartOfDay()?.format(dtFormat)}"
+        }
+        """
+
+      webTestClient.post()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_MIGRATE"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody().json(expectedResponse, false)
+    }
+
+    @Test
+    fun `future expiry dates are modified to today`() {
+      val request = UpsertSyncRequest(
+        firstPrisonerNumber = "C7777XT",
+        firstPrisonerReason = LegacyReason.VIC,
+        secondPrisonerNumber = "D7777XT",
+        secondPrisonerReason = LegacyReason.BUL,
+        restrictionType = LegacyRestrictionType.WING,
+        comment = "This is a comment",
+        authorisedBy = "The free text field for a staff name",
+        effectiveFromDate = LocalDate.now(clock).plusMonths(1),
+        lastModifiedByUsername = "A_NOMIS_USER",
+        expiryDate = LocalDate.now(clock).plusMonths(2),
+      )
+
+      val expectedResponse =
+        // language=json
+        """
+        {
+          "firstPrisonerNumber": "${request.firstPrisonerNumber}",
+          "firstPrisonerRole": "VICTIM",
+          "firstPrisonerRoleDescription": "Victim",
+          "secondPrisonerNumber": "${request.secondPrisonerNumber}",
+          "secondPrisonerRole": "UNKNOWN",
+          "secondPrisonerRoleDescription": "Unknown",
+          "reason": "${Reason.BULLYING}",
+          "reasonDescription": "${Reason.BULLYING.description}",
+          "restrictionType": "${request.restrictionType.toRestrictionType()}",
+          "restrictionTypeDescription": "${request.restrictionType.toRestrictionType().description}",
+          "comment": "${request.comment}",
+          "updatedBy": "${request.lastModifiedByUsername}",
+          "isClosed": true,
+          "closedReason": "$NO_CLOSURE_REASON_PROVIDED",
+          "closedBy": "A_NOMIS_USER",
+          "closedAt": "${today.format(dtFormat)}",
+          "whenCreated": "${today.format(dtFormat)}",
+          "whenUpdated": "${today.format(dtFormat)}"
+        }
+        """
+
+      webTestClient.post()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_MIGRATE"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody().json(expectedResponse, false)
+    }
   }
 
   @Nested
   inner class `Upsert Sync a non-association` {
-
+    private val now = LocalDateTime.now(clock)
+    private val today = LocalDate.now(clock).atStartOfDay()
     private val url = "/sync/upsert"
 
     @Test
@@ -308,7 +425,68 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "isClosed": false,
           "closedReason": null,
           "closedBy": null,
-          "closedAt": null
+          "closedAt": null,
+          "whenCreated": "${request.effectiveFromDate.atStartOfDay().format(dtFormat)}",
+          "whenUpdated": "$now"
+        }
+        """
+
+      webTestClient.put()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_NON_ASSOCIATIONS_SYNC"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(expectedResponse, false)
+    }
+
+    @Test
+    fun `can sync a future non-association`() {
+      val existingNa = repository.save(
+        genNonAssociation(
+          firstPrisonerNumber = "A7777XT",
+          secondPrisonerNumber = "B7777XT",
+        ),
+      )
+      val request = UpsertSyncRequest(
+        id = existingNa.id,
+        firstPrisonerNumber = "Z1111ZZ",
+        firstPrisonerReason = LegacyReason.VIC,
+        secondPrisonerNumber = "X1111XX",
+        secondPrisonerReason = LegacyReason.PER,
+        restrictionType = LegacyRestrictionType.CELL,
+        effectiveFromDate = LocalDate.now(clock).plusDays(10),
+        authorisedBy = "The free text field for a staff name",
+        lastModifiedByUsername = "A_NOMIS_USER",
+      )
+
+      val expectedResponse =
+        // language=json
+        """
+        {
+          "firstPrisonerNumber": "${existingNa.firstPrisonerNumber}",
+          "firstPrisonerRole": "VICTIM",
+          "firstPrisonerRoleDescription": "Victim",
+          "secondPrisonerNumber": "${existingNa.secondPrisonerNumber}",
+          "secondPrisonerRole": "PERPETRATOR",
+          "secondPrisonerRoleDescription": "Perpetrator",
+          "reason": "OTHER",
+          "reasonDescription": "Other",
+          "restrictionType": "${request.restrictionType.toRestrictionType()}",
+          "restrictionTypeDescription": "${request.restrictionType.toRestrictionType().description}",
+          "comment": "$NO_COMMENT_PROVIDED",
+          "updatedBy": "${request.lastModifiedByUsername}",
+          "isClosed": true,
+          "closedReason": "$NO_CLOSURE_REASON_PROVIDED",
+          "closedBy": "A_NOMIS_USER",
+          "closedAt": "${today.format(dtFormat)}",
+          "whenCreated": "${today.format(dtFormat)}",
+          "whenUpdated": "${today.format(dtFormat)}"
         }
         """
 
@@ -501,7 +679,9 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "isClosed": true,
           "closedReason": "$NO_CLOSURE_REASON_PROVIDED",
           "closedBy": "$SYSTEM_USERNAME",
-          "closedAt": "${request.expiryDate?.atStartOfDay()?.format(dtFormat)}"
+          "closedAt": "${request.expiryDate?.atStartOfDay()?.format(dtFormat)}",
+          "whenCreated": "${request.effectiveFromDate.atStartOfDay().format(dtFormat)}",
+          "whenUpdated": "${request.expiryDate?.atStartOfDay()?.format(dtFormat)}"
         }
         """
 

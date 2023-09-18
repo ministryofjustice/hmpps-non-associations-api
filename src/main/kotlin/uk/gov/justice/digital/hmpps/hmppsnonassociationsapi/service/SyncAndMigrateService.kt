@@ -104,16 +104,18 @@ class SyncAndMigrateService(
       authorisedBy = syncRequest.authorisedBy
       isClosed = syncRequest.isClosed(clock)
       updatedBy = syncRequest.lastModifiedByUsername ?: SYSTEM_USERNAME
-      whenUpdated = LocalDateTime.now(clock)
+      whenCreated = preventFutureDate(syncRequest.effectiveFromDate, LocalDate.now(clock)).atStartOfDay()
 
       if (syncRequest.isOpen(clock)) {
         closedReason = null
         closedBy = null
         closedAt = null
+        whenUpdated = LocalDateTime.now(clock)
       } else {
         closedReason = NO_CLOSURE_REASON_PROVIDED
         closedBy = syncRequest.lastModifiedByUsername ?: SYSTEM_USERNAME
         closedAt = preventFutureDate(syncRequest.expiryDate, LocalDate.now(clock)).atStartOfDay()
+        whenUpdated = preventFutureDate(syncRequest.expiryDate, LocalDate.now(clock)).atStartOfDay()
       }
       toDto().also {
         log.info("Updated Non-association [${it.id}] between ${it.firstPrisonerNumber} and ${it.secondPrisonerNumber}")
