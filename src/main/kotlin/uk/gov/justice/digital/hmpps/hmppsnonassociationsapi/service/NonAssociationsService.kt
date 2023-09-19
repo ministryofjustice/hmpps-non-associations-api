@@ -4,6 +4,8 @@ import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -87,6 +89,10 @@ class NonAssociationsService(
 
   fun getById(id: Long): NonAssociationDTO? {
     return nonAssociationsRepository.findById(id).getOrNull()?.toDto()
+  }
+
+  fun getAllNonAssociations(pageable: Pageable): Page<NonAssociationDTO> {
+    return nonAssociationsRepository.findAll(pageable).map(NonAssociationJPA::toDto)
   }
 
   /**

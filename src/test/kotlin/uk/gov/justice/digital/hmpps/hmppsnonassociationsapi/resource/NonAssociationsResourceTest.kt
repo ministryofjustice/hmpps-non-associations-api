@@ -1323,6 +1323,214 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   }
 
   @Nested
+  inner class `Get all paged non-associations` {
+    private lateinit var na1: NonAssociationJPA
+    private lateinit var na2: NonAssociationJPA
+    private lateinit var na3: NonAssociationJPA
+    private lateinit var na4: NonAssociationJPA
+    private lateinit var na5: NonAssociationJPA
+
+    @BeforeEach
+    fun setup() {
+      na1 = createNonAssociation(firstPrisonerNumber = "A1234AA", secondPrisonerNumber = "A1234AB")
+      na2 = createNonAssociation(firstPrisonerNumber = "A1235AA", secondPrisonerNumber = "A1235AB")
+      na3 = createNonAssociation(firstPrisonerNumber = "A1236AA", secondPrisonerNumber = "A1236AB")
+      na4 = createNonAssociation(firstPrisonerNumber = "A1237AA", secondPrisonerNumber = "A1237AB")
+      na5 = createNonAssociation(firstPrisonerNumber = "A1238AA", secondPrisonerNumber = "A1238AB")
+    }
+
+    @Test
+    fun `without a valid token responds 401 Unauthorized`() {
+      webTestClient.get()
+        .uri("/non-associations/paged")
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `without the correct role responds 403 Forbidden`() {
+      // wrong role
+      webTestClient.get()
+        .uri("/non-associations/paged")
+        .headers(setAuthorisation(roles = listOf("ROLE_SOMETHING_ELSE")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `a paged list is returned for a size of one`() {
+      webTestClient.get()
+        .uri("/non-associations/paged?size=1")
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_READ_NON_ASSOCIATIONS"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody().json(
+          // language=json
+          """
+          {
+            "content": [
+              {
+                "id": ${na1.id},
+                "firstPrisonerNumber": "${na1.firstPrisonerNumber}",
+                "secondPrisonerNumber": "${na1.secondPrisonerNumber}"
+              }
+            ],
+            "pageable": {
+              "pageNumber": 0,
+              "pageSize": 1,
+              "sort": {
+                "sorted": true
+              },
+              "offset": 0,
+              "paged": true,
+              "unpaged": false
+            },
+            "totalPages": 5,
+            "totalElements": 5,
+            "last": false,
+            "size": 1,
+            "number": 0,
+            "numberOfElements": 1,
+            "first": true,
+            "empty": false
+          }
+           """,
+          false,
+        )
+    }
+
+    @Test
+    fun `a paged list is returned for a size of two next page`() {
+      webTestClient.get()
+        .uri("/non-associations/paged?size=2&page=1")
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_READ_NON_ASSOCIATIONS"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody().json(
+          // language=json
+          """
+          {
+            "content": [
+              {
+                "id": ${na3.id},
+                "firstPrisonerNumber": "${na3.firstPrisonerNumber}",
+                "secondPrisonerNumber": "${na3.secondPrisonerNumber}"
+              },
+               {
+                "id": ${na4.id},
+                "firstPrisonerNumber": "${na4.firstPrisonerNumber}",
+                "secondPrisonerNumber": "${na4.secondPrisonerNumber}"
+              }
+            ],
+            "pageable": {
+              "pageNumber": 1,
+              "pageSize": 2,
+              "sort": {
+                "sorted": true
+              },
+              "offset": 2,
+              "paged": true,
+              "unpaged": false
+            },
+            "totalPages": 3,
+            "totalElements": 5,
+            "last": false,
+            "size": 2,
+            "number": 1,
+            "numberOfElements": 2,
+            "first": false,
+            "empty": false
+          }
+           """,
+          false,
+        )
+    }
+
+    @Test
+    fun `a total list of non-associations`() {
+      webTestClient.get()
+        .uri("/non-associations/paged?size=6")
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_READ_NON_ASSOCIATIONS"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody().json(
+          // language=json
+          """
+          {
+            "content": [
+              {
+                "id": ${na1.id},
+                "firstPrisonerNumber": "${na1.firstPrisonerNumber}",
+                "secondPrisonerNumber": "${na1.secondPrisonerNumber}"
+              },
+              {
+                "id": ${na2.id},
+                "firstPrisonerNumber": "${na2.firstPrisonerNumber}",
+                "secondPrisonerNumber": "${na2.secondPrisonerNumber}"
+              },
+              {
+                "id": ${na3.id},
+                "firstPrisonerNumber": "${na3.firstPrisonerNumber}",
+                "secondPrisonerNumber": "${na3.secondPrisonerNumber}"
+              },
+               {
+                "id": ${na4.id},
+                "firstPrisonerNumber": "${na4.firstPrisonerNumber}",
+                "secondPrisonerNumber": "${na4.secondPrisonerNumber}"
+              },
+              {
+                "id": ${na5.id},
+                "firstPrisonerNumber": "${na5.firstPrisonerNumber}",
+                "secondPrisonerNumber": "${na5.secondPrisonerNumber}"
+              }
+            ],
+            "pageable": {
+              "pageNumber": 0,
+              "pageSize": 6,
+              "sort": {
+                "sorted": true
+              },
+              "offset": 0,
+              "paged": true,
+              "unpaged": false
+            },
+            "totalPages": 1,
+            "totalElements": 5,
+            "last": true,
+            "size": 6,
+            "number": 0,
+            "numberOfElements": 5,
+            "first": true,
+            "empty": false
+          }
+           """,
+          false,
+        )
+    }
+  }
+
+  @Nested
   inner class `Get non-associations lists for a prisoner` {
     private val prisonerNumber = "A1234BC"
 
