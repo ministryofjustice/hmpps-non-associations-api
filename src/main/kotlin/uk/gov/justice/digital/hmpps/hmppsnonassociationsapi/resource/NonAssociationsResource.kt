@@ -531,7 +531,7 @@ class NonAssociationsResource(
     }
   }
 
-  @GetMapping("/non-associations/paged")
+  @GetMapping("/non-associations")
   @PreAuthorize("hasRole('ROLE_READ_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
@@ -549,7 +549,7 @@ class NonAssociationsResource(
       ),
       ApiResponse(
         responseCode = "403",
-        description = "Missing required role. Requires the DELETE_NON_ASSOCIATIONS role with write scope.",
+        description = "Missing required role. Requires the READ_NON_ASSOCIATIONS role.",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],

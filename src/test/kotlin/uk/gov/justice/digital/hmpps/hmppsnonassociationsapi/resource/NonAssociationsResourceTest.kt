@@ -1342,7 +1342,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `without a valid token responds 401 Unauthorized`() {
       webTestClient.get()
-        .uri("/non-associations/paged")
+        .uri("/non-associations")
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -1352,7 +1352,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     fun `without the correct role responds 403 Forbidden`() {
       // wrong role
       webTestClient.get()
-        .uri("/non-associations/paged")
+        .uri("/non-associations")
         .headers(setAuthorisation(roles = listOf("ROLE_SOMETHING_ELSE")))
         .header("Content-Type", "application/json")
         .exchange()
@@ -1363,7 +1363,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `a paged list is returned for a size of one`() {
       webTestClient.get()
-        .uri("/non-associations/paged?size=1")
+        .uri("/non-associations?size=1")
         .headers(
           setAuthorisation(
             roles = listOf("ROLE_READ_NON_ASSOCIATIONS"),
@@ -1411,7 +1411,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `a paged list is returned for a size of two next page`() {
       webTestClient.get()
-        .uri("/non-associations/paged?size=2&page=1")
+        .uri("/non-associations?size=2&page=1")
         .headers(
           setAuthorisation(
             roles = listOf("ROLE_READ_NON_ASSOCIATIONS"),
@@ -1464,7 +1464,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `a total list of non-associations`() {
       webTestClient.get()
-        .uri("/non-associations/paged?size=6")
+        .uri("/non-associations?size=6")
         .headers(
           setAuthorisation(
             roles = listOf("ROLE_READ_NON_ASSOCIATIONS"),
