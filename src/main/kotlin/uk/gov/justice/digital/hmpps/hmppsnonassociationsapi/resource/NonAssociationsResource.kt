@@ -7,7 +7,11 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.constraints.Pattern
+import org.springdoc.core.annotations.ParameterObject
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -525,6 +529,37 @@ class NonAssociationsResource(
     deleteEventPublishWrapper {
       Pair(nonAssociationsService.deleteNonAssociation(id, deleteNonAssociationRequest), deleteNonAssociationRequest)
     }
+  }
+
+  @GetMapping("/non-associations")
+  @PreAuthorize("hasRole('ROLE_READ_NON_ASSOCIATIONS')")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+    summary = "Get all non-associations, paged",
+    description = "Requires READ_NON_ASSOCIATIONS role",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "A page of Non-associations are returned",
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Missing required role. Requires the READ_NON_ASSOCIATIONS role.",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun getAllNonAssociations(
+    @ParameterObject
+    @PageableDefault(sort = ["id"], direction = Sort.Direction.ASC)
+    pageable: Pageable,
+  ): Page<NonAssociation> {
+    return nonAssociationsService.getAllNonAssociations(pageable)
   }
 
   @GetMapping("/constants")
