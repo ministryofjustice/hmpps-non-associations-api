@@ -1,6 +1,7 @@
 ---
 generic-service:
   nameOverride: hmpps-non-associations-api
+  productId: "DPS032"
 
   serviceAccountName: hmpps-non-associations-api
 
