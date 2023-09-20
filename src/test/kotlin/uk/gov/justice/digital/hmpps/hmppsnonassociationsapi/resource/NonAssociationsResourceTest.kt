@@ -1361,6 +1361,17 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
+    fun `without a valid page size responds 400 Bad Request`() {
+      webTestClient.get()
+        .uri("/non-associations?size=1000")
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+    }
+
+    @Test
     fun `a paged list is returned for a size of one`() {
       webTestClient.get()
         .uri("/non-associations?size=1")

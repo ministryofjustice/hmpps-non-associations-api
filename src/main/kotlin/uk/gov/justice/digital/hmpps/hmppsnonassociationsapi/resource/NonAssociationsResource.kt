@@ -543,6 +543,11 @@ class NonAssociationsResource(
         description = "A page of Non-associations are returned",
       ),
       ApiResponse(
+        responseCode = "400",
+        description = "When pagination parameters are not valid",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
@@ -556,9 +561,13 @@ class NonAssociationsResource(
   )
   fun getAllNonAssociations(
     @ParameterObject
-    @PageableDefault(sort = ["id"], direction = Sort.Direction.ASC)
+    @PageableDefault(size = 20, sort = ["id"], direction = Sort.Direction.ASC)
     pageable: Pageable,
   ): Page<NonAssociation> {
+    if (pageable.pageSize > 200) {
+      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Page size must be 200 or less")
+    }
+
     return nonAssociationsService.getAllNonAssociations(pageable)
   }
 
