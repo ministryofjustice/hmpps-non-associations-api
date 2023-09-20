@@ -206,16 +206,16 @@ class NonAssociationsResource(
   @PreAuthorize("hasRole('ROLE_READ_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
-    summary = "Get optionally-filtered non-associations, paged",
+    summary = "Get non-associations, filtered and paged",
     description = "Requires READ_NON_ASSOCIATIONS role",
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "A page of Non-associations are returned",
+        description = "A page of non-associations are returned",
       ),
       ApiResponse(
         responseCode = "400",
-        description = "When pagination parameters are not valid",
+        description = "When input parameters are not valid",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
@@ -243,11 +243,11 @@ class NonAssociationsResource(
     @Schema(
       description = "Whether to include closed non-associations or not",
       required = false,
-      defaultValue = "true",
-      example = "false",
+      defaultValue = "false",
+      example = "true",
     )
-    @RequestParam(required = false, defaultValue = "true")
-    includeClosed: Boolean = true,
+    @RequestParam(required = false, defaultValue = "false")
+    includeClosed: Boolean = false,
 
     @ParameterObject
     @PageableDefault(size = 20, sort = ["id"], direction = Sort.Direction.ASC)

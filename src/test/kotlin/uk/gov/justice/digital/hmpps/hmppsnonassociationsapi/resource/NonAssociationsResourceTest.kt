@@ -1323,7 +1323,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   }
 
   @Nested
-  inner class `Get non-associations lists` {
+  inner class `Get complete non-associations lists` {
     private lateinit var na1: NonAssociationJPA
     private lateinit var na2: NonAssociationJPA
     private lateinit var na3: NonAssociationJPA
@@ -1372,9 +1372,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `a paged list is returned for a size of one`() {
+    fun `a paged list of any non-association is returned for a size of one`() {
       webTestClient.get()
-        .uri("/non-associations?size=1")
+        .uri("/non-associations?size=1&includeClosed=true")
         .headers(
           setAuthorisation(
             roles = listOf("ROLE_READ_NON_ASSOCIATIONS"),
@@ -1422,7 +1422,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `a paged list of only open non-associations for a size of one`() {
       webTestClient.get()
-        .uri("/non-associations?includeClosed=false&size=1")
+        .uri("/non-associations?size=1")
         .headers(
           setAuthorisation(
             roles = listOf("ROLE_READ_NON_ASSOCIATIONS"),
@@ -1494,9 +1494,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `a paged list is returned for a size of two next page`() {
+    fun `a paged list of any non-associations is returned for a size of two next page`() {
       webTestClient.get()
-        .uri("/non-associations?size=2&page=1")
+        .uri("/non-associations?size=2&includeClosed=true&page=1")
         .headers(
           setAuthorisation(
             roles = listOf("ROLE_READ_NON_ASSOCIATIONS"),
@@ -1547,9 +1547,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `a total list of non-associations`() {
+    fun `a total list of any non-associations`() {
       webTestClient.get()
-        .uri("/non-associations?size=6")
+        .uri("/non-associations?includeOpen=true&includeClosed=true&size=6")
         .headers(
           setAuthorisation(
             roles = listOf("ROLE_READ_NON_ASSOCIATIONS"),
@@ -1617,7 +1617,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `a total list of only open non-associations`() {
       webTestClient.get()
-        .uri("/non-associations?includeClosed=false&size=100")
+        .uri("/non-associations?size=100")
         .headers(
           setAuthorisation(
             roles = listOf("ROLE_READ_NON_ASSOCIATIONS"),
@@ -1664,7 +1664,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `a total list of only closed non-associations`() {
       webTestClient.get()
-        .uri("/non-associations?includeOpen=false&size=100")
+        .uri("/non-associations?includeOpen=false&includeClosed=true&size=100")
         .headers(
           setAuthorisation(
             roles = listOf("ROLE_READ_NON_ASSOCIATIONS"),
