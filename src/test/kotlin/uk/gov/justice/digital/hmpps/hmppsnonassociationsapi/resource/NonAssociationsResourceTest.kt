@@ -1323,7 +1323,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   }
 
   @Nested
-  inner class `Get all paged non-associations` {
+  inner class `Get non-associations lists` {
     private lateinit var na1: NonAssociationJPA
     private lateinit var na2: NonAssociationJPA
     private lateinit var na3: NonAssociationJPA
@@ -1333,8 +1333,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @BeforeEach
     fun setup() {
       na1 = createNonAssociation(firstPrisonerNumber = "A1234AA", secondPrisonerNumber = "A1234AB")
-      na2 = createNonAssociation(firstPrisonerNumber = "A1235AA", secondPrisonerNumber = "A1235AB")
-      na3 = createNonAssociation(firstPrisonerNumber = "A1236AA", secondPrisonerNumber = "A1236AB")
+      na2 = createNonAssociation(firstPrisonerNumber = "A1235AA", secondPrisonerNumber = "A1235AB", isClosed = true)
+      na3 = createNonAssociation(firstPrisonerNumber = "A1236AA", secondPrisonerNumber = "A1236AB", isClosed = true)
       na4 = createNonAssociation(firstPrisonerNumber = "A1237AA", secondPrisonerNumber = "A1237AB")
       na5 = createNonAssociation(firstPrisonerNumber = "A1238AA", secondPrisonerNumber = "A1238AB")
     }
@@ -1413,8 +1413,82 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "numberOfElements": 1,
             "first": true,
             "empty": false
-          }
+           }
            """,
+          false,
+        )
+    }
+
+    @Test
+    fun `a paged list of only open non-associations for a size of one`() {
+      webTestClient.get()
+        .uri("/non-associations?includeClosed=false&size=1")
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_READ_NON_ASSOCIATIONS"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody().json(
+          // language=json
+          """
+          {
+            "content": [
+              {
+                "id": ${na1.id},
+                "firstPrisonerNumber": "${na1.firstPrisonerNumber}",
+                "secondPrisonerNumber": "${na1.secondPrisonerNumber}"
+              }
+            ],
+            "totalPages": 3,
+            "totalElements": 3,
+            "number": 0,
+            "size": 1,
+            "first": true,
+            "last": false,
+            "empty": false
+          }
+          """,
+          false,
+        )
+    }
+
+    @Test
+    fun `a paged list of only closed non-associations for a size of one`() {
+      webTestClient.get()
+        .uri("/non-associations?includeClosed=true&includeOpen=false&size=1")
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_READ_NON_ASSOCIATIONS"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody().json(
+          // language=json
+          """
+          {
+            "content": [
+              {
+                "id": ${na2.id},
+                "firstPrisonerNumber": "${na2.firstPrisonerNumber}",
+                "secondPrisonerNumber": "${na2.secondPrisonerNumber}"
+              }
+            ],
+            "totalPages": 2,
+            "totalElements": 2,
+            "number": 0,
+            "size": 1,
+            "first": true,
+            "last": false,
+            "empty": false
+          }
+          """,
           false,
         )
     }
@@ -1536,6 +1610,95 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "empty": false
           }
            """,
+          false,
+        )
+    }
+
+    @Test
+    fun `a total list of only open non-associations`() {
+      webTestClient.get()
+        .uri("/non-associations?includeClosed=false&size=100")
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_READ_NON_ASSOCIATIONS"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody().json(
+          // language=json
+          """
+          {
+            "content": [
+              {
+                "id": ${na1.id},
+                "firstPrisonerNumber": "${na1.firstPrisonerNumber}",
+                "secondPrisonerNumber": "${na1.secondPrisonerNumber}"
+              },
+              {
+                "id": ${na4.id},
+                "firstPrisonerNumber": "${na4.firstPrisonerNumber}",
+                "secondPrisonerNumber": "${na4.secondPrisonerNumber}"
+              },
+              {
+                "id": ${na5.id},
+                "firstPrisonerNumber": "${na5.firstPrisonerNumber}",
+                "secondPrisonerNumber": "${na5.secondPrisonerNumber}"
+              }
+            ],
+            "totalPages": 1,
+            "totalElements": 3,
+            "number": 0,
+            "size": 100,
+            "first": true,
+            "last": true,
+            "empty": false
+          }
+          """,
+          false,
+        )
+    }
+
+    @Test
+    fun `a total list of only closed non-associations`() {
+      webTestClient.get()
+        .uri("/non-associations?includeOpen=false&size=100")
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_READ_NON_ASSOCIATIONS"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody().json(
+          // language=json
+          """
+          {
+            "content": [
+              {
+                "id": ${na2.id},
+                "firstPrisonerNumber": "${na2.firstPrisonerNumber}",
+                "secondPrisonerNumber": "${na2.secondPrisonerNumber}"
+              },
+              {
+                "id": ${na3.id},
+                "firstPrisonerNumber": "${na3.firstPrisonerNumber}",
+                "secondPrisonerNumber": "${na3.secondPrisonerNumber}"
+              }
+            ],
+            "totalPages": 1,
+            "totalElements": 2,
+            "number": 0,
+            "size": 100,
+            "first": true,
+            "last": true,
+            "empty": false
+          }
+          """,
           false,
         )
     }

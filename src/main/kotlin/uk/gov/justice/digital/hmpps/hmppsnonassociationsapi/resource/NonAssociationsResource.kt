@@ -196,10 +196,71 @@ class NonAssociationsResource(
     @RequestBody
     @Validated
     createNonAssociation: CreateNonAssociationRequest,
-  ): NonAssociation =
-    eventPublishWrapper(NonAssociationDomainEventType.NON_ASSOCIATION_CREATED) {
+  ): NonAssociation {
+    return eventPublishWrapper(NonAssociationDomainEventType.NON_ASSOCIATION_CREATED) {
       nonAssociationsService.createNonAssociation(createNonAssociation)
     }
+  }
+
+  @GetMapping("/non-associations")
+  @PreAuthorize("hasRole('ROLE_READ_NON_ASSOCIATIONS')")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+    summary = "Get optionally-filtered non-associations, paged",
+    description = "Requires READ_NON_ASSOCIATIONS role",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "A page of Non-associations are returned",
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "When pagination parameters are not valid",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Missing required role. Requires the READ_NON_ASSOCIATIONS role.",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun getNonAssociations(
+    @Schema(
+      description = "Whether to include open non-associations or not",
+      required = false,
+      defaultValue = "true",
+      example = "false",
+    )
+    @RequestParam(required = false, defaultValue = "true")
+    includeOpen: Boolean = true,
+
+    @Schema(
+      description = "Whether to include closed non-associations or not",
+      required = false,
+      defaultValue = "true",
+      example = "false",
+    )
+    @RequestParam(required = false, defaultValue = "true")
+    includeClosed: Boolean = true,
+
+    @ParameterObject
+    @PageableDefault(size = 20, sort = ["id"], direction = Sort.Direction.ASC)
+    pageable: Pageable,
+  ): Page<NonAssociation> {
+    if (pageable.pageSize > 200) {
+      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Page size must be 200 or less")
+    }
+    val inclusion = NonAssociationListInclusion.of(includeOpen, includeClosed)
+      ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
+
+    return nonAssociationsService.getNonAssociations(inclusion, pageable)
+  }
 
   @GetMapping("/non-associations/{id}")
   @PreAuthorize("hasRole('ROLE_READ_NON_ASSOCIATIONS')")
@@ -234,10 +295,8 @@ class NonAssociationsResource(
     @PathVariable
     id: Long,
   ): NonAssociation {
-    return nonAssociationsService.getById(id) ?: throw ResponseStatusException(
-      HttpStatus.NOT_FOUND,
-      "Non-association with ID $id not found",
-    )
+    return nonAssociationsService.getById(id)
+      ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Non-association with ID $id not found")
   }
 
   @PostMapping("/non-associations/between")
@@ -529,46 +588,6 @@ class NonAssociationsResource(
     deleteEventPublishWrapper {
       Pair(nonAssociationsService.deleteNonAssociation(id, deleteNonAssociationRequest), deleteNonAssociationRequest)
     }
-  }
-
-  @GetMapping("/non-associations")
-  @PreAuthorize("hasRole('ROLE_READ_NON_ASSOCIATIONS')")
-  @ResponseStatus(HttpStatus.OK)
-  @Operation(
-    summary = "Get all non-associations, paged",
-    description = "Requires READ_NON_ASSOCIATIONS role",
-    responses = [
-      ApiResponse(
-        responseCode = "200",
-        description = "A page of Non-associations are returned",
-      ),
-      ApiResponse(
-        responseCode = "400",
-        description = "When pagination parameters are not valid",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
-      ApiResponse(
-        responseCode = "401",
-        description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
-      ApiResponse(
-        responseCode = "403",
-        description = "Missing required role. Requires the READ_NON_ASSOCIATIONS role.",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
-    ],
-  )
-  fun getAllNonAssociations(
-    @ParameterObject
-    @PageableDefault(size = 20, sort = ["id"], direction = Sort.Direction.ASC)
-    pageable: Pageable,
-  ): Page<NonAssociation> {
-    if (pageable.pageSize > 200) {
-      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Page size must be 200 or less")
-    }
-
-    return nonAssociationsService.getAllNonAssociations(pageable)
   }
 
   @GetMapping("/constants")
