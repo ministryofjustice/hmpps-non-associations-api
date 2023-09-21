@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -91,8 +92,15 @@ class NonAssociationsService(
     return nonAssociationsRepository.findById(id).getOrNull()?.toDto()
   }
 
-  fun getAllNonAssociations(pageable: Pageable): Page<NonAssociationDTO> {
-    return nonAssociationsRepository.findAll(pageable).map(NonAssociationJPA::toDto)
+  fun getNonAssociations(
+    inclusion: NonAssociationListInclusion = NonAssociationListInclusion.ALL,
+    pageable: Pageable = PageRequest.of(0, 20),
+  ): Page<NonAssociationDTO> {
+    return when (inclusion) {
+      NonAssociationListInclusion.OPEN_ONLY -> nonAssociationsRepository.findAllByIsClosed(false, pageable)
+      NonAssociationListInclusion.CLOSED_ONLY -> nonAssociationsRepository.findAllByIsClosed(true, pageable)
+      NonAssociationListInclusion.ALL -> nonAssociationsRepository.findAll(pageable)
+    }.map(NonAssociationJPA::toDto)
   }
 
   /**
