@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase.Companion.clock
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAllByPrisonerNumber
@@ -16,7 +15,8 @@ class NonAssociationsMergeServiceTest {
   private val nonAssociationsRepository: NonAssociationsRepository = mock()
   private val service = NonAssociationsMergeService(
     nonAssociationsRepository = nonAssociationsRepository,
-    clock = TestBase.clock,
+    clock = clock,
+    telemetryClient = mock(),
   )
 
   @Test
@@ -36,7 +36,7 @@ class NonAssociationsMergeServiceTest {
       ),
     )
 
-    val nonAssociationList = service.mergePrisonerNumbers("A1234AA", "A1234BB")
+    val nonAssociationMap = service.mergePrisonerNumbers("A1234AA", "A1234BB")
 
     val resultantNonAssociations = listOf(
       genNonAssociation(1, "A1234BB", "X1234AA", now),
@@ -49,8 +49,8 @@ class NonAssociationsMergeServiceTest {
       genNonAssociation(33, "Y1234AC", "A1234BB", now),
     )
 
-    assertThat(nonAssociationList).hasSize(8)
+    assertThat(nonAssociationMap[MergeResult.MERGED]).hasSize(8)
 
-    assertThat(nonAssociationList).isEqualTo(resultantNonAssociations)
+    assertThat(nonAssociationMap[MergeResult.MERGED]).isEqualTo(resultantNonAssociations)
   }
 }
