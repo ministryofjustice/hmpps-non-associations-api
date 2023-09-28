@@ -7,7 +7,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.CONFLICT
+import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
+import org.springframework.http.HttpStatus.NOT_FOUND
+import org.springframework.http.HttpStatus.UNAUTHORIZED
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.security.access.AccessDeniedException
@@ -88,10 +91,10 @@ class HmppsNonAssociationsApiExceptionHandler {
   fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<ErrorResponse> {
     log.debug("Forbidden (403) returned with message {}", e.message)
     return ResponseEntity
-      .status(HttpStatus.FORBIDDEN)
+      .status(FORBIDDEN)
       .body(
         ErrorResponse(
-          status = HttpStatus.FORBIDDEN,
+          status = FORBIDDEN,
           userMessage = "Forbidden: ${e.message}",
           developerMessage = e.message,
         ),
@@ -102,10 +105,10 @@ class HmppsNonAssociationsApiExceptionHandler {
   fun handleSpringNotFound(e: NotFound): ResponseEntity<ErrorResponse?>? {
     log.debug("Not found exception caught: {}", e.message)
     return ResponseEntity
-      .status(HttpStatus.NOT_FOUND)
+      .status(NOT_FOUND)
       .body(
         ErrorResponse(
-          status = HttpStatus.NOT_FOUND,
+          status = NOT_FOUND,
           userMessage = "Not Found: ${e.message}",
           developerMessage = e.message,
         ),
@@ -116,10 +119,10 @@ class HmppsNonAssociationsApiExceptionHandler {
   fun handleNonAssociationNotFound(e: NonAssociationNotFoundException): ResponseEntity<ErrorResponse?>? {
     log.debug("Non-association not found exception caught: {}", e.message)
     return ResponseEntity
-      .status(HttpStatus.NOT_FOUND)
+      .status(NOT_FOUND)
       .body(
         ErrorResponse(
-          status = HttpStatus.NOT_FOUND,
+          status = NOT_FOUND,
           userMessage = "Non-association not Found: ${e.message}",
           developerMessage = e.message,
         ),
@@ -158,10 +161,10 @@ class HmppsNonAssociationsApiExceptionHandler {
   fun handleNonAssociationAlreadyClosedException(e: NonAssociationAlreadyClosedException): ResponseEntity<ErrorResponse?>? {
     log.debug("Already Closed Non-Association caught: {}", e.message)
     return ResponseEntity
-      .status(HttpStatus.CONFLICT)
+      .status(CONFLICT)
       .body(
         ErrorResponse(
-          status = HttpStatus.CONFLICT,
+          status = CONFLICT,
           errorCode = ErrorCode.NonAssociationAlreadyClosed,
           userMessage = "Already Closed Non-Association: ${e.message}",
           developerMessage = e.message,
@@ -173,10 +176,10 @@ class HmppsNonAssociationsApiExceptionHandler {
   fun handleUserInContextMissingException(e: UserInContextMissingException): ResponseEntity<ErrorResponse?>? {
     log.debug("User in context missing: {}", e.message)
     return ResponseEntity
-      .status(HttpStatus.UNAUTHORIZED)
+      .status(UNAUTHORIZED)
       .body(
         ErrorResponse(
-          status = HttpStatus.UNAUTHORIZED,
+          status = UNAUTHORIZED,
           errorCode = ErrorCode.UserInContextMissing,
           userMessage = "User in context missing: ${e.message}",
           developerMessage = e.message,
@@ -222,7 +225,7 @@ class HmppsNonAssociationsApiExceptionHandler {
 
 /**
  * Codes that can be used by api clients to uniquely discriminate between error types,
- * instead of relying on non-constant text descriptions.
+ * instead of relying on non-constant text descriptions of HTTP status codes.
  *
  * NB: Once defined, the values must not be changed
  */
@@ -237,9 +240,9 @@ enum class ErrorCode(val errorCode: Int) {
 data class ErrorResponse(
   @Schema(description = "HTTP status code", example = "500", required = true)
   val status: Int,
-  @Schema(description = "When present, uniquely identifies the type of error making it easier for clients to discriminate without relying on error description; see `uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse` enumeration in hmpps-non-associations-api", example = "101", required = false)
+  @Schema(description = "When present, uniquely identifies the type of error making it easier for clients to discriminate without relying on error description or HTTP status code; see `uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorCode` enumeration in hmpps-non-associations-api", example = "101", required = false)
   val errorCode: Int? = null,
-  @Schema(description = "User message for the error", example = "No non-association level found for ID `324234`", required = false)
+  @Schema(description = "User message for the error", example = "No non-association found for ID `324234`", required = false)
   val userMessage: String? = null,
   @Schema(description = "More detailed error message", example = "[Details, sometimes a stack trace]", required = false)
   val developerMessage: String? = null,
@@ -260,6 +263,6 @@ class NonAssociationAlreadyClosedException(id: Long) : Exception("Non-associatio
 
 class UserInContextMissingException : Exception("There is no user in context for this request")
 
-class OpenNonAssociationAlreadyExistsException(prisoners: List<String>) : Exception("Prisoners [$prisoners] already have open non-associations")
+class OpenNonAssociationAlreadyExistsException(prisoners: List<String>) : Exception("Prisoners $prisoners already have open non-associations")
 
 class NonAssociationNotFoundException(id: Long) : Exception("There is no non-association found for ID = $id")
