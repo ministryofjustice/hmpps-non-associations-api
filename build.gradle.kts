@@ -56,22 +56,27 @@ java {
   toolchain.languageVersion = JavaLanguageVersion.of(20)
 }
 
-tasks.register<PortForwardRDSTask>("portForwardRDS") {
-  namespacePrefix = "hmpps-non-associations"
-}
-
-tasks.register<PortForwardRedisTask>("portForwardRedis") {
-  namespacePrefix = "hmpps-non-associations"
-}
-
-tasks.register<RevealSecretsTask>("revealSecrets") {
-  namespacePrefix = "hmpps-non-associations"
-}
-
 tasks {
+  register<PortForwardRDSTask>("portForwardRDS") {
+    namespacePrefix = "hmpps-non-associations"
+  }
+
+  register<PortForwardRedisTask>("portForwardRedis") {
+    namespacePrefix = "hmpps-non-associations"
+  }
+
+  register<RevealSecretsTask>("revealSecrets") {
+    namespacePrefix = "hmpps-non-associations"
+  }
+
   withType<KotlinCompile> {
     kotlinOptions {
       jvmTarget = JavaVersion.VERSION_20.toString()
     }
+  }
+
+  test {
+    // required for jjwt 0.12 - see https://github.com/jwtk/jjwt/issues/849
+    jvmArgs("--add-exports", "java.base/sun.security.util=ALL-UNNAMED")
   }
 }
