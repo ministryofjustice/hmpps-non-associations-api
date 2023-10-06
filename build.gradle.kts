@@ -43,8 +43,8 @@ dependencies {
   testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:3.0.1")
   testImplementation("org.testcontainers:postgresql:1.19.1")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
-  testImplementation("io.jsonwebtoken:jjwt-impl:0.12.1")
-  testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.1")
+  testImplementation("io.jsonwebtoken:jjwt-impl:0.12.2")
+  testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.2")
   testImplementation("org.mockito:mockito-inline:5.2.0")
   testImplementation("io.swagger.parser.v3:swagger-parser:2.1.16")
   testImplementation("org.springframework.security:spring-security-test")
@@ -73,10 +73,5 @@ tasks {
     kotlinOptions {
       jvmTarget = JavaVersion.VERSION_20.toString()
     }
-  }
-
-  test {
-    // required for jjwt 0.12 - see https://github.com/jwtk/jjwt/issues/849
-    jvmArgs("--add-exports", "java.base/sun.security.util=ALL-UNNAMED")
   }
 }
