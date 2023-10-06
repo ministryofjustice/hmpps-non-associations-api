@@ -1,5 +1,5 @@
 {
-  "name": "hmpps-non-associations-api",
+  "name": "@ministryofjustice/hmpps-non-associations-api",
   "version": "0.0.0",
   "private": false,
   "description": "HMPPS Non-associations API REST client",
@@ -9,7 +9,10 @@
     "url": "https://mojdigital.blog.gov.uk/"
   },
   "homepage": "https://github.com/ministryofjustice/hmpps-non-associations-api",
-  "repository": "git@github.com:ministryofjustice/hmpps-non-associations-api.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ministryofjustice/hmpps-non-associations-api.git"
+  },
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

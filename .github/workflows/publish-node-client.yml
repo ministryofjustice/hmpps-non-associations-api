@@ -1,0 +1,38 @@
+name: Publish node REST client package
+on:
+  release:
+    types: [published]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@ministryofjustice'
+      - name: Install dependencies
+        run: |
+          cd clients/node
+          npm clean-install --no-audit
+      - name: Run tests
+        run: |
+          cd clients/node
+          npm test
+      - name: Build package
+        run: |
+          cd clients/node
+          npm run clean
+          npm run build
+      - name: Publish package
+        run: |
+          cd clients/node
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
