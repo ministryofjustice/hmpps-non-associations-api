@@ -1,0 +1,16 @@
+{
+  "extends": "@tsconfig/node18/tsconfig.json",
+  "compileOnSave": true,
+  "compilerOptions": {
+    "outDir": "./dist",
+    "declaration": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "experimentalDecorators": true,
+  },
+  "exclude": [
+    "dist",
+    "node_modules",
+  ],
+  "include": ["src/**/*.ts"],
+}
