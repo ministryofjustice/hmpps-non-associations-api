@@ -74,9 +74,4 @@ tasks {
       jvmTarget = JavaVersion.VERSION_20.toString()
     }
   }
-
-  test {
-    // required for jjwt 0.12 - see https://github.com/jwtk/jjwt/issues/849
-    jvmArgs("--add-exports", "java.base/sun.security.util=ALL-UNNAMED")
-  }
 }
