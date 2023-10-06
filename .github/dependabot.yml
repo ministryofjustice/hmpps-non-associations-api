@@ -1,0 +1,18 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /clients/node
+    allow:
+      - dependency-type: development
+    ignore:
+      - dependency-type: production
+      - dependency-name: @types/node
+        versions:
+          - ">=19"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
