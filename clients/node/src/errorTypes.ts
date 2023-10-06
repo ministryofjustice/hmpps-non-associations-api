@@ -5,11 +5,11 @@
 export interface ErrorResponse {
   status: number
 
+  userMessage: string
+
+  developerMessage: string
+
   errorCode?: ErrorCode
-
-  userMessage?: string
-
-  developerMessage?: string
 
   moreInfo?: string
 }
@@ -18,8 +18,14 @@ export interface ErrorResponse {
  * Used to determine if an api error was of type `ErrorResponse` to use relevant properties
  */
 export function isErrorResponse(obj: unknown): obj is ErrorResponse {
-  // TODO: would be nice to make userMessage & developerMessage non-nullable in the api
-  return Boolean(obj && typeof obj === 'object' && 'status' in obj && typeof obj.status === 'number')
+  return Boolean(
+    obj &&
+      typeof obj === 'object' &&
+      'status' in obj &&
+      typeof obj.status === 'number' &&
+      'userMessage' in obj &&
+      'developerMessage' in obj,
+  )
 }
 
 /**
