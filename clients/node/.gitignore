@@ -1,0 +1,5 @@
+# dependencies and build artefacts
+/dist/
+/node_modules/
+/test_results/
+.eslintcache

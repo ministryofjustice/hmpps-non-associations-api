@@ -1,0 +1,59 @@
+{
+  "name": "@ministryofjustice/hmpps-non-associations-api",
+  "version": "0.0.0",
+  "private": false,
+  "description": "HMPPS Non-associations API REST client",
+  "author": {
+    "name": "HMPPS Digital (MoJ Digital & Technology)",
+    "email": "info@digital.justice.gov.uk",
+    "url": "https://mojdigital.blog.gov.uk/"
+  },
+  "homepage": "https://github.com/ministryofjustice/hmpps-non-associations-api",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ministryofjustice/hmpps-non-associations-api.git"
+  },
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "/dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf ./dist/",
+    "format": "prettier --write src test",
+    "lint": "eslint . --cache --max-warnings 0",
+    "test": "jest"
+  },
+  "engines": {
+    "node": "18 || 20"
+  },
+  "dependencies": {
+    "agentkeepalive": ">=4",
+    "superagent": ">=8"
+  },
+  "devDependencies": {
+    "@tsconfig/node18": "^18.2.2",
+    "@types/jest": "^29.5.5",
+    "@types/node": "^18.18.3",
+    "@types/superagent": "^4.1.19",
+    "@types/supertest": "^2.0.14",
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "@typescript-eslint/parser": "^6.7.4",
+    "eslint": "^8.50.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-no-only-tests": "^3.1.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0",
+    "nock": "^13.3.3",
+    "prettier": "^3.0.3",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2"
+  }
+}

@@ -54,6 +54,49 @@ jobs:
 #      - store_artifacts:
 #          path: build/reports/jacoco/test/html
 
+  test-node-client:
+    parameters:
+      node-version:
+        type: string
+    executor:
+      name: hmpps/node
+      tag: << parameters.node-version >>
+    steps:
+      - checkout
+      - run:
+          name: Update npm
+          command: sudo npm install -g npm@latest
+      - restore_cache:
+          key: dependency-cache-node<< parameters.node-version >>-{{ checksum "clients/node/package-lock.json" }}
+      - run:
+          name: Install dependencies
+          command: |
+            cd clients/node
+            npm clean-install --no-audit
+      - save_cache:
+          key: dependency-cache-node<< parameters.node-version >>-{{ checksum "clients/node/package-lock.json" }}
+          paths:
+            - clients/node/node_modules
+      - run:
+          name: Type-check node client library
+          command: |
+            cd clients/node
+            npm run build
+      - run:
+          name: Lint node client library
+          command: |
+            cd clients/node
+            npm run lint
+      - run:
+          name: Test node client library
+          command: |
+            cd clients/node
+            npm run test
+      - store_test_results:
+          path: clients/node/test_results/junit.xml
+      - store_artifacts:
+          path: clients/node/test_results/junit.xml
+
 workflows:
   version: 2
   build-test-and-deploy:
@@ -62,6 +105,10 @@ workflows:
           filters:
             tags:
               ignore: /.*/
+      - test-node-client:
+          matrix:
+            parameters:
+              node-version: ["18.18", "20.8"]
       - hmpps/helm_lint:
           name: helm_lint
       - hmpps/build_multiplatform_docker:

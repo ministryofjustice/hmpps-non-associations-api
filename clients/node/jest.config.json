@@ -1,0 +1,9 @@
+{
+  "preset": "ts-jest",
+  "testEnvironment": "node",
+  "testMatch": ["**/*.test.ts"],
+  "reporters": [
+    "default",
+    ["jest-junit", { "outputDirectory": "test_results" }]
+  ]
+}
