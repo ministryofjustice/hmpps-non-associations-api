@@ -54,7 +54,7 @@ jobs:
 #      - store_artifacts:
 #          path: build/reports/jacoco/test/html
 
-  build-node-client:
+  test-node-client:
     parameters:
       node-version:
         type: string
@@ -78,17 +78,17 @@ jobs:
           paths:
             - clients/node/node_modules
       - run:
-          name: Build node client library
+          name: Type-check node client library
           command: |
             cd clients/node
             npm run build
       - run:
-          name: Linter check
+          name: Lint node client library
           command: |
             cd clients/node
             npm run lint
       - run:
-          name: Run unit tests
+          name: Test node client library
           command: |
             cd clients/node
             npm run test
@@ -105,7 +105,7 @@ workflows:
           filters:
             tags:
               ignore: /.*/
-      - build-node-client:
+      - test-node-client:
           matrix:
             parameters:
               node-version: ["18.18", "20.8"]
@@ -128,7 +128,6 @@ workflows:
                 - main
           requires:
             - validate
-            - build-node-client
             - build_docker
             - helm_lint
           helm_timeout: 5m
