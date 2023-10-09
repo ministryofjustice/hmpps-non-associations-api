@@ -6,11 +6,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Set version from release tag
+        run: |
+          cd clients/node
+          release_tag='${{ github.event.release.tag_name }}'
+          echo "Release tag $release_tag"
+          echo $release_tag | grep -E '^node-client-[0-9]+\.[0-9]+\.[0-9]+$' || {
+            echo 'Release tag must be in the form node-client-\d+\.\d+\.\d+'
+            false
+          }
+          version=${release_tag:12}
+          echo "Will publish version $version"
+          sed -i 's/"version": "0.0.0"/"version": "'$version'"/' package.json
+          echo "version=$version" >> "$GITHUB_ENV"
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -25,12 +38,20 @@ jobs:
         run: |
           cd clients/node
           npm test
-      - name: Build package
+      - name: Build library
         run: |
           cd clients/node
           npm run clean
           npm run build
-      - name: Publish package
+          npm pack
+          mv ministryofjustice-hmpps-non-associations-api-$version.tgz node-client.tgz
+      - name: Upload package to GitHub Release
+        run: |
+          cd clients/node
+          gh release upload ${{ github.event.release.tag_name }} node-client.tgz
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Publish package to GitHub Packages
         run: |
           cd clients/node
           npm publish
