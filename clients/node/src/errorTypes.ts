@@ -1,6 +1,8 @@
 /**
  * Structure representing an error response from the api, wrapped in SanitisedError.
+ *
  * Defined in uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse class
+ * https://github.com/ministryofjustice/hmpps-non-associations-api/blob/f6002aa1da50b8c4ccd3613e970327d5c67c44ae/src/main/kotlin/uk/gov/justice/digital/hmpps/hmppsnonassociationsapi/config/HmppsNonAssociationsApiExceptionHandler.kt#L240-L261
  */
 export interface ErrorResponse {
   status: number
@@ -30,7 +32,9 @@ export function isErrorResponse(obj: unknown): obj is ErrorResponse {
 
 /**
  * Unique codes to discriminate errors returned from the api.
+ *
  * Defined in uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorCode enumeration
+ * https://github.com/ministryofjustice/hmpps-non-associations-api/blob/f6002aa1da50b8c4ccd3613e970327d5c67c44ae/src/main/kotlin/uk/gov/justice/digital/hmpps/hmppsnonassociationsapi/config/HmppsNonAssociationsApiExceptionHandler.kt#L227-L238
  */
 export enum ErrorCode {
   NonAssociationAlreadyClosed = 100,
