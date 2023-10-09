@@ -10,13 +10,50 @@ Using the library
 
 Typescript applications can install the library in several ways:
 
-### GitHub Packages – npm registry
-
-TODO
-
 ### GitHub Releases
 
-TODO
+Find the [latest release version](https://github.com/ministryofjustice/hmpps-non-associations-api/releases)
+and copy the link to the `node-client.tgz` asset.
+
+```shell
+npm install --save [link to asset]
+```
+
+Pros:
+- easy to install and requires no authentication
+
+Cons:
+- dependency upgrade tools are unlikely to notice new releases
+
+### GitHub Packages – npm registry
+
+Unfortunately, GitHub Packages requires authentication to pull from public npm registries,
+so the setup here is more complex.
+
+In the application repository, create `.npmrc` with:
+
+```text
+registry=https://registry.npmjs.org/
+@ministryofjustice:registry=https://npm.pkg.github.com
+```
+
+Create a classic GitHub personal access token with at least `read:packages` scope, adding it to `~/.npmrc`:
+
+```text
+//npm.pkg.github.com/:_authToken=[token]
+```
+
+Install library by adding the
+[latest release version](https://github.com/ministryofjustice/hmpps-non-associations-api/releases)
+to `package.json`:
+
+```text
+"@ministryofjustice/hmpps-non-associations-api": "[latest version number]"
+```
+
+Cons:
+- requires authentication when using locally and in CI other than GitHub Actions
+- it’s unclear whether dependency upgrade tools can process new releases
 
 ### Usage
 
@@ -76,6 +113,9 @@ Release a new version
 
 Do not change the version set in package.json, it should remain "0.0.0".
 
-- Check the latest release version and choose the next semantic versioning numbers to use
-- Tag the commit to release with `node-client-[version]` replacing `[version]` with the next version, e.g. "node-client-0.1.7"
+- Check the [latest release version](https://github.com/ministryofjustice/hmpps-non-associations-api/releases)
+  and choose the next semantic versioning numbers to use
+- Tag the commit (on the main branch) to release
+  with `node-client-[version]` replacing `[version]` with the next version,
+  e.g. "node-client-0.1.7"
 - Create a release from the tag on GitHub
