@@ -14,6 +14,7 @@ import type {
   CreateNonAssociationRequest,
   UpdateNonAssociationRequest,
   CloseNonAssociationRequest,
+  DeleteNonAssociationRequest,
 } from './responseTypes'
 import { parseDates } from './parseDates'
 import { sanitiseError } from './sanitiseError'
@@ -50,7 +51,7 @@ export class NonAssociationsApi {
   constructor(
     /**
      * Provide a system token with necessary roles, not a user token
-     * READ_NON_ASSOCIATIONS and optionally WRITE_NON_ASSOCIATIONS
+     * READ_NON_ASSOCIATIONS and optionally WRITE_NON_ASSOCIATIONS or DELETE_NON_ASSOCIATIONS
      */
     readonly systemToken: string,
 
@@ -133,7 +134,9 @@ export class NonAssociationsApi {
   }
 
   /**
-   * Retrieves a list of non-associations for given prisoner number
+   * Retrieves a list of non-associations for given prisoner number.
+   *
+   * Requires READ_NON_ASSOCIATIONS role.
    *
    * @throws SanitisedError<ErrorResponse>
    */
@@ -218,6 +221,8 @@ export class NonAssociationsApi {
    * Get non-associations between two or more prisoners by prisoner number.
    * Both people in the non-associations must be in the provided list.
    *
+   * Requires READ_NON_ASSOCIATIONS role.
+   *
    * @throws SanitisedError<ErrorResponse>
    */
   listNonAssociationsBetween(
@@ -280,6 +285,8 @@ export class NonAssociationsApi {
    * Get non-associations involving any of the given prisoners.
    * Either person in the non-association must be in the provided list.
    *
+   * Requires READ_NON_ASSOCIATIONS role.
+   *
    * @throws SanitisedError<ErrorResponse>
    */
   listNonAssociationsInvolving(
@@ -339,7 +346,9 @@ export class NonAssociationsApi {
   }
 
   /**
-   * Retrieve a non-association by ID
+   * Retrieve a non-association by ID.
+   *
+   * Requires READ_NON_ASSOCIATIONS role.
    *
    * @throws SanitisedError<ErrorResponse>
    */
@@ -353,7 +362,9 @@ export class NonAssociationsApi {
   }
 
   /**
-   * Create a new non-association
+   * Create a new non-association.
+   *
+   * Requires WRITE_NON_ASSOCIATIONS role with write scope.
    *
    * @throws SanitisedError<ErrorResponse>
    */
@@ -367,7 +378,9 @@ export class NonAssociationsApi {
   }
 
   /**
-   * Update an existing new non-association by ID
+   * Update an existing new non-association by ID.
+   *
+   * Requires WRITE_NON_ASSOCIATIONS role with write scope.
    *
    * @throws SanitisedError<ErrorResponse>
    */
@@ -381,7 +394,9 @@ export class NonAssociationsApi {
   }
 
   /**
-   * Close an open non-association by ID
+   * Close an open non-association by ID.
+   *
+   * Requires WRITE_NON_ASSOCIATIONS role with write scope.
    *
    * @throws SanitisedError<ErrorResponse>
    */
@@ -392,5 +407,20 @@ export class NonAssociationsApi {
       const nonAssociation: ClosedNonAssociation = response.body
       return parseDates(nonAssociation)
     })
+  }
+
+  /**
+   * Delete a non-association by ID.
+   * This is a special endpoint which should NOT be exposed to regular users,
+   * they should instead close non-associations.
+   *
+   * Requires DELETE_NON_ASSOCIATIONS role with write scope.
+   *
+   * @throws SanitisedError<ErrorResponse>
+   */
+  deleteNonAssociation(id: number, payload: DeleteNonAssociationRequest): Promise<null> {
+    const request = superagent.delete(this.buildUrl(`/non-associations/${encodeURIComponent(id)}/delete`)).send(payload)
+
+    return this.sendRequest(request).then(() => null)
   }
 }

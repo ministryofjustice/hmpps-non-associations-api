@@ -101,12 +101,13 @@ async (req, res) => {
 
 **NB: It is left to the application to determine which actions a user is allowed to perfom!**
 
-General notes:
+General notes regarding permissions and roles:
 
 - All prison users can _view_ all non-associations
 - Users with the `NON_ASSOCIATIONS` role can _add_, _update_ and _close_ non-associations for prisoners in any of their caseloads
 - Users with the `GLOBAL_SEARCH` role can _add_, _update_ and _close_ non-associations for prisoners in transfer
 - Users with the `INACTIVE_BOOKINGS` role can _add_, _update_ and _close_ non-associations for prisoners outside any establishment / released
+- Users should _close_ rather than _delete_ non-associations
 
 Release a new version
 ---------------------

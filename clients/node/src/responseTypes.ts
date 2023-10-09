@@ -148,3 +148,14 @@ export interface CloseNonAssociationRequest {
   closedAt?: Date
   closedBy?: string
 }
+
+/**
+ * Request payload for deleting an existing non-association
+ *
+ * Defined in uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteNonAssociationRequest class
+ * https://github.com/ministryofjustice/hmpps-non-associations-api/blob/f6002aa1da50b8c4ccd3613e970327d5c67c44ae/src/main/kotlin/uk/gov/justice/digital/hmpps/hmppsnonassociationsapi/dto/NonAssociation.kt#L140-L151
+ */
+export interface DeleteNonAssociationRequest {
+  deletionReason: string
+  staffUserNameRequestingDeletion: string
+}

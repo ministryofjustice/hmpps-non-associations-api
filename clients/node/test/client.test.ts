@@ -210,6 +210,21 @@ describe('REST Client', () => {
       expect(logger.error).not.toHaveBeenCalled()
       expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'PUT' }))
     })
+
+    it('when deleting a non-association', async () => {
+      mockResponse().delete('/non-associations/1/delete').reply(204, '')
+
+      const result: null = await client.deleteNonAssociation(1, {
+        deletionReason: 'Entered in error',
+        staffUserNameRequestingDeletion: 'abc123',
+      })
+      expect(result).toBeNull()
+      expect(nock.isDone()).toEqual(true)
+
+      expect(logger.info).toHaveBeenCalledTimes(1)
+      expect(logger.error).not.toHaveBeenCalled()
+      expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'DELETE' }))
+    })
   })
 
   describe('should retry on failure', () => {
@@ -422,6 +437,25 @@ describe('REST Client', () => {
         expect.objectContaining({
           status: 503,
           message: 'Service Unavailable',
+        }),
+      )
+
+      expect(logger.info).toHaveBeenCalledTimes(1)
+      expect(logger.error).toHaveBeenCalledTimes(1)
+    })
+
+    it('when deleting a non-association', async () => {
+      mockResponse().delete('/non-associations/1/delete').reply(403)
+
+      await expect(
+        client.deleteNonAssociation(1, {
+          deletionReason: 'Entered in error',
+          staffUserNameRequestingDeletion: 'abc123',
+        }),
+      ).rejects.toEqual(
+        expect.objectContaining({
+          status: 403,
+          message: 'Forbidden',
         }),
       )
 
