@@ -251,7 +251,7 @@ export class NonAssociationsApi {
 
   listNonAssociationsBetween(
     prisonerNumbers: string[],
-    options?: {
+    options: {
       includeOpen?: boolean
       includeClosed?: boolean
     },
@@ -315,7 +315,7 @@ export class NonAssociationsApi {
 
   listNonAssociationsInvolving(
     prisonerNumbers: string[],
-    options?: {
+    options: {
       includeOpen?: boolean
       includeClosed?: boolean
     },
