@@ -3,6 +3,7 @@ import superagent, { type Plugin, type SuperAgentRequest } from 'superagent'
 
 import type { SortBy, SortDirection } from './constants'
 import type { ErrorResponse } from './errorTypes'
+import type { Page, PageRequest } from './paginationTypes'
 import type {
   Constants,
   NonAssociationsList,
@@ -39,6 +40,10 @@ export interface Logger {
   warn(msg: string): void
   error(msg: string): void
 }
+
+type SortedPageRequest = PageRequest<
+  'id' | 'firstPrisonerNumber' | 'secondPrisonerNumber' | 'whenCreated' | 'whenUpdated'
+>
 
 /**
  * REST client to access HMPPS Non-associations API
@@ -342,6 +347,74 @@ export class NonAssociationsApi {
     return this.sendRequest(request).then(response => {
       const nonAssociations: NonAssociation[] = response.body
       return nonAssociations.map(nonAssociation => parseDates(nonAssociation))
+    })
+  }
+
+  /**
+   * Retrieves ALL non-associations in pages.
+   * This is rarely a useful endpoint due to the filters being very limited.
+   *
+   * Requires READ_NON_ASSOCIATIONS role.
+   *
+   * @throws SanitisedError<ErrorResponse>
+   */
+  pagedNonAssociations(
+    options?: {
+      includeOpen?: true
+      includeClosed?: false
+    } & SortedPageRequest,
+  ): Promise<Page<OpenNonAssociation>>
+
+  pagedNonAssociations(
+    options: {
+      includeOpen: false
+      includeClosed: true
+    } & SortedPageRequest,
+  ): Promise<Page<ClosedNonAssociation>>
+
+  pagedNonAssociations(
+    options: {
+      includeOpen: false
+      includeClosed: false
+    } & SortedPageRequest,
+  ): Promise<Page<never>>
+
+  pagedNonAssociations(
+    options: {
+      includeOpen?: boolean
+      includeClosed?: boolean
+    } & SortedPageRequest,
+  ): Promise<Page<NonAssociation>>
+
+  pagedNonAssociations({
+    includeOpen = true,
+    includeClosed = false,
+    page,
+    size,
+    sort,
+  }: {
+    includeOpen?: boolean
+    includeClosed?: boolean
+  } & SortedPageRequest = {}): Promise<Page<NonAssociation>> {
+    const query: Record<string, number | string | string[]> = {
+      includeOpen: includeOpen.toString(),
+      includeClosed: includeClosed.toString(),
+    }
+    if (typeof page !== 'undefined') {
+      query.page = page
+    }
+    if (typeof size !== 'undefined') {
+      query.size = size
+    }
+    if (typeof sort !== 'undefined') {
+      query.sort = sort
+    }
+    const request = superagent.get(this.buildUrl('/non-associations')).query(query)
+
+    return this.sendRequest(request, true).then(response => {
+      const nonAssociations: Page<NonAssociation> = response.body
+      nonAssociations.content.forEach(nonAssociation => parseDates(nonAssociation))
+      return nonAssociations
     })
   }
 
