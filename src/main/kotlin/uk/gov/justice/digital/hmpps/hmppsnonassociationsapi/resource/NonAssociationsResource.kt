@@ -250,7 +250,7 @@ class NonAssociationsResource(
     includeClosed: Boolean = false,
 
     @ParameterObject
-    @PageableDefault(size = 20, sort = ["id"], direction = Sort.Direction.ASC)
+    @PageableDefault(page = 0, size = 20, sort = ["id"], direction = Sort.Direction.ASC)
     pageable: Pageable,
   ): Page<NonAssociation> {
     if (pageable.pageSize > 200) {
