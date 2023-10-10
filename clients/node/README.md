@@ -10,7 +10,9 @@ Using the library
 
 Typescript applications can install the library in several ways:
 
-### GitHub Releases
+### Install from GitHub Releases
+
+This is the recommended method currently.
 
 Find the [latest release version](https://github.com/ministryofjustice/hmpps-non-associations-api/releases)
 and copy the link to the `node-client.tgz` asset.
@@ -25,7 +27,7 @@ Pros:
 Cons:
 - dependency upgrade tools are unlikely to notice new releases
 
-### GitHub Packages – npm registry
+### Install from GitHub Packages – npm registry
 
 Unfortunately, GitHub Packages requires authentication to pull from public npm registries,
 so the setup here is more complex.
