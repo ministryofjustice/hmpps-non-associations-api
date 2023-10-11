@@ -554,7 +554,8 @@ class NonAssociationsResource(
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @Operation(
     summary = "Delete a non-association",
-    description = "Requires DELETE_NON_ASSOCIATIONS role with write scope.",
+    description = "Requires DELETE_NON_ASSOCIATIONS role with write scope.\n" +
+      "**Please note**: This is a special endpoint which should NOT be exposed to regular users, they should instead close non-associations.",
     responses = [
       ApiResponse(
         responseCode = "204",

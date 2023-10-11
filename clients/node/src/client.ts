@@ -484,7 +484,8 @@ export class NonAssociationsApi {
 
   /**
    * Delete a non-association by ID.
-   * This is a special endpoint which should NOT be exposed to regular users,
+   *
+   * **Please note**: This is a special endpoint which should NOT be exposed to regular users,
    * they should instead close non-associations.
    *
    * Requires DELETE_NON_ASSOCIATIONS role with write scope.
@@ -492,7 +493,7 @@ export class NonAssociationsApi {
    * @throws SanitisedError<ErrorResponse>
    */
   deleteNonAssociation(id: number, payload: DeleteNonAssociationRequest): Promise<null> {
-    const request = superagent.delete(this.buildUrl(`/non-associations/${encodeURIComponent(id)}/delete`)).send(payload)
+    const request = superagent.post(this.buildUrl(`/non-associations/${encodeURIComponent(id)}/delete`)).send(payload)
 
     return this.sendRequest(request).then(() => null)
   }

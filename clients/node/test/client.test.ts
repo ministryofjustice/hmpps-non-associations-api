@@ -237,7 +237,7 @@ describe('REST Client', () => {
     })
 
     it('when deleting a non-association', async () => {
-      mockResponse().delete('/non-associations/1/delete').reply(204, '')
+      mockResponse().post('/non-associations/1/delete').reply(204, '')
 
       const result: null = await client.deleteNonAssociation(1, {
         deletionReason: 'Entered in error',
@@ -248,7 +248,7 @@ describe('REST Client', () => {
 
       expect(logger.info).toHaveBeenCalledTimes(1)
       expect(logger.error).not.toHaveBeenCalled()
-      expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'DELETE' }))
+      expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'POST' }))
     })
   })
 
@@ -510,7 +510,7 @@ describe('REST Client', () => {
     })
 
     it('when deleting a non-association', async () => {
-      mockResponse().delete('/non-associations/1/delete').reply(403)
+      mockResponse().post('/non-associations/1/delete').reply(403)
 
       await expect(
         client.deleteNonAssociation(1, {
