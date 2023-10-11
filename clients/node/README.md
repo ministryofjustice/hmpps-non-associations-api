@@ -10,7 +10,9 @@ Using the library
 
 Typescript applications can install the library in several ways:
 
-### GitHub Releases
+### Install from GitHub Releases
+
+This is the recommended method currently.
 
 Find the [latest release version](https://github.com/ministryofjustice/hmpps-non-associations-api/releases)
 and copy the link to the `node-client.tgz` asset.
@@ -25,7 +27,7 @@ Pros:
 Cons:
 - dependency upgrade tools are unlikely to notice new releases
 
-### GitHub Packages – npm registry
+### Install from GitHub Packages – npm registry
 
 Unfortunately, GitHub Packages requires authentication to pull from public npm registries,
 so the setup here is more complex.
@@ -101,12 +103,13 @@ async (req, res) => {
 
 **NB: It is left to the application to determine which actions a user is allowed to perfom!**
 
-General notes:
+General notes regarding permissions and roles:
 
 - All prison users can _view_ all non-associations
 - Users with the `NON_ASSOCIATIONS` role can _add_, _update_ and _close_ non-associations for prisoners in any of their caseloads
 - Users with the `GLOBAL_SEARCH` role can _add_, _update_ and _close_ non-associations for prisoners in transfer
 - Users with the `INACTIVE_BOOKINGS` role can _add_, _update_ and _close_ non-associations for prisoners outside any establishment / released
+- Users should _close_ rather than _delete_ non-associations
 
 Release a new version
 ---------------------

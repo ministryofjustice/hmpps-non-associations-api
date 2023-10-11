@@ -6,7 +6,7 @@ updates:
       - dependency-type: development
     ignore:
       - dependency-type: production
-      - dependency-name: @types/node
+      - dependency-name: "@types/node"
         versions:
           - ">=19"
     schedule:

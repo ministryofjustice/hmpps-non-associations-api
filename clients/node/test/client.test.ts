@@ -12,6 +12,7 @@ import {
   type NonAssociationsList,
   type OpenNonAssociationsListItem,
   type ClosedNonAssociationsListItem,
+  type Page,
 } from '../src'
 import { nonAssociationListOpen, openNonAssociation, closedNonAssociation } from './testData'
 
@@ -147,6 +148,30 @@ describe('REST Client', () => {
       expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'POST' }))
     })
 
+    it('when listing all non-associations in pages', async () => {
+      mockResponse()
+        .get('/non-associations?includeOpen=true&includeClosed=true')
+        .reply(200, {
+          content: [openNonAssociation, closedNonAssociation],
+          number: 0,
+          totalPages: 1,
+          totalElements: 2,
+        })
+
+      const nonAssociationsList = await client.pagedNonAssociations({ includeClosed: true })
+      expect(nonAssociationsList).toStrictEqual({
+        content: [openNonAssociation, closedNonAssociation],
+        number: 0,
+        totalPages: 1,
+        totalElements: 2,
+      })
+      expect(nock.isDone()).toEqual(true)
+
+      expect(logger.info).toHaveBeenCalledTimes(1)
+      expect(logger.error).not.toHaveBeenCalled()
+      expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'GET' }))
+    })
+
     it('when creating a non-association', async () => {
       mockResponse()
         .post('/non-associations', /See IR 12133100/, {
@@ -210,6 +235,21 @@ describe('REST Client', () => {
       expect(logger.error).not.toHaveBeenCalled()
       expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'PUT' }))
     })
+
+    it('when deleting a non-association', async () => {
+      mockResponse().post('/non-associations/1/delete').reply(204, '')
+
+      const result: null = await client.deleteNonAssociation(1, {
+        deletionReason: 'Entered in error',
+        staffUserNameRequestingDeletion: 'abc123',
+      })
+      expect(result).toBeNull()
+      expect(nock.isDone()).toEqual(true)
+
+      expect(logger.info).toHaveBeenCalledTimes(1)
+      expect(logger.error).not.toHaveBeenCalled()
+      expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'POST' }))
+    })
   })
 
   describe('should retry on failure', () => {
@@ -258,6 +298,26 @@ describe('REST Client', () => {
 
       const nonAssociations = await client.listNonAssociations(nonAssociationListOpen.prisonerNumber)
       expect(nonAssociations).toStrictEqual(nonAssociationListOpen)
+      expect(nock.isDone()).toEqual(true)
+
+      expect(logger.info).toHaveBeenCalledTimes(1)
+      expect(logger.error).not.toHaveBeenCalled()
+    })
+
+    it('when listing all non-associations in pages', async () => {
+      mockResponse()
+        .get('/non-associations?includeOpen=true&includeClosed=false')
+        .reply(503)
+        .get('/non-associations?includeOpen=true&includeClosed=false')
+        .reply(200, {
+          content: [openNonAssociation],
+          number: 0,
+          totalPages: 1,
+          totalElements: 1,
+        })
+
+      const nonAssociations = await client.pagedNonAssociations()
+      expect(nonAssociations.content[0]).toStrictEqual(openNonAssociation)
       expect(nock.isDone()).toEqual(true)
 
       expect(logger.info).toHaveBeenCalledTimes(1)
@@ -319,6 +379,26 @@ describe('REST Client', () => {
         .reply(503)
 
       await expect(client.listNonAssociations(nonAssociationListOpen.prisonerNumber)).rejects.toEqual(
+        expect.objectContaining({
+          status: 503,
+          message: 'Service Unavailable',
+        }),
+      )
+
+      expect(logger.info).toHaveBeenCalledTimes(1)
+      expect(logger.error).toHaveBeenCalledTimes(1)
+    })
+
+    it('when listing all non-associations in pages', async () => {
+      mockResponse()
+        .get('/non-associations?includeOpen=true&includeClosed=false')
+        .reply(503)
+        .get('/non-associations?includeOpen=true&includeClosed=false')
+        .reply(503)
+        .get('/non-associations?includeOpen=true&includeClosed=false')
+        .reply(503)
+
+      await expect(client.pagedNonAssociations()).rejects.toEqual(
         expect.objectContaining({
           status: 503,
           message: 'Service Unavailable',
@@ -428,23 +508,31 @@ describe('REST Client', () => {
       expect(logger.info).toHaveBeenCalledTimes(1)
       expect(logger.error).toHaveBeenCalledTimes(1)
     })
+
+    it('when deleting a non-association', async () => {
+      mockResponse().post('/non-associations/1/delete').reply(403)
+
+      await expect(
+        client.deleteNonAssociation(1, {
+          deletionReason: 'Entered in error',
+          staffUserNameRequestingDeletion: 'abc123',
+        }),
+      ).rejects.toEqual(
+        expect.objectContaining({
+          status: 403,
+          message: 'Forbidden',
+        }),
+      )
+
+      expect(logger.info).toHaveBeenCalledTimes(1)
+      expect(logger.error).toHaveBeenCalledTimes(1)
+    })
   })
 
   describe('should specify varying return types', () => {
     it('when listing non-associations for a prisoner', async () => {
       mockResponse()
-        .get(/prisoner\/A1234BC\/non-associations/)
-        .reply(200, nonAssociationListOpen)
-        .get(/prisoner\/A1234BC\/non-associations/)
-        .reply(200, nonAssociationListOpen)
-        .get(/prisoner\/A1234BC\/non-associations/)
-        .reply(200, nonAssociationListOpen)
-        .get(/prisoner\/A1234BC\/non-associations/)
-        .reply(200, nonAssociationListOpen)
-        .get(/prisoner\/A1234BC\/non-associations/)
-        .reply(200, nonAssociationListOpen)
-        .get(/prisoner\/A1234BC\/non-associations/)
-        .reply(200, nonAssociationListOpen)
+        .persist()
         .get(/prisoner\/A1234BC\/non-associations/)
         .reply(200, nonAssociationListOpen)
 
@@ -469,21 +557,11 @@ describe('REST Client', () => {
     })
 
     it('when listing non-associations between 2 prisoners', async () => {
+      const emptyResponse: NonAssociation[] = []
       mockResponse()
+        .persist()
         .post(/non-associations\/between/)
-        .reply(200, [])
-        .post(/non-associations\/between/)
-        .reply(200, [])
-        .post(/non-associations\/between/)
-        .reply(200, [])
-        .post(/non-associations\/between/)
-        .reply(200, [])
-        .post(/non-associations\/between/)
-        .reply(200, [])
-        .post(/non-associations\/between/)
-        .reply(200, [])
-        .post(/non-associations\/between/)
-        .reply(200, [])
+        .reply(200, emptyResponse)
 
       const promises: [
         OpenNonAssociation[],
@@ -506,21 +584,11 @@ describe('REST Client', () => {
     })
 
     it('when listing non-associations involving 2 prisoners', async () => {
+      const emptyResponse: NonAssociation[] = []
       mockResponse()
+        .persist()
         .post(/non-associations\/involving/)
-        .reply(200, [])
-        .post(/non-associations\/involving/)
-        .reply(200, [])
-        .post(/non-associations\/involving/)
-        .reply(200, [])
-        .post(/non-associations\/involving/)
-        .reply(200, [])
-        .post(/non-associations\/involving/)
-        .reply(200, [])
-        .post(/non-associations\/involving/)
-        .reply(200, [])
-        .post(/non-associations\/involving/)
-        .reply(200, [])
+        .reply(200, emptyResponse)
 
       const promises: [
         OpenNonAssociation[],
@@ -540,6 +608,69 @@ describe('REST Client', () => {
         client.listNonAssociationsInvolving([], { includeOpen: false, includeClosed: false }),
       ])
       expect(promises).toHaveLength(7)
+    })
+
+    it('when listing all non-associations in pages', async () => {
+      const emptyResponse: Page<NonAssociation> = {
+        content: [],
+        number: 0,
+        totalPages: 0,
+        totalElements: 0,
+      }
+      mockResponse()
+        .persist()
+        .get(/non-associations/)
+        .reply(200, emptyResponse)
+
+      const promises: [
+        Page<OpenNonAssociation>,
+        Page<OpenNonAssociation>,
+        Page<OpenNonAssociation>,
+        Page<OpenNonAssociation>,
+        Page<ClosedNonAssociation>,
+        Page<NonAssociation>,
+        Page<never>,
+      ] = await Promise.all([
+        client.pagedNonAssociations(),
+        client.pagedNonAssociations({ includeOpen: true }),
+        client.pagedNonAssociations({ includeClosed: false }),
+        client.pagedNonAssociations({ includeOpen: true, includeClosed: false }),
+        client.pagedNonAssociations({ includeOpen: false, includeClosed: true }),
+        client.pagedNonAssociations({ includeOpen: true, includeClosed: true }),
+        client.pagedNonAssociations({ includeOpen: false, includeClosed: false }),
+      ])
+      expect(promises).toHaveLength(7)
+    })
+  })
+
+  describe('should pass query parameters to api', () => {
+    it('when listing all non-associations in pages', async () => {
+      const emptyResponse: Page<NonAssociation> = {
+        content: [],
+        number: 0,
+        totalPages: 0,
+        totalElements: 0,
+      }
+      mockResponse()
+        .get('/non-associations?includeOpen=true&includeClosed=false&page=2')
+        .reply(200, emptyResponse)
+        .get('/non-associations?includeOpen=true&includeClosed=false&size=100')
+        .reply(200, emptyResponse)
+        .get('/non-associations?includeOpen=true&includeClosed=false&page=1&size=200')
+        .reply(200, emptyResponse)
+        .get('/non-associations?includeOpen=true&includeClosed=false&page=345&sort=id')
+        .reply(200, emptyResponse)
+        .get('/non-associations?includeOpen=true&includeClosed=false&size=1&sort=whenCreated,DESC')
+        .reply(200, emptyResponse)
+
+      await Promise.all([
+        client.pagedNonAssociations({ page: 2 }),
+        client.pagedNonAssociations({ size: 100 }),
+        client.pagedNonAssociations({ page: 1, size: 200 }),
+        client.pagedNonAssociations({ sort: 'id', page: 345 }),
+        client.pagedNonAssociations({ sort: 'whenCreated,DESC', size: 1 }),
+      ])
+      expect(nock.isDone()).toEqual(true)
     })
   })
 })
