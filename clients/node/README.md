@@ -70,7 +70,7 @@ export class Client extends NonAssociationsApi {
        * READ_NON_ASSOCIATIONS and optionally WRITE_NON_ASSOCIATIONS
        */
       systemToken,
-      
+
       /**
        * API configuration standard in DPS front-end apps
        */
@@ -107,8 +107,8 @@ General notes regarding permissions and roles:
 
 - All prison users can _view_ all non-associations
 - Users with the `NON_ASSOCIATIONS` role can _add_, _update_ and _close_ non-associations for prisoners in any of their caseloads
-- Users with the `GLOBAL_SEARCH` role can _add_, _update_ and _close_ non-associations for prisoners in transfer
-- Users with the `INACTIVE_BOOKINGS` role can _add_, _update_ and _close_ non-associations for prisoners outside any establishment / released
+- Users also having the `GLOBAL_SEARCH` role can _add_, _update_ and _close_ non-associations for prisoners in transfer
+- Users also having the `INACTIVE_BOOKINGS` role can _add_, _update_ and _close_ non-associations for prisoners outside any establishment / released
 - Users should _close_ rather than _delete_ non-associations
 
 Release a new version
