@@ -10,7 +10,7 @@ jobs:
       packages: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
       - name: Set version from release tag
         run: |
           cd clients/node
