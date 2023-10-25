@@ -26,8 +26,8 @@ interface BaseNonAssociationsListItem extends ObjectWithDates {
     roleDescription: Role[keyof Role]
     firstName: string
     lastName: string
-    prisonId: string
-    prisonName: string
+    prisonId?: string
+    prisonName?: string
     cellLocation?: string
   }
 }
@@ -58,8 +58,8 @@ export interface NonAssociationsList<
   prisonerNumber: string
   firstName: string
   lastName: string
-  prisonId: string
-  prisonName: string
+  prisonId?: string
+  prisonName?: string
   cellLocation?: string
   openCount: number
   closedCount: number
