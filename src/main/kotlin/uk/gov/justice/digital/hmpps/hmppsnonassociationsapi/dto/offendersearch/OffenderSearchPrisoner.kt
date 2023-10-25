@@ -5,7 +5,7 @@ data class OffenderSearchPrisoner(
   val firstName: String,
   val lastName: String,
 
-  val prisonId: String,
-  val prisonName: String,
+  val prisonId: String?,
+  val prisonName: String?,
   val cellLocation: String?,
 )

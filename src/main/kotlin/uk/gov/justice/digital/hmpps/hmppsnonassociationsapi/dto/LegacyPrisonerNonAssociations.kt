@@ -14,10 +14,10 @@ data class LegacyPrisonerNonAssociations(
   val firstName: String,
   @Schema(description = "Last name", required = true, example = "Hall")
   val lastName: String,
-  @Schema(description = "Prison ID where prisoner resides or OUT for released", required = true, example = "MDI")
-  val agencyId: String,
-  @Schema(description = "Description of the agency (e.g. prison) the offender is assigned to", required = true, example = "Moorland (HMP & YOI)")
-  val agencyDescription: String,
+  @Schema(description = "Prison ID where prisoner resides or OUT for released", required = false, example = "MDI")
+  val agencyId: String?,
+  @Schema(description = "Description of the agency (e.g. prison) the offender is assigned to", required = false, example = "Moorland (HMP & YOI)")
+  val agencyDescription: String?,
   @Schema(description = "Description of living unit (e.g. cell) the offender is assigned to.", required = false, example = "MDI-1-1-3")
   val assignedLivingUnitDescription: String?,
   @Schema(description = "Non-associations with other prisoners", required = true)
@@ -64,10 +64,10 @@ data class LegacyOtherPrisonerDetails(
   val reasonCode: LegacyReason,
   @Schema(description = "Reason for the non-association", required = true, example = "Perpetrator")
   val reasonDescription: String,
-  @Schema(description = "Prison ID where prisoner resides or OUT for released", required = true, example = "MDI")
-  val agencyId: String,
-  @Schema(description = "Description of the agency (e.g. prison) the offender is assigned to", required = true, example = "Moorland (HMP & YOI)")
-  val agencyDescription: String,
+  @Schema(description = "Prison ID where prisoner resides or OUT for released", required = false, example = "MDI")
+  val agencyId: String?,
+  @Schema(description = "Description of the agency (e.g. prison) the offender is assigned to", required = false, example = "Moorland (HMP & YOI)")
+  val agencyDescription: String?,
   @Schema(description = "Description of living unit (e.g. cell) the offender is assigned to.", required = false, example = "MDI-2-3-4")
   val assignedLivingUnitDescription: String?,
 )
