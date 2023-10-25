@@ -110,6 +110,7 @@ General notes regarding permissions and roles:
 - Users also having the `GLOBAL_SEARCH` role can also _add_, _update_ and _close_ non-associations for prisoners in transfer and where one prisoner is not in a prison that’s not in their caseloads
 - Users also having the `INACTIVE_BOOKINGS` role can also _add_, _update_ and _close_ non-associations for prisoners outside any establishment / released
 - Users must _close_ rather than _delete_ non-associations
+- No users should be able to _add_, _update_ or _close_ non-associations for prisoners without a booking / with a null location
 
 Release a new version
 ---------------------
