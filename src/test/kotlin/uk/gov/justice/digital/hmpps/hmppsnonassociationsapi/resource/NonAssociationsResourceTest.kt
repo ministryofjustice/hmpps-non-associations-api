@@ -2512,15 +2512,15 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `when non-associations are requested between more than 2 prisoners`() {
-      // language=mermaid
-      """
+      /*
+      %% language=mermaid
       classDiagram
         A0000AA -- A1111AA
         A0000AA -- A2222AA
         A2222AA -- A3333AA
         A1111AA -- A4444AA
         A4444AA -- A2222AA : closed
-      """
+      */
       createNonAssociation("A0000AA", "A1111AA") // never returned
       createNonAssociation("A0000AA", "A2222AA") // returned
       createNonAssociation("A2222AA", "A3333AA") // never returned
@@ -2865,15 +2865,15 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `when non-associations are requested involving more than 2 prisoners`() {
-      // language=mermaid
-      """
+      /*
+      %% language=mermaid
       classDiagram
         A0000AA -- A1111AA
         A0000AA -- A2222AA
         A2222AA -- A3333AA
         A1111AA -- A4444AA
         A4444AA -- A2222AA : closed
-      """
+      */
       createNonAssociation("A0000AA", "A1111AA") // never returned
       createNonAssociation("A0000AA", "A2222AA") // returned
       createNonAssociation("A2222AA", "A3333AA") // returned
