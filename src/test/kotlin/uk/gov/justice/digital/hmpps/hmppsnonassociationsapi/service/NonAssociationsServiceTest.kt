@@ -167,9 +167,9 @@ class NonAssociationsServiceTest {
           NonAssociationsSort.LAST_NAME -> { n -> n.otherPrisonerDetails.lastName }
           NonAssociationsSort.FIRST_NAME -> { n -> n.otherPrisonerDetails.firstName }
           NonAssociationsSort.PRISONER_NUMBER -> { n -> n.otherPrisonerDetails.prisonerNumber }
-          NonAssociationsSort.PRISON_ID -> { n -> n.otherPrisonerDetails.prisonId }
-          NonAssociationsSort.PRISON_NAME -> { n -> n.otherPrisonerDetails.prisonName }
-          NonAssociationsSort.CELL_LOCATION -> { n -> n.otherPrisonerDetails.cellLocation!! }
+          NonAssociationsSort.PRISON_ID -> { n -> n.otherPrisonerDetails.prisonId ?: "" }
+          NonAssociationsSort.PRISON_NAME -> { n -> n.otherPrisonerDetails.prisonName ?: "" }
+          NonAssociationsSort.CELL_LOCATION -> { n -> n.otherPrisonerDetails.cellLocation ?: "" }
         }
         Sort.Direction.entries.forEach { sortDirection ->
           val listOptions = NonAssociationListOptions(sortBy = sortBy, sortDirection = sortDirection)

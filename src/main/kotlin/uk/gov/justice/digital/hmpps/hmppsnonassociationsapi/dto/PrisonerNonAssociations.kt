@@ -16,10 +16,10 @@ data class PrisonerNonAssociations(
   val firstName: String,
   @Schema(description = "Last name", required = true, example = "Hall")
   val lastName: String,
-  @Schema(description = "ID of the prison the prisoner is assigned to", required = true, example = "MDI")
-  val prisonId: String,
-  @Schema(description = "Name of the prison the prisoner is assigned to", required = true, example = "Moorland (HMP & YOI)")
-  val prisonName: String,
+  @Schema(description = "ID of the prison the prisoner is assigned to", required = false, example = "MDI")
+  val prisonId: String?,
+  @Schema(description = "Name of the prison the prisoner is assigned to", required = false, example = "Moorland (HMP & YOI)")
+  val prisonName: String?,
   @Schema(description = "Cell the prisoner is assigned to", required = false, example = "A-1-002")
   val cellLocation: String?,
   @Schema(description = "Number of open non-associations (follows includeOtherPrisons filter)", required = true, example = "1", minimum = "0", type = "integer", format = "int32")
@@ -93,10 +93,10 @@ data class OtherPrisonerDetails(
   val firstName: String,
   @Schema(description = "Last name", required = true, example = "Bloggs")
   val lastName: String,
-  @Schema(description = "ID of the prison the prisoner is assigned to", required = true, example = "MDI")
-  val prisonId: String,
-  @Schema(description = "Name of the prison the prisoner is assigned to", required = true, example = "Moorland (HMP & YOI)")
-  val prisonName: String,
+  @Schema(description = "ID of the prison the prisoner is assigned to", required = false, example = "MDI")
+  val prisonId: String?,
+  @Schema(description = "Name of the prison the prisoner is assigned to", required = false, example = "Moorland (HMP & YOI)")
+  val prisonName: String?,
   @Schema(description = "Cell the prisoner is assigned to", required = false, example = "B-2-007")
   val cellLocation: String?,
 )

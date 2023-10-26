@@ -104,4 +104,31 @@ val offenderSearchPrisoners = mapOf(
     prisonName = "Forest Bank",
     cellLocation = "FBI-C-2",
   ),
+  // In transfer
+  "C1234CC" to OffenderSearchPrisoner(
+    prisonerNumber = "C1234CC",
+    firstName = "MAX",
+    lastName = "CLARKE",
+    prisonId = "TRN",
+    prisonName = "Transfer",
+    cellLocation = null,
+  ),
+  // Outside any establishment
+  "B1234BB" to OffenderSearchPrisoner(
+    prisonerNumber = "B1234BB",
+    firstName = "JOE",
+    lastName = "PETERS",
+    prisonId = "OUT",
+    prisonName = "Outside - released from Moorland (HMP)",
+    cellLocation = null,
+  ),
+  // Null location, allegedly indicates no booking
+  "D1234DD" to OffenderSearchPrisoner(
+    prisonerNumber = "D1234DD",
+    firstName = "NATHAN",
+    lastName = "LOST",
+    prisonId = null,
+    prisonName = null,
+    cellLocation = null,
+  ),
 )

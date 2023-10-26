@@ -187,7 +187,12 @@ class NonAssociationsResource(
       ),
       ApiResponse(
         responseCode = "404",
-        description = "Any of the prisoners could not be found.",
+        description = "Some of the prisoners were not be found.",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "409",
+        description = "Open non-association already exists or some prisoner’s location is null.",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],

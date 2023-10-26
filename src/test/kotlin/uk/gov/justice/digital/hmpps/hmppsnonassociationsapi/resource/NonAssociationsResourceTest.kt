@@ -324,6 +324,41 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
+    fun `cannot create NA if some prisoner has a null location`() {
+      val firstPrisoner = offenderSearchPrisoners["A1234BC"]!!
+      val secondPrisoner = offenderSearchPrisoners["D1234DD"]!!
+
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        listOf("A1234BC", "D1234DD"),
+        listOf(firstPrisoner, secondPrisoner),
+      )
+
+      val request = createNonAssociationRequest(
+        firstPrisonerNumber = firstPrisoner.prisonerNumber,
+        firstPrisonerRole = Role.VICTIM,
+        secondPrisonerNumber = secondPrisoner.prisonerNumber,
+        secondPrisonerRole = Role.PERPETRATOR,
+        reason = Reason.VIOLENCE,
+        restrictionType = RestrictionType.CELL,
+        comment = "They keep fighting",
+      )
+
+      webTestClient.post()
+        .uri(url)
+        .headers(
+          setAuthorisation(
+            user = expectedUsername,
+            roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
+            scopes = listOf("write", "read"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isEqualTo(409)
+    }
+
+    @Test
     fun `can create NA for already closed NA between same prisoners`() {
       val firstPrisoner = offenderSearchPrisoners["A1234BC"]!!
       val secondPrisoner = offenderSearchPrisoners["D5678EF"]!!
@@ -2512,15 +2547,15 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `when non-associations are requested between more than 2 prisoners`() {
-      // language=mermaid
-      """
+      /*
+      %% language=mermaid
       classDiagram
         A0000AA -- A1111AA
         A0000AA -- A2222AA
         A2222AA -- A3333AA
         A1111AA -- A4444AA
         A4444AA -- A2222AA : closed
-      """
+      */
       createNonAssociation("A0000AA", "A1111AA") // never returned
       createNonAssociation("A0000AA", "A2222AA") // returned
       createNonAssociation("A2222AA", "A3333AA") // never returned
@@ -2865,15 +2900,15 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `when non-associations are requested involving more than 2 prisoners`() {
-      // language=mermaid
-      """
+      /*
+      %% language=mermaid
       classDiagram
         A0000AA -- A1111AA
         A0000AA -- A2222AA
         A2222AA -- A3333AA
         A1111AA -- A4444AA
         A4444AA -- A2222AA : closed
-      """
+      */
       createNonAssociation("A0000AA", "A1111AA") // never returned
       createNonAssociation("A0000AA", "A2222AA") // returned
       createNonAssociation("A2222AA", "A3333AA") // returned

@@ -219,6 +219,21 @@ class HmppsNonAssociationsApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(NullPrisonerLocationsException::class)
+  fun handleNullPrisonerLocationsException(e: NullPrisonerLocationsException): ResponseEntity<ErrorResponse?>? {
+    log.debug("Non-association cannot be created when prisoner locations are null: {}", e.message)
+    return ResponseEntity
+      .status(CONFLICT)
+      .body(
+        ErrorResponse(
+          status = CONFLICT,
+          errorCode = ErrorCode.NullPrisonerLocations,
+          userMessage = "Non-association cannot be created when prisoner locations are null: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
@@ -235,6 +250,7 @@ enum class ErrorCode(val errorCode: Int) {
   UserInContextMissing(401),
   OpenNonAssociationAlreadyExist(101),
   ValidationFailure(102),
+  NullPrisonerLocations(103),
 }
 
 @Schema(description = "Error response")
@@ -267,3 +283,5 @@ class UserInContextMissingException : Exception("There is no user in context for
 class OpenNonAssociationAlreadyExistsException(prisoners: List<String>) : Exception("Prisoners $prisoners already have open non-associations")
 
 class NonAssociationNotFoundException(id: Long) : Exception("There is no non-association found for ID = $id")
+
+class NullPrisonerLocationsException(prisoners: List<String>) : Exception("Prisoners $prisoners have null locations")
