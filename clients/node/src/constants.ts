@@ -27,6 +27,7 @@ export type RestrictionType = typeof restrictionTypeOptions
 export const sortByOptions = [
   'WHEN_CREATED',
   'WHEN_UPDATED',
+  'WHEN_CLOSED',
   'LAST_NAME',
   'FIRST_NAME',
   'PRISONER_NUMBER',

@@ -164,6 +164,7 @@ class NonAssociationsServiceTest {
         val getter: (PrisonerNonAssociation) -> String = when (sortBy) {
           NonAssociationsSort.WHEN_CREATED -> { n -> n.whenCreated.format(dtFormat) }
           NonAssociationsSort.WHEN_UPDATED -> { n -> n.whenUpdated.format(dtFormat) }
+          NonAssociationsSort.WHEN_CLOSED -> { n -> n.closedAt?.format(dtFormat) ?: "" }
           NonAssociationsSort.LAST_NAME -> { n -> n.otherPrisonerDetails.lastName }
           NonAssociationsSort.FIRST_NAME -> { n -> n.otherPrisonerDetails.firstName }
           NonAssociationsSort.PRISONER_NUMBER -> { n -> n.otherPrisonerDetails.prisonerNumber }
