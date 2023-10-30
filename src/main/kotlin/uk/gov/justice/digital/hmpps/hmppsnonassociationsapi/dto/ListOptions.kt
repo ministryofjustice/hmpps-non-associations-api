@@ -46,6 +46,7 @@ data class NonAssociationListOptions(
       return when (sortBy) {
         NonAssociationsSort.WHEN_CREATED -> compareBy(PrisonerNonAssociation::whenCreated)
         NonAssociationsSort.WHEN_UPDATED -> compareBy(PrisonerNonAssociation::whenUpdated)
+        NonAssociationsSort.WHEN_CLOSED -> compareBy(PrisonerNonAssociation::closedAt)
         NonAssociationsSort.LAST_NAME -> compareBy { nonna -> nonna.otherPrisonerDetails.lastName }
         NonAssociationsSort.FIRST_NAME -> compareBy { nonna -> nonna.otherPrisonerDetails.firstName }
         NonAssociationsSort.PRISONER_NUMBER -> compareBy { nonna -> nonna.otherPrisonerDetails.prisonerNumber }
@@ -61,6 +62,7 @@ data class NonAssociationListOptions(
 enum class NonAssociationsSort(val defaultSortDirection: Sort.Direction) {
   WHEN_CREATED(Sort.Direction.DESC),
   WHEN_UPDATED(Sort.Direction.DESC),
+  WHEN_CLOSED(Sort.Direction.DESC),
   LAST_NAME(Sort.Direction.ASC),
   FIRST_NAME(Sort.Direction.ASC),
   PRISONER_NUMBER(Sort.Direction.ASC),
