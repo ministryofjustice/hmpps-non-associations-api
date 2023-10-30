@@ -23,7 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.UpsertSyncRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.EventPublishService
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.InformationSource
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.SyncAndMigrateService
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.SyncService
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociationDomainEventType
 
 @RestController
@@ -35,7 +35,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociat
 )
 @PreAuthorize("hasRole('ROLE_NON_ASSOCIATIONS_SYNC')")
 class SyncResource(
-  private val syncAndMigrateService: SyncAndMigrateService,
+  private val syncService: SyncService,
   private val eventPublishService: EventPublishService,
 ) {
 
@@ -65,7 +65,7 @@ class SyncResource(
     @Valid @RequestBody
     syncRequest: UpsertSyncRequest,
   ): NonAssociation {
-    val (_, nonAssociation) = syncAndMigrateService.sync(syncRequest).also { (event, nonAssociation) ->
+    val (_, nonAssociation) = syncService.sync(syncRequest).also { (event, nonAssociation) ->
       eventPublishService.publishEvent(event, nonAssociation, syncRequest, InformationSource.NOMIS)
     }
     return nonAssociation
@@ -97,7 +97,7 @@ class SyncResource(
     @Valid @RequestBody
     deleteRequest: DeleteSyncRequest,
   ) =
-    syncAndMigrateService.delete(deleteRequest)
+    syncService.delete(deleteRequest)
       .onEach { deletedNonAssociation ->
         eventPublishService.publishEvent(
           NonAssociationDomainEventType.NON_ASSOCIATION_DELETED,
@@ -144,7 +144,7 @@ class SyncResource(
     @PathVariable
     id: Long,
   ) =
-    syncAndMigrateService.delete(id).also { deletedNonAssociation ->
+    syncService.delete(id).also { deletedNonAssociation ->
       eventPublishService.publishEvent(
         NonAssociationDomainEventType.NON_ASSOCIATION_DELETED,
         deletedNonAssociation,

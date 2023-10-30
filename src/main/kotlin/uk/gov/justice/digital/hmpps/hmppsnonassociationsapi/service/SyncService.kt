@@ -27,7 +27,7 @@ const val NO_COMMENT_PROVIDED = "No comment provided"
 
 @Service
 @Transactional
-class SyncAndMigrateService(
+class SyncService(
   private val nonAssociationsRepository: NonAssociationsRepository,
   private val telemetryClient: TelemetryClient,
   private val clock: Clock,
@@ -173,27 +173,5 @@ class SyncAndMigrateService(
       null,
     )
     return naToDelete.toDto()
-  }
-
-  fun migrate(migrateRequest: UpsertSyncRequest): NonAssociation {
-    log.info("Migrating $migrateRequest")
-    if (migrateRequest.isOpen(clock)) {
-      val prisonersToKeepApart = listOf(
-        migrateRequest.firstPrisonerNumber,
-        migrateRequest.secondPrisonerNumber,
-      )
-      if (nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonersToKeepApart).isNotEmpty()) {
-        throw OpenNonAssociationAlreadyExistsException(prisonersToKeepApart)
-      }
-    }
-
-    return nonAssociationsRepository.save(migrateRequest.toNewEntity(clock).also { log.info("MIGRATE: Creating Non Association [$it]") }).toDto().also {
-      log.info("Migrated Non-association [$migrateRequest]")
-      telemetryClient.trackEvent(
-        "Migrate",
-        mapOf("id" to it.id.toString()),
-        null,
-      )
-    }
   }
 }
