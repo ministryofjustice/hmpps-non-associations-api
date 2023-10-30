@@ -1114,7 +1114,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           "restrictionType": "${nonAssociation.restrictionType}",
           "restrictionTypeDescription": "${nonAssociation.restrictionType.description}",
           "comment": "${nonAssociation.comment}",
-          "updatedBy": "$expectedUsername",
+          "updatedBy": "A_DPS_USER",
           "isClosed": true,
           "closedReason": "$closedReason",
           "closedBy": $expectedUsername,

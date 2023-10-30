@@ -388,10 +388,12 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `can sync non-association by ID`() {
+      val historicalCreateTime = now.minusDays(10)
       val existingNa = repository.save(
         genNonAssociation(
           firstPrisonerNumber = "A7777XT",
           secondPrisonerNumber = "B7777XT",
+          createTime = historicalCreateTime,
         ),
       )
       val request = UpsertSyncRequest(
@@ -426,8 +428,8 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "closedReason": null,
           "closedBy": null,
           "closedAt": null,
-          "whenCreated": "${request.effectiveFromDate.atStartOfDay().format(dtFormat)}",
-          "whenUpdated": "$now"
+          "whenCreated": "${historicalCreateTime.format(dtFormat)}",
+          "whenUpdated": "${now.format(dtFormat)}"
         }
         """
 
@@ -447,10 +449,12 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `can sync a future non-association`() {
+      val historicalCreateTime = now.minusDays(10)
       val existingNa = repository.save(
         genNonAssociation(
           firstPrisonerNumber = "A7777XT",
           secondPrisonerNumber = "B7777XT",
+          createTime = historicalCreateTime,
         ),
       )
       val request = UpsertSyncRequest(
@@ -485,8 +489,8 @@ class SyncAndMigrateResourceTest : SqsIntegrationTestBase() {
           "closedReason": "$NO_CLOSURE_REASON_PROVIDED",
           "closedBy": "A_NOMIS_USER",
           "closedAt": "${today.format(dtFormat)}",
-          "whenCreated": "${today.format(dtFormat)}",
-          "whenUpdated": "${today.format(dtFormat)}"
+          "whenCreated": "${historicalCreateTime.format(dtFormat)}",
+          "whenUpdated": "${historicalCreateTime.format(dtFormat)}"
         }
         """
 

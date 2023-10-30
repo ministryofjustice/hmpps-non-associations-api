@@ -55,8 +55,6 @@ class NonAssociation(
     this.closedBy = closedBy
     this.closedReason = closedReason
     this.closedAt = closedAt
-    this.updatedBy = closedBy
-    this.whenUpdated = closedAt
   }
 
   val isOpen: Boolean
