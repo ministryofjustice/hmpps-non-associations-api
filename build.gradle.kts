@@ -53,7 +53,7 @@ dependencies {
 }
 
 java {
-  toolchain.languageVersion = JavaLanguageVersion.of(20)
+  toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
 tasks {
@@ -71,7 +71,7 @@ tasks {
 
   withType<KotlinCompile> {
     kotlinOptions {
-      jvmTarget = JavaVersion.VERSION_20.toString()
+      jvmTarget = JavaVersion.VERSION_21.toString()
     }
   }
 }
