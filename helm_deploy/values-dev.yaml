@@ -4,6 +4,9 @@
 generic-service:
   replicaCount: 2
 
+  scheduledDowntime:
+    enabled: true
+
   ingress:
     host: non-associations-api-dev.hmpps.service.justice.gov.uk
 
