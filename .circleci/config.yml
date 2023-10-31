@@ -10,15 +10,17 @@ parameters:
   releases-slack-channel:
     type: string
     default: dps-releases
+
   java-version:
     type: string
-    default: "20.0"
+    default: "21.0"
   postgres-version:
     type: string
     default: "15"
   localstack-version:
     type: string
     default: "2.3"
+
 jobs:
   validate:
     executor:
@@ -108,7 +110,7 @@ workflows:
       - test-node-client:
           matrix:
             parameters:
-              node-version: ["18.18", "20.8"]
+              node-version: ["18.18", "20.9"]
       - hmpps/helm_lint:
           name: helm_lint
       - hmpps/build_multiplatform_docker:

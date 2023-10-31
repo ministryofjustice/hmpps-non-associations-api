@@ -5,8 +5,8 @@ import uk.gov.justice.digital.hmpps.gradle.RevealSecretsTask
 
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.7.0"
-  kotlin("plugin.spring") version "1.9.10"
-  kotlin("plugin.jpa") version "1.9.10"
+  kotlin("plugin.spring") version "1.9.20"
+  kotlin("plugin.jpa") version "1.9.20"
   idea
 }
 
@@ -53,7 +53,7 @@ dependencies {
 }
 
 java {
-  toolchain.languageVersion = JavaLanguageVersion.of(20)
+  toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
 tasks {
@@ -71,7 +71,7 @@ tasks {
 
   withType<KotlinCompile> {
     kotlinOptions {
-      jvmTarget = JavaVersion.VERSION_20.toString()
+      jvmTarget = JavaVersion.VERSION_21.toString()
     }
   }
 }
