@@ -52,8 +52,8 @@ dependencies {
   testImplementation("org.testcontainers:localstack:1.19.1")
 }
 
-java {
-  toolchain.languageVersion = JavaLanguageVersion.of(21)
+kotlin {
+  jvmToolchain(21)
 }
 
 tasks {
