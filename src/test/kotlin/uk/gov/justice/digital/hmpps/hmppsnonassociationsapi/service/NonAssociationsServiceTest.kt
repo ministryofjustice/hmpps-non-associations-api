@@ -49,8 +49,8 @@ class NonAssociationsServiceTest {
   fun createNonAssociation() {
     val createNonAssociationRequest: CreateNonAssociationRequest = createNonAssociationRequest()
 
-    val updatedBy = "TEST_USER_GEN"
-    whenever(authenticationFacade.currentUsername).thenReturn(updatedBy)
+    val createdBy = "TEST_USER_GEN"
+    whenever(authenticationFacade.currentUsername).thenReturn(createdBy)
 
     val expectedId = 42L
     val now = LocalDateTime.now(TestBase.clock)
@@ -63,12 +63,12 @@ class NonAssociationsServiceTest {
       comment = createNonAssociationRequest.comment,
       reason = createNonAssociationRequest.reason,
       restrictionType = createNonAssociationRequest.restrictionType,
-      authorisedBy = updatedBy,
+      authorisedBy = createdBy,
       isClosed = false,
       closedBy = null,
       closedReason = null,
       closedAt = null,
-      updatedBy = updatedBy,
+      updatedBy = createdBy,
       whenCreated = now,
       whenUpdated = now,
     )

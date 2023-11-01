@@ -85,7 +85,7 @@ data class CreateNonAssociationRequest(
   @field:Size(min = 1, message = "A comment is required")
   val comment: String,
 ) {
-  fun toNewEntity(updatedBy: String, clock: Clock): NonAssociationJPA {
+  fun toNewEntity(createdBy: String, clock: Clock): NonAssociationJPA {
     return NonAssociationJPA(
       id = null,
       firstPrisonerNumber = firstPrisonerNumber,
@@ -95,7 +95,8 @@ data class CreateNonAssociationRequest(
       reason = reason,
       restrictionType = restrictionType,
       comment = comment,
-      updatedBy = updatedBy,
+      authorisedBy = createdBy,
+      updatedBy = createdBy,
       whenCreated = LocalDateTime.now(clock),
       whenUpdated = LocalDateTime.now(clock),
     )
