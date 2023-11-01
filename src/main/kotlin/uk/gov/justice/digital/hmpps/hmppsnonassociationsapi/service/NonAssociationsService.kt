@@ -78,7 +78,7 @@ class NonAssociationsService(
     }
 
     val nonAssociationJpa = createNonAssociationRequest.toNewEntity(
-      updatedBy = authenticationFacade.currentUsername
+      createdBy = authenticationFacade.currentUsername
         ?: throw UserInContextMissingException(),
       clock = clock,
     )

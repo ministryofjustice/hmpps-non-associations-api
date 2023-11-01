@@ -37,7 +37,9 @@ class NonAssociation(
   var restrictionType: RestrictionType,
   var comment: String,
 
-  var authorisedBy: String? = null, // This is stored for legacy reasons - the data is not returned in the API except on the legacy endpoints
+  // The user who created or authorised a non-association is not always available,
+  // it was a free text field in NOMIS and initially not set when non-associations were created by this api.
+  var authorisedBy: String? = null,
 
   // Non-associations can be closed (with details of who/why/when)
   var isClosed: Boolean = false,

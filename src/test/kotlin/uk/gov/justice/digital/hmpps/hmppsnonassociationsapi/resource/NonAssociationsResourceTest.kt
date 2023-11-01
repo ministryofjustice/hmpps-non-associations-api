@@ -282,6 +282,26 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           assertThat(nonAssociation.id).isGreaterThan(0)
           assertThat(nonAssociation.whenCreated).isNotNull()
           assertThat(nonAssociation.whenUpdated).isEqualTo(nonAssociation.whenCreated)
+
+          val nonAssociationJpa = repository.findById(nonAssociation.id).get()
+          with(nonAssociationJpa) {
+            assertThat(firstPrisonerNumber).isEqualTo(firstPrisoner.prisonerNumber)
+            assertThat(firstPrisonerRole).isEqualTo(Role.VICTIM)
+            assertThat(secondPrisonerNumber).isEqualTo(secondPrisoner.prisonerNumber)
+            assertThat(secondPrisonerRole).isEqualTo(Role.PERPETRATOR)
+            assertThat(reason).isEqualTo(Reason.VIOLENCE)
+            assertThat(restrictionType).isEqualTo(RestrictionType.CELL)
+            assertThat(comment).isEqualTo("They keep fighting")
+            assertThat(authorisedBy).isEqualTo(expectedUsername)
+            assertThat(updatedBy).isEqualTo(expectedUsername)
+            assertThat(whenCreated).isEqualTo(nonAssociation.whenCreated)
+            assertThat(whenUpdated).isEqualTo(nonAssociation.whenCreated)
+
+            assertThat(isOpen).isTrue()
+            assertThat(closedBy).isNull()
+            assertThat(closedAt).isNull()
+            assertThat(closedReason).isNull()
+          }
         }
     }
 
