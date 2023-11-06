@@ -34,7 +34,7 @@ dependencies {
 
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.3")
 
-  implementation("com.zaxxer:HikariCP:5.0.1")
+  implementation("com.zaxxer:HikariCP:5.1.0")
   runtimeOnly("org.postgresql:postgresql:42.6.0")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
 
