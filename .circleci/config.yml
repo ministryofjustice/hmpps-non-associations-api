@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  hmpps: ministryofjustice/hmpps@7.5
+  hmpps: ministryofjustice/hmpps@7
 
 parameters:
   alerts-slack-channel:
@@ -41,10 +41,10 @@ jobs:
       - run:
           name: Run check
           command: ./gradlew check
-#          name: Run check & send results to sonarcloud
-#          command: |
-#            export GRADLE_OPTS="--add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED"
-#            ./gradlew check sonar --info
+      #          name: Run check & send results to sonarcloud
+      #          command: |
+      #            export GRADLE_OPTS="--add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED"
+      #            ./gradlew check sonar --info
       - save_cache:
           paths:
             - ~/.gradle
@@ -53,8 +53,8 @@ jobs:
           path: build/test-results
       - store_artifacts:
           path: build/reports/tests
-#      - store_artifacts:
-#          path: build/reports/jacoco/test/html
+  #      - store_artifacts:
+  #          path: build/reports/jacoco/test/html
 
   test-node-client:
     parameters:
@@ -69,14 +69,16 @@ jobs:
           name: Update npm
           command: sudo npm install -g npm@latest
       - restore_cache:
-          key: dependency-cache-node<< parameters.node-version >>-{{ checksum "clients/node/package-lock.json" }}
+          key: dependency-cache-node<< parameters.node-version >>-{{ checksum
+            "clients/node/package-lock.json" }}
       - run:
           name: Install dependencies
           command: |
             cd clients/node
             npm clean-install --no-audit
       - save_cache:
-          key: dependency-cache-node<< parameters.node-version >>-{{ checksum "clients/node/package-lock.json" }}
+          key: dependency-cache-node<< parameters.node-version >>-{{ checksum
+            "clients/node/package-lock.json" }}
           paths:
             - clients/node/node_modules
       - run:
@@ -110,7 +112,7 @@ workflows:
       - test-node-client:
           matrix:
             parameters:
-              node-version: ["18.18", "20.9"]
+              node-version: [ "18.18", "20.9" ]
       - hmpps/helm_lint:
           name: helm_lint
       - hmpps/build_multiplatform_docker:
