@@ -123,7 +123,8 @@ class HmppsNonAssociationsApiExceptionHandler {
       .body(
         ErrorResponse(
           status = NOT_FOUND,
-          userMessage = "Non-association not Found: ${e.message}",
+          errorCode = ErrorCode.NonAssociationNotFound,
+          userMessage = "Non-association not found: ${e.message}",
           developerMessage = e.message,
         ),
       )
@@ -168,6 +169,21 @@ class HmppsNonAssociationsApiExceptionHandler {
           status = CONFLICT,
           errorCode = ErrorCode.NonAssociationAlreadyClosed,
           userMessage = "Already Closed Non-Association: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
+  @ExceptionHandler(NonAssociationAlreadyOpenException::class)
+  fun handleNonAssociationAlreadyOpenException(e: NonAssociationAlreadyOpenException): ResponseEntity<ErrorResponse?>? {
+    log.debug("Already Open Non-Association caught: {}", e.message)
+    return ResponseEntity
+      .status(CONFLICT)
+      .body(
+        ErrorResponse(
+          status = CONFLICT,
+          errorCode = ErrorCode.NonAssociationAlreadyOpen,
+          userMessage = "Already Open Non-Association: ${e.message}",
           developerMessage = e.message,
         ),
       )
@@ -251,6 +267,8 @@ enum class ErrorCode(val errorCode: Int) {
   OpenNonAssociationAlreadyExist(101),
   ValidationFailure(102),
   NullPrisonerLocations(103),
+  NonAssociationAlreadyOpen(104),
+  NonAssociationNotFound(404),
 }
 
 @Schema(description = "Error response")
@@ -275,6 +293,8 @@ data class ErrorResponse(
   ) :
     this(status.value(), userMessage, developerMessage ?: userMessage, errorCode?.errorCode, moreInfo)
 }
+
+class NonAssociationAlreadyOpenException(id: Long) : Exception("Non-association [ID=$id] already open")
 
 class NonAssociationAlreadyClosedException(id: Long) : Exception("Non-association [ID=$id] already closed")
 

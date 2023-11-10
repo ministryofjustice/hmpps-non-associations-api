@@ -151,6 +151,21 @@ data class DeleteNonAssociationRequest(
   val staffUserNameRequestingDeletion: String,
 )
 
+/**
+ * Request format to re-open a non-association between two prisoners
+ */
+@Schema(description = "Request to re-open a non-association")
+data class ReopenNonAssociationRequest(
+  @Schema(description = "Reason for re-opening the non-association", required = true, example = "Prisoners are fighting again", minLength = 1)
+  @field:Size(min = 1, message = "The reason for re-opening cannot be blank")
+  val reopenReason: String,
+  @Schema(description = "Date and time of the re-open, if not provided will default to today's time", required = false, example = "2023-06-07", defaultValue = "now")
+  val reopenedAt: LocalDateTime? = null,
+  @Schema(description = "The username of the member of staff requesting the re-open, if not provided will use the user in the JWT access token", required = true, example = "AJONES", minLength = 1, maxLength = 60)
+  @field:Size(min = 1, max = 60, message = "Deleted by must be a maximum of 60 characters")
+  val staffUserNameRequestingReopen: String?,
+)
+
 fun NonAssociationJPA.updateWith(patch: PatchNonAssociationRequest, updatedBy: String, clock: Clock): NonAssociationJPA {
   this.firstPrisonerRole = patch.firstPrisonerRole ?: this.firstPrisonerRole
   this.secondPrisonerRole = patch.secondPrisonerRole ?: this.secondPrisonerRole
