@@ -38,6 +38,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationsS
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.ReopenNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
@@ -596,6 +597,46 @@ class NonAssociationsResource(
       Pair(nonAssociationsService.deleteNonAssociation(id, deleteNonAssociationRequest), deleteNonAssociationRequest)
     }
   }
+
+  @PutMapping("/non-associations/{id}/reopen")
+  @PreAuthorize("hasRole('ROLE_REOPEN_NON_ASSOCIATIONS') and hasAuthority('SCOPE_write')")
+  @Operation(
+    summary = "Re-open a non-association",
+    description = "Requires REOPEN_NON_ASSOCIATIONS role with write scope.\n" +
+      "**Please note**: This is a special endpoint which should NOT be exposed to regular users, they should instead create a new non-association.",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Non-association re-opened",
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorized to access this endpoint",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Missing required role. Requires the REOPEN_NON_ASSOCIATIONS role with write scope.",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Non-association not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  fun reopenNonAssociation(
+    @Schema(description = "The non-association ID", example = "42", required = true)
+    @PathVariable
+    id: Long,
+    @RequestBody
+    @Validated
+    reopenNonAssociationRequest: ReopenNonAssociationRequest,
+  ): NonAssociation =
+    eventPublishWrapper(NonAssociationDomainEventType.NON_ASSOCIATION_REOPENED) {
+      nonAssociationsService.reopenNonAssociation(id, reopenNonAssociationRequest)
+    }
 
   @GetMapping("/constants")
   @ResponseStatus(HttpStatus.OK)

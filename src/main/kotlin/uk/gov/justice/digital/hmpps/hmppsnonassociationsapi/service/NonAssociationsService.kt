@@ -8,12 +8,12 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ResponseStatusException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.FeatureFlagsConfig
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationAlreadyClosedException
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationAlreadyOpenException
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NullPrisonerLocationsException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.OpenNonAssociationAlreadyExistsException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.UserInContextMissingException
@@ -29,6 +29,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationLi
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListOptions
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.ReopenNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.toPrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.translateFromRolesAndReason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.updateWith
@@ -155,10 +156,7 @@ class NonAssociationsService(
   }
 
   fun updateNonAssociation(id: Long, update: PatchNonAssociationRequest): NonAssociationDTO {
-    val nonAssociation = nonAssociationsRepository.findById(id).getOrNull() ?: throw ResponseStatusException(
-      HttpStatus.NOT_FOUND,
-      "Non-association with ID $id not found",
-    )
+    val nonAssociation = nonAssociationsRepository.findById(id).getOrNull() ?: throw NonAssociationNotFoundException(id)
 
     nonAssociation.updateWith(update, authenticationFacade.getUserOrSystemInContext(), clock)
 
@@ -167,10 +165,7 @@ class NonAssociationsService(
   }
 
   fun closeNonAssociation(id: Long, closeRequest: CloseNonAssociationRequest): NonAssociationDTO {
-    val nonAssociation = nonAssociationsRepository.findById(id).getOrNull() ?: throw ResponseStatusException(
-      HttpStatus.NOT_FOUND,
-      "Non-association with ID $id not found",
-    )
+    val nonAssociation = nonAssociationsRepository.findById(id).getOrNull() ?: throw NonAssociationNotFoundException(id)
 
     if (nonAssociation.isClosed) {
       throw NonAssociationAlreadyClosedException(id)
@@ -186,11 +181,31 @@ class NonAssociationsService(
     return nonAssociation.toDto()
   }
 
-  fun deleteNonAssociation(id: Long, deleteRequest: DeleteNonAssociationRequest): NonAssociationDTO {
-    val nonAssociation = nonAssociationsRepository.findById(id).getOrNull() ?: throw ResponseStatusException(
-      HttpStatus.NOT_FOUND,
-      "Non-association with ID $id not found",
+  fun reopenNonAssociation(id: Long, reopenNonAssociationRequest: ReopenNonAssociationRequest): NonAssociationDTO {
+    val nonAssociation = nonAssociationsRepository.findById(id).getOrNull() ?: throw NonAssociationNotFoundException(id)
+
+    if (nonAssociationsRepository.findAnyBetweenPrisonerNumbers(
+        listOf(
+            nonAssociation.firstPrisonerNumber,
+            nonAssociation.secondPrisonerNumber,
+          ),
+      ).isNotEmpty()
+    ) {
+      throw NonAssociationAlreadyOpenException(id)
+    }
+
+    nonAssociation.reopen(
+      reopenedAt = reopenNonAssociationRequest.reopenedAt ?: LocalDateTime.now(clock),
+      reopenedBy = reopenNonAssociationRequest.reopenedBy ?: authenticationFacade.currentUsername ?: throw UserInContextMissingException(),
+      reopenedReason = reopenNonAssociationRequest.reopenReason,
     )
+
+    log.info("Re-opened Non-association [$id]")
+    return nonAssociation.toDto()
+  }
+
+  fun deleteNonAssociation(id: Long, deleteRequest: DeleteNonAssociationRequest): NonAssociationDTO {
+    val nonAssociation = nonAssociationsRepository.findById(id).getOrNull() ?: throw NonAssociationNotFoundException(id)
 
     nonAssociationsRepository.delete(nonAssociation)
 
