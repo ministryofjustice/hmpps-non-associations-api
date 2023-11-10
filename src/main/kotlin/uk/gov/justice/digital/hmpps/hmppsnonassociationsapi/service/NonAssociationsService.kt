@@ -196,7 +196,7 @@ class NonAssociationsService(
 
     nonAssociation.reopen(
       reopenedAt = reopenNonAssociationRequest.reopenedAt ?: LocalDateTime.now(clock),
-      reopenedBy = reopenNonAssociationRequest.staffUserNameRequestingReopen ?: authenticationFacade.currentUsername ?: throw UserInContextMissingException(),
+      reopenedBy = reopenNonAssociationRequest.reopenedBy ?: authenticationFacade.currentUsername ?: throw UserInContextMissingException(),
       reopenedReason = reopenNonAssociationRequest.reopenReason,
     )
 

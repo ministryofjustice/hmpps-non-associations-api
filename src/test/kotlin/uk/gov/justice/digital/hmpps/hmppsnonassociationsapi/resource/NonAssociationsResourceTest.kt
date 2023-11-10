@@ -1347,7 +1347,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     fun `closed non-association with existing open non-association cannot be re-opened`() {
       val request = ReopenNonAssociationRequest(
         reopenReason = "Please open again",
-        staffUserNameRequestingReopen = "MWILLIS",
+        reopenedBy = "MWILLIS",
         reopenedAt = LocalDateTime.now(clock),
       )
 
