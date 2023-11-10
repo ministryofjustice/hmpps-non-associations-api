@@ -163,7 +163,7 @@ data class ReopenNonAssociationRequest(
   val reopenedAt: LocalDateTime? = null,
   @Schema(description = "The username of the member of staff requesting the re-open, if not provided will use the user in the JWT access token", required = true, example = "AJONES", minLength = 1, maxLength = 60)
   @field:Size(min = 1, max = 60, message = "Deleted by must be a maximum of 60 characters")
-  val staffUserNameRequestingReopen: String?,
+  val staffUserNameRequestingReopen: String? = null,
 )
 
 fun NonAssociationJPA.updateWith(patch: PatchNonAssociationRequest, updatedBy: String, clock: Clock): NonAssociationJPA {

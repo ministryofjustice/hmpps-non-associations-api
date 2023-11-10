@@ -11,16 +11,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.reactive.server.returnResult
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteNonAssociationRequest
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyReason
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationsSort
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.*
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
@@ -1178,6 +1169,183 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           setAuthorisation(
             user = "MWILLIS",
             roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
+            scopes = listOf("write", "read"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isEqualTo(409)
+    }
+  }
+
+  @Nested
+  inner class `Re-open a non-association` {
+
+    private lateinit var naWhichHasAnAnotherOpenRecord: NonAssociationJPA
+    private lateinit var naToBeReopened: NonAssociationJPA
+    private lateinit var url: String
+
+    @BeforeEach
+    fun setUp() {
+      naToBeReopened = createNonAssociation(isClosed = true)
+      createNonAssociation(firstPrisonerNumber = "A1111GH", secondPrisonerNumber = "A1111GK")
+      naWhichHasAnAnotherOpenRecord = createNonAssociation(firstPrisonerNumber = "A1111GH", secondPrisonerNumber = "A1111GK", isClosed = true)
+      url = "/non-associations/%d/reopen"
+    }
+
+    @Test
+    fun `without a valid token responds 401 Unauthorized`() {
+      webTestClient.put()
+        .uri(format(url, naToBeReopened.id))
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `without the correct role and scope responds 403 Forbidden`() {
+      val request = ReopenNonAssociationRequest(
+        reopenReason = "All gone wrong again",
+      )
+
+      // correct role, missing write scope
+      webTestClient.put()
+        .uri(format(url, naToBeReopened.id))
+        .headers(setAuthorisation(roles = listOf("ROLE_NON_ASSOCIATIONS")))
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+
+      // correct role, missing write scope
+      webTestClient.put()
+        .uri(format(url, naToBeReopened.id))
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_REOPEN_NON_ASSOCIATIONS"),
+            scopes = listOf("read"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `without a valid request body responds 400 Bad Request`() {
+      // no request body
+      webTestClient.put()
+        .uri(format(url, naToBeReopened.id))
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_REOPEN_NON_ASSOCIATIONS"),
+            scopes = listOf("write"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+
+      // unsupported Content-Type
+      webTestClient.put()
+        .uri(format(url, naToBeReopened.id))
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_REOPEN_NON_ASSOCIATIONS"),
+            scopes = listOf("write"),
+          ),
+        )
+        .header("Content-Type", "text/plain")
+        .bodyValue("{}")
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+
+      // request body has invalid fields
+      webTestClient.put()
+        .uri(format(url, naToBeReopened.id))
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_REOPEN_NON_ASSOCIATIONS"),
+            scopes = listOf("write"),
+          ),
+        )
+        .header("Content-Type", "text/plain")
+        .bodyValue(jsonString("dummy" to "TEST"))
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+    }
+
+    @Test
+    fun `for a valid request closes the non-association`() {
+      // language=text
+      val reopenReason = "Gone Bad"
+      val request = mapOf("reopenReason" to reopenReason)
+
+      val expectedResponse =
+        // language=json
+        """
+        {
+          "firstPrisonerNumber": "${naToBeReopened.firstPrisonerNumber}",
+          "firstPrisonerRole": "${naToBeReopened.firstPrisonerRole}",
+          "firstPrisonerRoleDescription": "${naToBeReopened.firstPrisonerRole.description}",
+          "secondPrisonerNumber": "${naToBeReopened.secondPrisonerNumber}",
+          "secondPrisonerRole": "${naToBeReopened.secondPrisonerRole}",
+          "secondPrisonerRoleDescription": "${naToBeReopened.secondPrisonerRole.description}",
+          "reason": "${naToBeReopened.reason}",
+          "reasonDescription": "${naToBeReopened.reason.description}",
+          "restrictionType": "${naToBeReopened.restrictionType}",
+          "restrictionTypeDescription": "${naToBeReopened.restrictionType.description}",
+          "comment": "$reopenReason",
+          "updatedBy": "$expectedUsername",
+          "isClosed": false,
+          "closedReason": null,
+          "closedBy": null,
+          "closedAt": null
+        }
+        """
+
+      webTestClient.put()
+        .uri(format(url, naToBeReopened.id))
+        .headers(
+          setAuthorisation(
+            user = expectedUsername,
+            roles = listOf("ROLE_REOPEN_NON_ASSOCIATIONS"),
+            scopes = listOf("write", "read"),
+          ),
+        )
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(request))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(expectedResponse, false)
+        .consumeWith {
+          val nonAssociation = objectMapper.readValue(it.responseBody, NonAssociation::class.java)
+          assertThat(nonAssociation.id).isGreaterThan(0)
+          assertThat(nonAssociation.whenCreated).isNotNull()
+          assertThat(nonAssociation.whenUpdated).isAfterOrEqualTo(nonAssociation.whenCreated)
+        }
+    }
+
+    @Test
+    fun `closed non-association with existing open non-association cannot be re-opened`() {
+      val request = ReopenNonAssociationRequest(
+        reopenReason = "Please open again",
+        staffUserNameRequestingReopen = "MWILLIS",
+        reopenedAt = LocalDateTime.now(clock),
+      )
+
+      webTestClient.put()
+        .uri(format(url, naWhichHasAnAnotherOpenRecord.id))
+        .headers(
+          setAuthorisation(
+            roles = listOf("ROLE_REOPEN_NON_ASSOCIATIONS"),
             scopes = listOf("write", "read"),
           ),
         )
