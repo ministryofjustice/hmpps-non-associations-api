@@ -61,13 +61,13 @@ class NonAssociation(
     this.whenUpdated = closedAt
   }
 
-  fun reopen(reopenedAt: LocalDateTime?, reopenedBy: String, reopenedReason: String) {
+  fun reopen(reopenedAt: LocalDateTime, reopenedBy: String, reopenedReason: String) {
     this.isClosed = false
     this.closedBy = null
     this.closedReason = null
     this.closedAt = null
     this.updatedBy = reopenedBy
-    this.whenUpdated = reopenedAt ?: LocalDateTime.now()
+    this.whenUpdated = reopenedAt
     this.comment = reopenedReason
   }
   val isOpen: Boolean
