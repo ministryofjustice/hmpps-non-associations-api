@@ -250,6 +250,20 @@ describe('REST Client', () => {
       expect(logger.error).not.toHaveBeenCalled()
       expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'POST' }))
     })
+
+    it('when reopening a non-association', async () => {
+      mockResponse().put('/non-associations/101/reopen').reply(200, openNonAssociation)
+
+      const nonAssociation: OpenNonAssociation = await client.reopenNonAssociation(101, {
+        reopenReason: 'Closed in error',
+      })
+      expect(nonAssociation).toEqual(openNonAssociation)
+      expect(nock.isDone()).toEqual(true)
+
+      expect(logger.info).toHaveBeenCalledTimes(1)
+      expect(logger.error).not.toHaveBeenCalled()
+      expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'PUT' }))
+    })
   })
 
   describe('should retry on failure', () => {
@@ -516,6 +530,25 @@ describe('REST Client', () => {
         client.deleteNonAssociation(1, {
           deletionReason: 'Entered in error',
           staffUserNameRequestingDeletion: 'abc123',
+        }),
+      ).rejects.toEqual(
+        expect.objectContaining({
+          status: 403,
+          message: 'Forbidden',
+        }),
+      )
+
+      expect(logger.info).toHaveBeenCalledTimes(1)
+      expect(logger.error).toHaveBeenCalledTimes(1)
+    })
+
+    it('when reopening a non-association', async () => {
+      mockResponse().put('/non-associations/101/reopen').reply(403)
+
+      await expect(
+        client.reopenNonAssociation(101, {
+          reopenReason: 'Closed in error',
+          reopenedBy: 'abc123',
         }),
       ).rejects.toEqual(
         expect.objectContaining({

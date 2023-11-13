@@ -4,7 +4,7 @@ import type { Reason, RestrictionType, Role } from './constants'
  * Request payload for creating a new non-association
  *
  * Defined in uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest class
- * https://github.com/ministryofjustice/hmpps-non-associations-api/blob/f6002aa1da50b8c4ccd3613e970327d5c67c44ae/src/main/kotlin/uk/gov/justice/digital/hmpps/hmppsnonassociationsapi/dto/NonAssociation.kt#L63-L87
+ * see https://github.com/ministryofjustice/hmpps-non-associations-api
  */
 export interface CreateNonAssociationRequest {
   firstPrisonerNumber: string
@@ -20,7 +20,7 @@ export interface CreateNonAssociationRequest {
  * Request payload for updating an existing non-association
  *
  * Defined in uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest class
- * https://github.com/ministryofjustice/hmpps-non-associations-api/blob/f6002aa1da50b8c4ccd3613e970327d5c67c44ae/src/main/kotlin/uk/gov/justice/digital/hmpps/hmppsnonassociationsapi/dto/NonAssociation.kt#L105-L124
+ * see https://github.com/ministryofjustice/hmpps-non-associations-api
  */
 export interface UpdateNonAssociationRequest {
   firstPrisonerRole?: keyof Role
@@ -34,7 +34,7 @@ export interface UpdateNonAssociationRequest {
  * Request payload for closing an existing open non-association
  *
  * Defined in uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest class
- * https://github.com/ministryofjustice/hmpps-non-associations-api/blob/f6002aa1da50b8c4ccd3613e970327d5c67c44ae/src/main/kotlin/uk/gov/justice/digital/hmpps/hmppsnonassociationsapi/dto/NonAssociation.kt#L125-L138
+ * see https://github.com/ministryofjustice/hmpps-non-associations-api
  */
 export interface CloseNonAssociationRequest {
   closedReason: string
@@ -46,9 +46,21 @@ export interface CloseNonAssociationRequest {
  * Request payload for deleting an existing non-association
  *
  * Defined in uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteNonAssociationRequest class
- * https://github.com/ministryofjustice/hmpps-non-associations-api/blob/f6002aa1da50b8c4ccd3613e970327d5c67c44ae/src/main/kotlin/uk/gov/justice/digital/hmpps/hmppsnonassociationsapi/dto/NonAssociation.kt#L140-L151
+ * see https://github.com/ministryofjustice/hmpps-non-associations-api
  */
 export interface DeleteNonAssociationRequest {
   deletionReason: string
   staffUserNameRequestingDeletion: string
+}
+
+/**
+ * Request payload for re-opening an existing closed non-association
+ *
+ * Defined in uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.ReopenNonAssociationRequest class
+ * see https://github.com/ministryofjustice/hmpps-non-associations-api
+ */
+export interface ReopenNonAssociationRequest {
+  reopenReason: string
+  reopenedAt?: Date
+  reopenedBy?: string
 }

@@ -50,7 +50,7 @@ export interface ClosedNonAssociationsListItem extends BaseNonAssociationsListIt
  * List of non-associations for a particular prisoner
  *
  * Defined in uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations class
- * https://github.com/ministryofjustice/hmpps-non-associations-api/blob/f6002aa1da50b8c4ccd3613e970327d5c67c44ae/src/main/kotlin/uk/gov/justice/digital/hmpps/hmppsnonassociationsapi/dto/PrisonerNonAssociations.kt#L8-L31
+ * see https://github.com/ministryofjustice/hmpps-non-associations-api
  */
 export interface NonAssociationsList<
   Item extends BaseNonAssociationsListItem = OpenNonAssociationsListItem | ClosedNonAssociationsListItem,
@@ -103,6 +103,6 @@ export interface ClosedNonAssociation extends BaseNonAssociation {
  * Non-association between two prisoners
  *
  * Defined in uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation class
- * https://github.com/ministryofjustice/hmpps-non-associations-api/blob/f6002aa1da50b8c4ccd3613e970327d5c67c44ae/src/main/kotlin/uk/gov/justice/digital/hmpps/hmppsnonassociationsapi/dto/NonAssociation.kt#L10-L61
+ * see https://github.com/ministryofjustice/hmpps-non-associations-api
  */
 export type NonAssociation = OpenNonAssociation | ClosedNonAssociation
