@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.server.ResponseStatusException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyPrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
@@ -110,9 +110,7 @@ class LegacyResource(
     @PathVariable
     id: Long,
   ): LegacyNonAssociation {
-    return nonAssociationsService.getLegacyById(id) ?: throw ResponseStatusException(
-      HttpStatus.NOT_FOUND,
-      "Non-association with ID $id not found",
-    )
+    return nonAssociationsService.getLegacyById(id)
+      ?: throw NonAssociationNotFoundException(id)
   }
 }

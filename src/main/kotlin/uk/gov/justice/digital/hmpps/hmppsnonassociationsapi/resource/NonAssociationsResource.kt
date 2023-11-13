@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteNonAssociationRequest
@@ -303,7 +304,7 @@ class NonAssociationsResource(
     id: Long,
   ): NonAssociation {
     return nonAssociationsService.getById(id)
-      ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Non-association with ID $id not found")
+      ?: throw NonAssociationNotFoundException(id)
   }
 
   @PostMapping("/non-associations/between")
