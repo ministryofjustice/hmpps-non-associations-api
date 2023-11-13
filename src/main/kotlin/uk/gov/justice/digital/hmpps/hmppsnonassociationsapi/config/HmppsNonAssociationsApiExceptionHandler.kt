@@ -40,7 +40,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(HttpMediaTypeNotSupportedException::class)
-  fun handleInvalidRequestFormatValidationException(e: HttpMediaTypeNotSupportedException): ResponseEntity<ErrorResponse> {
+  fun handleInvalidRequestFormatException(e: HttpMediaTypeNotSupportedException): ResponseEntity<ErrorResponse> {
     log.info("Validation exception: Request format not supported: {}", e.message)
     return ResponseEntity
       .status(UNSUPPORTED_MEDIA_TYPE)
@@ -206,7 +206,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(MethodArgumentNotValidException::class)
-  fun handleValidationException(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse>? {
+  fun handleInvalidMethodArgumentException(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse>? {
     log.debug("MethodArgumentNotValidException exception caught: {}", e.message)
 
     return ResponseEntity
