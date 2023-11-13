@@ -5,6 +5,12 @@ import type { SortBy, SortDirection } from './constants'
 import type { ErrorResponse } from './errorTypes'
 import type { Page, PageRequest } from './paginationTypes'
 import type {
+  CreateNonAssociationRequest,
+  UpdateNonAssociationRequest,
+  CloseNonAssociationRequest,
+  DeleteNonAssociationRequest,
+} from './requestTypes'
+import type {
   Constants,
   NonAssociationsList,
   OpenNonAssociationsListItem,
@@ -12,10 +18,6 @@ import type {
   NonAssociation,
   OpenNonAssociation,
   ClosedNonAssociation,
-  CreateNonAssociationRequest,
-  UpdateNonAssociationRequest,
-  CloseNonAssociationRequest,
-  DeleteNonAssociationRequest,
 } from './responseTypes'
 import { parseDates } from './parseDates'
 import { sanitiseError } from './sanitiseError'
