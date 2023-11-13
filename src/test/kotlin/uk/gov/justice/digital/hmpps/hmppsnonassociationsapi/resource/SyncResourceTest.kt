@@ -69,7 +69,7 @@ class SyncResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `without a valid request body responds 400 Bad Request`() {
+    fun `without a valid request body responds 415 Unsupported Media Type`() {
       // no request body
       webTestClient.put()
         .uri(url)
@@ -95,7 +95,7 @@ class SyncResourceTest : SqsIntegrationTestBase() {
         .bodyValue("{}")
         .exchange()
         .expectStatus()
-        .isBadRequest
+        .isEqualTo(415)
 
       // request body missing some fields
       webTestClient.put()
@@ -106,7 +106,7 @@ class SyncResourceTest : SqsIntegrationTestBase() {
           ),
         )
         .header("Content-Type", "application/json")
-        .bodyValue(jsonString("firstPrisonerNumber" to "A1234BC"))
+        .bodyValue(jsonString(mapOf("firstPrisonerNumber" to "A1234BC")))
         .exchange()
         .expectStatus()
         .isBadRequest
@@ -595,7 +595,7 @@ class SyncResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `without a valid request body responds 400 Bad Request`() {
+    fun `without a valid request body responds 400 Bad Request or 415 Unsupported Media Type`() {
       // no request body
       webTestClient.put()
         .uri(url)
@@ -621,7 +621,7 @@ class SyncResourceTest : SqsIntegrationTestBase() {
         .bodyValue("{}")
         .exchange()
         .expectStatus()
-        .isBadRequest
+        .isEqualTo(415)
 
       // request body missing some fields
       webTestClient.put()
@@ -632,7 +632,7 @@ class SyncResourceTest : SqsIntegrationTestBase() {
           ),
         )
         .header("Content-Type", "application/json")
-        .bodyValue(jsonString("firstPrisonerNumber" to "A1234BC"))
+        .bodyValue(jsonString(mapOf("firstPrisonerNumber" to "A1234BC")))
         .exchange()
         .expectStatus()
         .isBadRequest
