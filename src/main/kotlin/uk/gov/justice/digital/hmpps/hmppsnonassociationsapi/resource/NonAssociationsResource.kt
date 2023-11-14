@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.ValidationException
 import jakarta.validation.constraints.Pattern
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Page
@@ -26,8 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.server.ResponseStatusException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteNonAssociationRequest
@@ -148,7 +149,7 @@ class NonAssociationsResource(
     sortDirection: Sort.Direction?,
   ): PrisonerNonAssociations {
     val inclusion = NonAssociationListInclusion.of(includeOpen, includeClosed)
-      ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
+      ?: throw ValidationException("includeOpen and includeClosed cannot both be false")
 
     return nonAssociationsService.getPrisonerNonAssociations(
       prisonerNumber,
@@ -261,10 +262,10 @@ class NonAssociationsResource(
     pageable: Pageable,
   ): Page<NonAssociation> {
     if (pageable.pageSize > 200) {
-      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Page size must be 200 or less")
+      throw ValidationException("Page size must be 200 or less")
     }
     val inclusion = NonAssociationListInclusion.of(includeOpen, includeClosed)
-      ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
+      ?: throw ValidationException("includeOpen and includeClosed cannot both be false")
 
     return nonAssociationsService.getNonAssociations(inclusion, pageable)
   }
@@ -303,7 +304,7 @@ class NonAssociationsResource(
     id: Long,
   ): NonAssociation {
     return nonAssociationsService.getById(id)
-      ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Non-association with ID $id not found")
+      ?: throw NonAssociationNotFoundException(id)
   }
 
   @PostMapping("/non-associations/between")
@@ -382,11 +383,11 @@ class NonAssociationsResource(
   ): List<NonAssociation> {
     val distinctPrisonerNumbers = prisonerNumbers?.toSet()?.filter { it.isNotEmpty() }
     if (distinctPrisonerNumbers == null || distinctPrisonerNumbers.size < 2) {
-      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Two or more distinct prisoner numbers are required")
+      throw ValidationException("Two or more distinct prisoner numbers are required")
     }
 
     val inclusion = NonAssociationListInclusion.of(includeOpen, includeClosed)
-      ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
+      ?: throw ValidationException("includeOpen and includeClosed cannot both be false")
 
     return nonAssociationsService.getAnyBetween(prisonerNumbers, inclusion, prisonId)
   }
@@ -467,11 +468,11 @@ class NonAssociationsResource(
   ): List<NonAssociation> {
     val distinctPrisonerNumbers = prisonerNumbers?.toSet()?.filter { it.isNotEmpty() }
     if (distinctPrisonerNumbers.isNullOrEmpty()) {
-      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "One or more distinct prisoner numbers are required")
+      throw ValidationException("One or more distinct prisoner numbers are required")
     }
 
     val inclusion = NonAssociationListInclusion.of(includeOpen, includeClosed)
-      ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "includeOpen and includeClosed cannot both be false")
+      ?: throw ValidationException("includeOpen and includeClosed cannot both be false")
 
     return nonAssociationsService.getAnyInvolving(prisonerNumbers, inclusion, prisonId)
   }

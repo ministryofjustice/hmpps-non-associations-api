@@ -130,13 +130,13 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `without a valid request body responds 400 Bad Request`() {
+    fun `without a valid request body responds 400 Bad Request or 415 Unsupported Media Type`() {
       // no request body
       webTestClient.post()
         .uri(url)
         .headers(
           setAuthorisation(
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write"),
           ),
         )
@@ -150,7 +150,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .uri(url)
         .headers(
           setAuthorisation(
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write"),
           ),
         )
@@ -158,19 +158,19 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue("{}")
         .exchange()
         .expectStatus()
-        .isBadRequest
+        .isEqualTo(415)
 
       // request body missing some fields
       webTestClient.post()
         .uri(url)
         .headers(
           setAuthorisation(
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write"),
           ),
         )
-        .header("Content-Type", "text/plain")
-        .bodyValue(jsonString("firstPrisonerNumber" to "A1234BC"))
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(mapOf("firstPrisonerNumber" to "A1234BC")))
         .exchange()
         .expectStatus()
         .isBadRequest
@@ -482,14 +482,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `without a valid request body responds 400 Bad Request`() {
+    fun `without a valid request body responds 400 Bad Request or 415 Unsupported Media Type`() {
       // TODO: How do we check the request body is not empty if all fields optional?
       // no request body
       webTestClient.patch()
         .uri(url)
         .headers(
           setAuthorisation(
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write"),
           ),
         )
@@ -503,7 +503,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .uri(url)
         .headers(
           setAuthorisation(
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write"),
           ),
         )
@@ -511,19 +511,19 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue("{}")
         .exchange()
         .expectStatus()
-        .isBadRequest
+        .isEqualTo(415)
 
       // request body has invalid fields
       webTestClient.patch()
         .uri(url)
         .headers(
           setAuthorisation(
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write"),
           ),
         )
-        .header("Content-Type", "text/plain")
-        .bodyValue(jsonString("firstPrisonerNumber" to "A1234BC"))
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(mapOf("firstPrisonerRole" to "missing")))
         .exchange()
         .expectStatus()
         .isBadRequest
@@ -1068,13 +1068,13 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `without a valid request body responds 400 Bad Request`() {
+    fun `without a valid request body responds 400 Bad Request or 415 Unsupported Media Type`() {
       // no request body
       webTestClient.put()
         .uri(format(url, nonAssociation.id))
         .headers(
           setAuthorisation(
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write"),
           ),
         )
@@ -1088,7 +1088,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .uri(format(url, nonAssociation.id))
         .headers(
           setAuthorisation(
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write"),
           ),
         )
@@ -1096,19 +1096,19 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue("{}")
         .exchange()
         .expectStatus()
-        .isBadRequest
+        .isEqualTo(415)
 
       // request body has invalid fields
       webTestClient.put()
         .uri(format(url, nonAssociation.id))
         .headers(
           setAuthorisation(
-            roles = listOf("ROLE_NON_ASSOCIATIONS"),
+            roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write"),
           ),
         )
-        .header("Content-Type", "text/plain")
-        .bodyValue(jsonString("closedBy" to "TEST"))
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(mapOf("closedBy" to "TEST")))
         .exchange()
         .expectStatus()
         .isBadRequest
@@ -1246,7 +1246,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `without a valid request body responds 400 Bad Request`() {
+    fun `without a valid request body responds 400 Bad Request or 415 Unsupported Media Type`() {
       // no request body
       webTestClient.put()
         .uri(format(url, naToBeReopened.id))
@@ -1274,7 +1274,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue("{}")
         .exchange()
         .expectStatus()
-        .isBadRequest
+        .isEqualTo(415)
 
       // request body has invalid fields
       webTestClient.put()
@@ -1285,8 +1285,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             scopes = listOf("write"),
           ),
         )
-        .header("Content-Type", "text/plain")
-        .bodyValue(jsonString("dummy" to "TEST"))
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(mapOf("dummy" to "TEST")))
         .exchange()
         .expectStatus()
         .isBadRequest
@@ -1421,7 +1421,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `without a valid request body responds 400 Bad Request`() {
+    fun `without a valid request body responds 400 Bad Request or 415 Unsupported Media Type`() {
       // no request body
       webTestClient.post()
         .uri(format(url, nonAssociation.id))
@@ -1449,7 +1449,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue("{}")
         .exchange()
         .expectStatus()
-        .isBadRequest
+        .isEqualTo(415)
 
       // request body has invalid fields
       webTestClient.post()
@@ -1460,8 +1460,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             scopes = listOf("write"),
           ),
         )
-        .header("Content-Type", "text/plain")
-        .bodyValue(jsonString("staffUserNameRequestingDeletion" to "TEST"))
+        .header("Content-Type", "application/json")
+        .bodyValue(jsonString(mapOf("staffUserNameRequestingDeletion" to "TEST")))
         .exchange()
         .expectStatus()
         .isBadRequest

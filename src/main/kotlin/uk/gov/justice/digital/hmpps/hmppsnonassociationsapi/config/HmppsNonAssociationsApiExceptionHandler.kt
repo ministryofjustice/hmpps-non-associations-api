@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.HttpStatus.UNAUTHORIZED
+import org.springframework.http.HttpStatus.UNSUPPORTED_MEDIA_TYPE
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.security.access.AccessDeniedException
@@ -25,7 +26,7 @@ import org.springframework.web.server.ResponseStatusException
 @RestControllerAdvice
 class HmppsNonAssociationsApiExceptionHandler {
   @ExceptionHandler(ValidationException::class)
-  fun handleValidationException(e: Exception): ResponseEntity<ErrorResponse> {
+  fun handleValidationException(e: ValidationException): ResponseEntity<ErrorResponse> {
     log.info("Validation exception: {}", e.message)
     return ResponseEntity
       .status(BAD_REQUEST)
@@ -39,13 +40,13 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(HttpMediaTypeNotSupportedException::class)
-  fun handleInvalidRequestFormatValidationException(e: Exception): ResponseEntity<ErrorResponse> {
+  fun handleInvalidRequestFormatException(e: HttpMediaTypeNotSupportedException): ResponseEntity<ErrorResponse> {
     log.info("Validation exception: Request format not supported: {}", e.message)
     return ResponseEntity
-      .status(BAD_REQUEST)
+      .status(UNSUPPORTED_MEDIA_TYPE)
       .body(
         ErrorResponse(
-          status = BAD_REQUEST,
+          status = UNSUPPORTED_MEDIA_TYPE,
           userMessage = "Validation failure: Request format not supported: ${e.message}",
           developerMessage = e.message,
         ),
@@ -53,7 +54,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(HttpMessageNotReadableException::class)
-  fun handleNoBodyValidationException(e: Exception): ResponseEntity<ErrorResponse> {
+  fun handleNoBodyValidationException(e: HttpMessageNotReadableException): ResponseEntity<ErrorResponse> {
     log.info("Validation exception: Couldn't read request body: {}", e.message)
     return ResponseEntity
       .status(BAD_REQUEST)
@@ -205,7 +206,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(MethodArgumentNotValidException::class)
-  fun handleValidationException(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse>? {
+  fun handleInvalidMethodArgumentException(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse>? {
     log.debug("MethodArgumentNotValidException exception caught: {}", e.message)
 
     return ResponseEntity
