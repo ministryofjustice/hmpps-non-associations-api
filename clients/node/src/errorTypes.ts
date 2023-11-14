@@ -41,5 +41,7 @@ export enum ErrorCode {
   OpenNonAssociationAlreadyExist = 101,
   ValidationFailure = 102,
   NullPrisonerLocations = 103,
+  NonAssociationAlreadyOpen = 104,
   UserInContextMissing = 401,
+  NonAssociationNotFound = 404,
 }

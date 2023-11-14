@@ -5,6 +5,13 @@ import type { SortBy, SortDirection } from './constants'
 import type { ErrorResponse } from './errorTypes'
 import type { Page, PageRequest } from './paginationTypes'
 import type {
+  CreateNonAssociationRequest,
+  UpdateNonAssociationRequest,
+  CloseNonAssociationRequest,
+  DeleteNonAssociationRequest,
+  ReopenNonAssociationRequest,
+} from './requestTypes'
+import type {
   Constants,
   NonAssociationsList,
   OpenNonAssociationsListItem,
@@ -12,10 +19,6 @@ import type {
   NonAssociation,
   OpenNonAssociation,
   ClosedNonAssociation,
-  CreateNonAssociationRequest,
-  UpdateNonAssociationRequest,
-  CloseNonAssociationRequest,
-  DeleteNonAssociationRequest,
 } from './responseTypes'
 import { parseDates } from './parseDates'
 import { sanitiseError } from './sanitiseError'
@@ -496,5 +499,24 @@ export class NonAssociationsApi {
     const request = superagent.post(this.buildUrl(`/non-associations/${encodeURIComponent(id)}/delete`)).send(payload)
 
     return this.sendRequest(request).then(() => null)
+  }
+
+  /**
+   * Reopen a closed non-association by ID.
+   *
+   * **Please note**: This is a special endpoint which should NOT be exposed to regular users,
+   * they should instead open new non-associations.
+   *
+   * Requires REOPEN_NON_ASSOCIATIONS role with write scope.
+   *
+   * @throws SanitisedError<ErrorResponse>
+   */
+  reopenNonAssociation(id: number, payload: ReopenNonAssociationRequest): Promise<OpenNonAssociation> {
+    const request = superagent.put(this.buildUrl(`/non-associations/${encodeURIComponent(id)}/reopen`)).send(payload)
+
+    return this.sendRequest(request).then(response => {
+      const nonAssociation: OpenNonAssociation = response.body
+      return parseDates(nonAssociation)
+    })
   }
 }
