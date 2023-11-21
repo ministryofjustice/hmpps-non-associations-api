@@ -41,15 +41,15 @@ dependencies {
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
   testImplementation("org.wiremock:wiremock:3.3.1")
-  testImplementation("org.testcontainers:postgresql:1.19.2")
+  testImplementation("org.testcontainers:postgresql:1.19.3")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.3")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.3")
   testImplementation("org.mockito:mockito-inline:5.2.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.18")
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.19")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  testImplementation("org.testcontainers:localstack:1.19.2")
+  testImplementation("org.testcontainers:localstack:1.19.3")
 }
 
 kotlin {
