@@ -26,3 +26,6 @@ generic-prometheus-alerts:
   alertSeverity: digital-prison-service
   rdsAlertsDatabases:
     cloud-platform-994c511ab5935ecc: non-associations-api
+  sqsAlertsQueueNames:
+    - hmpps-non-associations-production-prisoner-event-queue
+    - hmpps-non-associations-production-prisoner-event-dlq

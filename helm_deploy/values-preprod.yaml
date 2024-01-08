@@ -19,3 +19,6 @@ generic-prometheus-alerts:
   businessHoursOnly: true
   rdsAlertsDatabases:
     cloud-platform-b6126468990788eb: non-associations-api
+  sqsAlertsQueueNames:
+    - hmpps-non-associations-preprod-prisoner-event-queue
+    - hmpps-non-associations-preprod-prisoner-event-dlq
