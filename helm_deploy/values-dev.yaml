@@ -19,3 +19,5 @@ generic-service:
 generic-prometheus-alerts:
   alertSeverity: digital-prison-service-dev
   businessHoursOnly: true
+  rdsAlertsDatabases:
+    cloud-platform-7534158a562cce9e: non-associations-api
