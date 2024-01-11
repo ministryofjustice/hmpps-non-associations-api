@@ -39,9 +39,21 @@ fun genNonAssociation(
   whenCreated = createTime,
   updatedBy = updatedBy ?: "A_DPS_USER",
   isClosed = closed,
-  closedAt = if (closed) { LocalDateTime.now(clock) } else { null },
-  closedBy = if (closed) { "A_DPS_USER" } else { null },
-  closedReason = if (closed) { closedReason } else { null },
+  closedAt = if (closed) {
+    LocalDateTime.now(clock)
+  } else {
+    null
+  },
+  closedBy = if (closed) {
+    "A_DPS_USER"
+  } else {
+    null
+  },
+  closedReason = if (closed) {
+    closedReason
+  } else {
+    null
+  },
 )
 
 /**

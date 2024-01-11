@@ -2753,7 +2753,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         A2222AA -- A3333AA
         A1111AA -- A4444AA
         A4444AA -- A2222AA : closed
-      */
+       */
       createNonAssociation("A0000AA", "A1111AA") // never returned
       createNonAssociation("A0000AA", "A2222AA") // returned
       createNonAssociation("A2222AA", "A3333AA") // never returned
@@ -3106,7 +3106,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         A2222AA -- A3333AA
         A1111AA -- A4444AA
         A4444AA -- A2222AA : closed
-      */
+       */
       createNonAssociation("A0000AA", "A1111AA") // never returned
       createNonAssociation("A0000AA", "A2222AA") // returned
       createNonAssociation("A2222AA", "A3333AA") // returned

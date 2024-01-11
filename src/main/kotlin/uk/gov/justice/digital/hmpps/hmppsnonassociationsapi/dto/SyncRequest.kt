@@ -72,11 +72,27 @@ data class UpsertSyncRequest(
       comment = comment ?: NO_COMMENT_PROVIDED,
       authorisedBy = authorisedBy,
       isClosed = isClosed(clock),
-      closedAt = if (isOpen(clock)) { null } else { preventFutureDate(expiryDate, currentDate).atStartOfDay() },
-      closedBy = if (isOpen(clock)) { null } else { lastModifiedByUsername ?: SYSTEM_USERNAME },
-      closedReason = if (isOpen(clock)) { null } else { NO_CLOSURE_REASON_PROVIDED },
+      closedAt = if (isOpen(clock)) {
+        null
+      } else {
+        preventFutureDate(expiryDate, currentDate).atStartOfDay()
+      },
+      closedBy = if (isOpen(clock)) {
+        null
+      } else {
+        lastModifiedByUsername ?: SYSTEM_USERNAME
+      },
+      closedReason = if (isOpen(clock)) {
+        null
+      } else {
+        NO_CLOSURE_REASON_PROVIDED
+      },
       whenCreated = preventFutureDate(effectiveFromDate, currentDate).atStartOfDay(),
-      whenUpdated = if (isOpen(clock)) { preventFutureDate(effectiveFromDate, currentDate).atStartOfDay() } else { preventFutureDate(expiryDate, currentDate).atStartOfDay() },
+      whenUpdated = if (isOpen(clock)) {
+        preventFutureDate(effectiveFromDate, currentDate).atStartOfDay()
+      } else {
+        preventFutureDate(expiryDate, currentDate).atStartOfDay()
+      },
       updatedBy = lastModifiedByUsername ?: SYSTEM_USERNAME,
     )
   }

@@ -390,9 +390,19 @@ class NonAssociationsRepositoryTest : TestBase() {
       isClosed = closed,
       closedAt = if (closed) {
         now
-      } else { null },
-      closedBy = if (closed) { "A USER" } else { null },
-      closedReason = if (closed) { "Problems resolved" } else { null },
+      } else {
+        null
+      },
+      closedBy = if (closed) {
+        "A USER"
+      } else {
+        null
+      },
+      closedReason = if (closed) {
+        "Problems resolved"
+      } else {
+        null
+      },
       whenCreated = now,
       whenUpdated = now,
     )
