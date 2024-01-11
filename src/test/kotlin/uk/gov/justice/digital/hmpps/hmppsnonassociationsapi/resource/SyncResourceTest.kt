@@ -20,7 +20,7 @@ import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-@WithMockUser(username = expectedUsername)
+@WithMockUser(username = EXPECTED_USERNAME)
 class SyncResourceTest : SqsIntegrationTestBase() {
   @TestConfiguration
   class FixedClockConfig {

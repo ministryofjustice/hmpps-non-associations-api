@@ -5,5 +5,4 @@ enum class Role(val description: String) {
   PERPETRATOR("Perpetrator"),
   NOT_RELEVANT("Not relevant"),
   UNKNOWN("Unknown"),
-  ;
 }

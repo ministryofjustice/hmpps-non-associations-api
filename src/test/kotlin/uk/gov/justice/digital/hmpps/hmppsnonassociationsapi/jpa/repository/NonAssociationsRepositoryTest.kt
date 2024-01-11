@@ -27,6 +27,7 @@ import java.time.LocalDateTime
 @Import(AuthenticationFacade::class)
 @WithMockUser(username = "A_DPS_USER")
 @Transactional
+@Suppress("ktlint:standard:discouraged-comment-location")
 class NonAssociationsRepositoryTest : TestBase() {
 
   @Autowired
@@ -85,7 +86,7 @@ class NonAssociationsRepositoryTest : TestBase() {
   }
 
   @Nested
-  inner class findAnyBetweenPrisonerNumbers() {
+  inner class `find any between prisoner numbers`() {
     @Test
     fun openNonAssociations() {
       repository.saveAll(
@@ -176,7 +177,7 @@ class NonAssociationsRepositoryTest : TestBase() {
   }
 
   @Nested
-  inner class findAnyInvolvingPrisonerNumbers() {
+  inner class `find any involving prisoner numbers`() {
     @Test
     fun openNonAssociations() {
       repository.saveAll(
@@ -390,9 +391,19 @@ class NonAssociationsRepositoryTest : TestBase() {
       isClosed = closed,
       closedAt = if (closed) {
         now
-      } else { null },
-      closedBy = if (closed) { "A USER" } else { null },
-      closedReason = if (closed) { "Problems resolved" } else { null },
+      } else {
+        null
+      },
+      closedBy = if (closed) {
+        "A USER"
+      } else {
+        null
+      },
+      closedReason = if (closed) {
+        "Problems resolved"
+      } else {
+        null
+      },
       whenCreated = now,
       whenUpdated = now,
     )

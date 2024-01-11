@@ -186,9 +186,9 @@ class NonAssociationsService(
 
     if (nonAssociationsRepository.findAnyBetweenPrisonerNumbers(
         listOf(
-            nonAssociation.firstPrisonerNumber,
-            nonAssociation.secondPrisonerNumber,
-          ),
+          nonAssociation.firstPrisonerNumber,
+          nonAssociation.secondPrisonerNumber,
+        ),
       ).isNotEmpty()
     ) {
       throw NonAssociationAlreadyOpenException(id)

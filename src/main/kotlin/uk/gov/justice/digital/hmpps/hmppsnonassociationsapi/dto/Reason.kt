@@ -8,5 +8,4 @@ enum class Reason(val description: String) {
   THREAT("Threat"),
   VIOLENCE("Violence"),
   OTHER("Other"),
-  ;
 }

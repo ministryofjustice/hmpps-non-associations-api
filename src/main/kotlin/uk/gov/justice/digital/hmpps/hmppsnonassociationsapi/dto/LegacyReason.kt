@@ -10,7 +10,6 @@ enum class LegacyReason(val description: String) {
   VIC("Victim"),
   NOT_REL("Not relevant"),
   UNKNOWN("Unknown"),
-  ;
 }
 
 /**

@@ -33,9 +33,9 @@ import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
 // language=text
-const val expectedUsername = "A_TEST_USER"
+const val EXPECTED_USERNAME = "A_TEST_USER"
 
-@WithMockUser(username = expectedUsername)
+@WithMockUser(username = EXPECTED_USERNAME)
 class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   @TestConfiguration
   class FixedClockConfig {
@@ -256,7 +256,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           "restrictionType": "${request.restrictionType}",
           "restrictionTypeDescription": "${request.restrictionType.description}",
           "comment": "${request.comment}",
-          "updatedBy": "$expectedUsername",
+          "updatedBy": "$EXPECTED_USERNAME",
           "isClosed": false,
           "closedReason": null,
           "closedBy": null,
@@ -268,7 +268,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .uri(url)
         .headers(
           setAuthorisation(
-            user = expectedUsername,
+            user = EXPECTED_USERNAME,
             roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write", "read"),
           ),
@@ -293,8 +293,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             assertThat(reason).isEqualTo(Reason.VIOLENCE)
             assertThat(restrictionType).isEqualTo(RestrictionType.CELL)
             assertThat(comment).isEqualTo("They keep fighting")
-            assertThat(authorisedBy).isEqualTo(expectedUsername)
-            assertThat(updatedBy).isEqualTo(expectedUsername)
+            assertThat(authorisedBy).isEqualTo(EXPECTED_USERNAME)
+            assertThat(updatedBy).isEqualTo(EXPECTED_USERNAME)
             assertThat(whenCreated).isEqualTo(nonAssociation.whenCreated)
             assertThat(whenUpdated).isEqualTo(nonAssociation.whenCreated)
 
@@ -333,7 +333,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .uri(url)
         .headers(
           setAuthorisation(
-            user = expectedUsername,
+            user = EXPECTED_USERNAME,
             roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write", "read"),
           ),
@@ -368,7 +368,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .uri(url)
         .headers(
           setAuthorisation(
-            user = expectedUsername,
+            user = EXPECTED_USERNAME,
             roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write", "read"),
           ),
@@ -416,7 +416,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .uri(url)
         .headers(
           setAuthorisation(
-            user = expectedUsername,
+            user = EXPECTED_USERNAME,
             roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write", "read"),
           ),
@@ -552,7 +552,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           "restrictionType": "${nonAssociation.restrictionType}",
           "restrictionTypeDescription": "${nonAssociation.restrictionType.description}",
           "comment": "$updatedComment",
-          "updatedBy": "$expectedUsername",
+          "updatedBy": "$EXPECTED_USERNAME",
           "isClosed": false,
           "closedReason": null,
           "closedBy": null,
@@ -564,7 +564,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .uri(url)
         .headers(
           setAuthorisation(
-            user = expectedUsername,
+            user = EXPECTED_USERNAME,
             roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write", "read"),
           ),
@@ -1135,10 +1135,10 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           "restrictionType": "${nonAssociation.restrictionType}",
           "restrictionTypeDescription": "${nonAssociation.restrictionType.description}",
           "comment": "${nonAssociation.comment}",
-          "updatedBy": "$expectedUsername",
+          "updatedBy": "$EXPECTED_USERNAME",
           "isClosed": true,
           "closedReason": "$closedReason",
-          "closedBy": $expectedUsername,
+          "closedBy": $EXPECTED_USERNAME,
           "closedAt": "${LocalDateTime.now(clock)}"
         }
         """
@@ -1147,7 +1147,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .uri(format(url, nonAssociation.id))
         .headers(
           setAuthorisation(
-            user = expectedUsername,
+            user = EXPECTED_USERNAME,
             roles = listOf("ROLE_WRITE_NON_ASSOCIATIONS"),
             scopes = listOf("write", "read"),
           ),
@@ -1313,7 +1313,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           "restrictionType": "${naToBeReopened.restrictionType}",
           "restrictionTypeDescription": "${naToBeReopened.restrictionType.description}",
           "comment": "$reopenReason",
-          "updatedBy": "$expectedUsername",
+          "updatedBy": "$EXPECTED_USERNAME",
           "isClosed": false,
           "closedReason": null,
           "closedBy": null,
@@ -1325,7 +1325,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .uri(format(url, naToBeReopened.id))
         .headers(
           setAuthorisation(
-            user = expectedUsername,
+            user = EXPECTED_USERNAME,
             roles = listOf("ROLE_REOPEN_NON_ASSOCIATIONS"),
             scopes = listOf("write", "read"),
           ),
@@ -1475,7 +1475,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .uri(format(url, nonAssociation.id))
         .headers(
           setAuthorisation(
-            user = expectedUsername,
+            user = EXPECTED_USERNAME,
             roles = listOf("ROLE_DELETE_NON_ASSOCIATIONS"),
             scopes = listOf("write", "read"),
           ),
@@ -2753,7 +2753,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         A2222AA -- A3333AA
         A1111AA -- A4444AA
         A4444AA -- A2222AA : closed
-      */
+       */
       createNonAssociation("A0000AA", "A1111AA") // never returned
       createNonAssociation("A0000AA", "A2222AA") // returned
       createNonAssociation("A2222AA", "A3333AA") // never returned
@@ -3106,7 +3106,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         A2222AA -- A3333AA
         A1111AA -- A4444AA
         A4444AA -- A2222AA : closed
-      */
+       */
       createNonAssociation("A0000AA", "A1111AA") // never returned
       createNonAssociation("A0000AA", "A2222AA") // returned
       createNonAssociation("A2222AA", "A3333AA") // returned
