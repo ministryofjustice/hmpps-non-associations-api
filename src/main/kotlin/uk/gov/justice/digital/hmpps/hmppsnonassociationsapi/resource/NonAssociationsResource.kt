@@ -85,6 +85,7 @@ class NonAssociationsResource(
       ),
     ],
   )
+  @Suppress("ktlint:standard:function-signature")
   fun getPrisonerNonAssociations(
     @Schema(description = "The offender prisoner number", example = "A1234BC", required = true)
     @PathVariable
@@ -238,6 +239,7 @@ class NonAssociationsResource(
       ),
     ],
   )
+  @Suppress("ktlint:standard:function-signature")
   fun getNonAssociations(
     @Schema(
       description = "Whether to include open non-associations or not",
@@ -340,6 +342,7 @@ class NonAssociationsResource(
       ),
     ],
   )
+  @Suppress("ktlint:standard:function-signature")
   fun getNonAssociationsBetweenPrisoners(
     @ArraySchema(
       arraySchema = Schema(description = "Two or more distinct prisoner numbers"),
@@ -425,6 +428,7 @@ class NonAssociationsResource(
       ),
     ],
   )
+  @Suppress("ktlint:standard:function-signature")
   fun getNonAssociationsInvolvingPrisoners(
     @ArraySchema(
       arraySchema = Schema(description = "One or more distinct prisoner numbers"),
