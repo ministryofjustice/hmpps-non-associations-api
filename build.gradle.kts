@@ -41,7 +41,7 @@ dependencies {
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
   testImplementation("org.wiremock:wiremock-standalone:3.3.1")
-  testImplementation("org.testcontainers:postgresql:1.19.3")
+  testImplementation("org.testcontainers:postgresql:1.19.4")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.3")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.3")
@@ -49,7 +49,7 @@ dependencies {
   testImplementation("io.swagger.parser.v3:swagger-parser:2.1.20")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  testImplementation("org.testcontainers:localstack:1.19.3")
+  testImplementation("org.testcontainers:localstack:1.19.4")
 }
 
 kotlin {
