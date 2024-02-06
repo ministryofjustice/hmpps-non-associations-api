@@ -26,7 +26,6 @@ import java.util.*
 @Configuration
 class WebClientConfiguration(
   @Value("\${api.base.url.oauth}") private val authBaseUri: String,
-  @Value("\${api.base.url.prison}") private val prisonRootUri: String,
   @Value("\${api.base.url.offender-search}") private val offenderSearchUri: String,
 ) {
 
@@ -37,15 +36,6 @@ class WebClientConfiguration(
       .filter(addAuthHeaderFilterFunction())
       .build()
   }
-
-  @Bean
-  fun prisonWebClientClientCredentials(
-    @Qualifier(value = "authorizedClientManagerAppScope") authorizedClientManager: OAuth2AuthorizedClientManager,
-    builder: WebClient.Builder,
-  ): WebClient = getOAuthWebClient(authorizedClientManager, builder, prisonRootUri)
-
-  @Bean
-  fun prisonWebClient(builder: WebClient.Builder): WebClient = createForwardAuthWebClient(builder, prisonRootUri)
 
   @Bean
   fun offenderSearchClientCredentials(

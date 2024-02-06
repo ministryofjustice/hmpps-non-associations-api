@@ -11,7 +11,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.data.domain.Sort
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.FeatureFlagsConfig
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListOptions
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationsSort
@@ -26,22 +25,21 @@ import java.time.format.DateTimeFormatter
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation as NonAssociationDTO
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
+/**
+ * This class contains unit tests for the NonAssociationsService class.
+ */
 class NonAssociationsServiceTest {
 
   private val nonAssociationsRepository: NonAssociationsRepository = mock()
   private val offenderSearchService: OffenderSearchService = mock()
-  private val prisonApiService: PrisonApiService = mock()
   private val authenticationFacade: AuthenticationFacade = mock()
   private val telemetryClient: TelemetryClient = mock()
 
-  private val featureFlagsConfig: FeatureFlagsConfig = mock()
   private val service = NonAssociationsService(
     nonAssociationsRepository,
     offenderSearchService,
     authenticationFacade,
-    prisonApiService,
     telemetryClient,
-    featureFlagsConfig,
     TestBase.clock,
   )
 

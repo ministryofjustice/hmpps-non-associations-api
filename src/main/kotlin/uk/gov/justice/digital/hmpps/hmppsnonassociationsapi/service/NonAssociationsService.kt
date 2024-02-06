@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.FeatureFlagsConfig
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationAlreadyClosedException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationAlreadyOpenException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationNotFoundException
@@ -49,9 +48,7 @@ class NonAssociationsService(
   private val nonAssociationsRepository: NonAssociationsRepository,
   private val offenderSearch: OffenderSearchService,
   private val authenticationFacade: AuthenticationFacade,
-  private val prisonApiService: PrisonApiService,
   private val telemetryClient: TelemetryClient,
-  private val featureFlagsConfig: FeatureFlagsConfig,
   private val clock: Clock,
 ) {
 
@@ -265,16 +262,11 @@ class NonAssociationsService(
     currentPrisonOnly: Boolean = true,
     excludeInactive: Boolean = true,
   ): LegacyPrisonerNonAssociations {
-    return when (featureFlagsConfig.legacyEndpointNomisSourceOfTruth) {
-      true -> prisonApiService.getNonAssociationDetails(prisonerNumber, currentPrisonOnly, excludeInactive)
-      false -> {
-        val inclusion = if (excludeInactive) NonAssociationListInclusion.OPEN_ONLY else NonAssociationListInclusion.ALL
-        return getPrisonerNonAssociations(
-          prisonerNumber,
-          NonAssociationListOptions(inclusion = inclusion, includeOtherPrisons = !currentPrisonOnly),
-        ).toLegacy()
-      }
-    }
+    val inclusion = if (excludeInactive) NonAssociationListInclusion.OPEN_ONLY else NonAssociationListInclusion.ALL
+    return getPrisonerNonAssociations(
+      prisonerNumber,
+      NonAssociationListOptions(inclusion = inclusion, includeOtherPrisons = !currentPrisonOnly),
+    ).toLegacy()
   }
 
   private fun filterByPrisonId(nonAssociations: List<NonAssociationJPA>, prisonId: String): List<NonAssociationJPA> {

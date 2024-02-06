@@ -26,6 +26,3 @@ spring:
 
   jpa:
     show-sql: true
-
-feature:
-  legacy-endpoint-nomis-source-of-truth: false

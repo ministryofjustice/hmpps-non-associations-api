@@ -13,7 +13,6 @@ Environment variables to be set are as follows:
 
 ```
 API_BASE_URL_OAUTH=https://sign-in-dev.hmpps.service.justice.gov.uk/auth
-API_BASE_URL_PRISON=https://prison-api-dev.prison.service.justice.gov.uk
 NON_ASSOCIATIONS_API_CLIENT_ID=[choose a suitable hmpps-auth client]
 NON_ASSOCIATIONS_API_CLIENT_SECRET=
 ```
