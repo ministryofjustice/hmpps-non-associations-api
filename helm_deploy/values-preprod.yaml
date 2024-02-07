@@ -10,9 +10,7 @@ generic-service:
   env:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     API_BASE_URL_OAUTH: https://sign-in-preprod.hmpps.service.justice.gov.uk/auth
-    API_BASE_URL_PRISON: https://prison-api-preprod.prison.service.justice.gov.uk
     API_BASE_URL_OFFENDER_SEARCH: https://prisoner-search-preprod.prison.service.justice.gov.uk
-    FEATURE_LEGACY_ENDPOINT_NOMIS_SOURCE_OF_TRUTH: false
 
 generic-prometheus-alerts:
   alertSeverity: digital-prison-service-dev

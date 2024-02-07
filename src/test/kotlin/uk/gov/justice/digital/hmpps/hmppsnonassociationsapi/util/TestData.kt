@@ -8,20 +8,20 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NO_CLOSURE_REASON_PROVIDED
 import java.time.Clock
 import java.time.LocalDateTime
 
 /**
  * Creates a new non-association entity
  */
+
 fun genNonAssociation(
   id: Long? = null,
   firstPrisonerNumber: String,
   secondPrisonerNumber: String,
   createTime: LocalDateTime = LocalDateTime.now(TestBase.clock).minusDays(1),
   closed: Boolean = false,
-  closedReason: String? = NO_CLOSURE_REASON_PROVIDED,
+  closedReason: String? = "No closure reason provided",
   updatedBy: String? = SYSTEM_USERNAME,
   clock: Clock = TestBase.clock,
   authorisedBy: String? = null,

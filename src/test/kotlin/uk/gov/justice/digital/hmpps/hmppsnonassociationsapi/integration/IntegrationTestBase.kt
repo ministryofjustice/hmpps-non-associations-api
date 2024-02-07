@@ -16,7 +16,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.HmppsAuthMockServer
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.OffenderSearchMockServer
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.PrisonApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import java.time.format.DateTimeFormatter
 
@@ -45,9 +44,6 @@ abstract class IntegrationTestBase : TestBase() {
     val offenderSearchMockServer = OffenderSearchMockServer()
 
     @JvmField
-    val prisonApiMockServer = PrisonApiMockServer()
-
-    @JvmField
     val hmppsAuthMockServer = HmppsAuthMockServer()
 
     @BeforeAll
@@ -57,13 +53,11 @@ abstract class IntegrationTestBase : TestBase() {
       hmppsAuthMockServer.stubGrantToken()
 
       offenderSearchMockServer.start()
-      prisonApiMockServer.start()
     }
 
     @AfterAll
     @JvmStatic
     fun stopMocks() {
-      prisonApiMockServer.stop()
       hmppsAuthMockServer.stop()
     }
 

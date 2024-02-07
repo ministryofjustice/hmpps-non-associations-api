@@ -86,7 +86,7 @@ class NonAssociationsRepositoryTest : TestBase() {
   }
 
   @Nested
-  inner class `find any between prisoner numbers`() {
+  inner class `find any between prisoner numbers` {
     @Test
     fun openNonAssociations() {
       repository.saveAll(
@@ -177,7 +177,7 @@ class NonAssociationsRepositoryTest : TestBase() {
   }
 
   @Nested
-  inner class `find any involving prisoner numbers`() {
+  inner class `find any involving prisoner numbers` {
     @Test
     fun openNonAssociations() {
       repository.saveAll(
