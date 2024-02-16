@@ -24,7 +24,7 @@ dependencies {
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:3.1.1")
   implementation("io.opentelemetry:opentelemetry-api:1.35.0")
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.0.0")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.1.0")
 
   implementation("org.flywaydb:flyway-core")
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
