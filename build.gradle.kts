@@ -40,7 +40,7 @@ dependencies {
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-  testImplementation("org.wiremock:wiremock-standalone:3.3.1")
+  testImplementation("org.wiremock:wiremock-standalone:3.4.0")
   testImplementation("org.testcontainers:postgresql:1.19.5")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.5")
