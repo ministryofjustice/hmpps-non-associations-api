@@ -10,9 +10,24 @@ Using the library
 
 Typescript applications can install the library in several ways:
 
+### Install from npmjs.com
+
+This is the simplest method.
+
+```shell
+npm install --save @ministryofjustice/hmpps-non-associations-api
+```
+
+Pros:
+- uses the most standard, public registry
+- dependency upgrade tools will process new releases
+
+Cons:
+- publishing requires access token
+
 ### Install from GitHub Releases
 
-This is the recommended method currently.
+This is a fallback method in case we lose ability to publish to npmjs.com.
 
 Find the [latest release version](https://github.com/ministryofjustice/hmpps-non-associations-api/releases)
 and copy the link to the `node-client.tgz` asset.
