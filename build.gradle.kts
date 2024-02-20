@@ -35,7 +35,7 @@ dependencies {
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.1")
 
   implementation("com.zaxxer:HikariCP:5.1.0")
-  runtimeOnly("org.postgresql:postgresql:42.7.1")
+  runtimeOnly("org.postgresql:postgresql:42.7.2")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
