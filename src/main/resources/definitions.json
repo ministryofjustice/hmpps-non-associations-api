@@ -1,0 +1,174 @@
+{
+  "id": "analyst-prison-reports",
+  "name": "Prison Reports",
+  "description": "Non-associations prison reports",
+  "metadata": {
+    "author": "hmpps-non-associations",
+    "version": "0.0.1",
+    "owner": "hmpps-non-associations"
+  },
+  "datasource": [
+    {
+      "id": "postgres",
+      "name": "PostgreSQL",
+      "connection": "postgres"
+    }
+  ],
+  "dataset": [
+    {
+      "id": "all",
+      "name": "All",
+      "query": "SELECT na.first_prisoner_role, na.second_prisoner_role, na.reason, na.restriction_type, DATE(na.when_created) AS created_date, DATE(na.when_updated) AS updated_date, na.is_closed, DATE(na.closed_at) AS closed_date FROM non_association AS na ORDER BY na.when_created DESC",
+      "schema": {
+        "field": [
+          {
+            "name": "first_prisoner_role",
+            "type": "string"
+          },
+          {
+            "name": "second_prisoner_role",
+            "type": "string"
+          },
+          {
+            "name": "reason",
+            "type": "string"
+          },
+          {
+            "name": "restriction_type",
+            "type": "string"
+          },
+          {
+            "name": "created_date",
+            "type": "date"
+          },
+          {
+            "name": "updated_date",
+            "type": "date"
+          },
+          {
+            "name": "is_closed",
+            "type": "boolean"
+          },
+          {
+            "name": "closed_date",
+            "type": "date"
+          }
+        ]
+      }
+    }
+  ],
+  "report": [
+    {
+      "id": "all",
+      "name": "Last Week",
+      "description": "All non-associations, in the past week",
+      "version": "0.1.0",
+      "dataset": "$ref:all",
+      "policy": [],
+      "render": "HTML",
+      "specification": {
+        "template": "list",
+        "field": [
+          {
+            "name": "$ref:first_prisoner_role",
+            "display": "First prisoner role",
+            "sortable": true,
+            "defaultsort": true,
+            "filter": {
+              "type": "Radio",
+              "dynamicoptions": {
+                "minimumLength": 2,
+                "returnAsStaticOptions": true
+              }
+            }
+          },
+          {
+            "name": "$ref:second_prisoner_role",
+            "display": "Second prisoner role",
+            "sortable": true,
+            "defaultsort": true,
+            "filter": {
+              "type": "Radio",
+              "dynamicoptions": {
+                "minimumLength": 2,
+                "returnAsStaticOptions": true
+              }
+            }
+          },
+          {
+            "name": "$ref:reason",
+            "display": "Reason",
+            "sortable": true,
+            "defaultsort": true,
+            "filter": {
+              "type": "Radio",
+              "dynamicoptions": {
+                "minimumLength": 2,
+                "returnAsStaticOptions": true
+              }
+            }
+          },
+          {
+            "name": "$ref:restriction_type",
+            "display": "Restriction type",
+            "sortable": true,
+            "defaultsort": true,
+            "filter": {
+              "type": "Radio",
+              "dynamicoptions": {
+                "minimumLength": 2,
+                "returnAsStaticOptions": true
+              }
+            }
+          },
+          {
+            "name": "$ref:created_date",
+            "display": "Creation Date",
+            "sortable": true,
+            "defaultsort": false,
+            "filter": {
+              "type": "daterange",
+              "default": "today(-1,weeks) - today()"
+            }
+          },
+          {
+            "name": "$ref:updated_date",
+            "display": "Update Date",
+            "sortable": true,
+            "defaultsort": false,
+            "filter": {
+              "type": "daterange",
+              "default": "today(-1,weeks) - today()"
+            }
+          },
+          {
+            "name": "$ref:is_closed",
+            "display": "Closed non-association?",
+            "sortable": true
+          },
+          {
+            "name": "$ref:closed_date",
+            "display": "Close Date",
+            "sortable": true,
+            "defaultsort": false,
+            "filter": {
+              "type": "daterange",
+              "default": "today(-1,weeks) - today()"
+            }
+          }
+        ]
+      },
+      "destination": []
+    }
+  ],
+  "policy": [
+    {
+      "id": "default",
+      "type": "row-level",
+      "action": [
+        "TRUE"
+      ],
+      "rule": []
+    }
+  ]
+}
