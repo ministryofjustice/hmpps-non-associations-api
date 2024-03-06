@@ -1,6 +1,6 @@
 {
-  "id": "analyst-prison-reports",
-  "name": "Prison Reports",
+  "id": "non-associations",
+  "name": "Non-associations",
   "description": "Non-associations prison reports",
   "metadata": {
     "author": "hmpps-non-associations",
@@ -47,7 +47,7 @@
           },
           {
             "name": "is_closed",
-            "type": "boolean"
+            "type": "string"
           },
           {
             "name": "closed_date",
@@ -161,14 +161,5 @@
       "destination": []
     }
   ],
-  "policy": [
-    {
-      "id": "default",
-      "type": "row-level",
-      "action": [
-        "TRUE"
-      ],
-      "rule": []
-    }
-  ]
+  "policy": []
 }
