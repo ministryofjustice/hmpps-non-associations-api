@@ -23,7 +23,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-validation")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:3.1.1")
-  implementation("io.opentelemetry:opentelemetry-api:1.35.0")
+  implementation("io.opentelemetry:opentelemetry-api:1.36.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.1.0")
 
   implementation("org.flywaydb:flyway-core")
@@ -32,7 +32,7 @@ dependencies {
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
 
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.1")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.2")
 
   implementation("com.zaxxer:HikariCP:5.1.0")
   runtimeOnly("org.postgresql:postgresql:42.7.2")
