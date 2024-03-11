@@ -18,7 +18,7 @@
     {
       "id": "all",
       "name": "All",
-      "query": "SELECT na.first_prisoner_number, na.first_prisoner_role, na.second_prisoner_number, na.second_prisoner_role, na.reason, na.restriction_type, DATE(na.when_created) AS created_date, DATE(na.when_updated) AS updated_date, na.is_closed, DATE(na.closed_at) AS closed_date FROM non_association AS na ORDER BY na.when_created DESC",
+      "query": "SELECT na.first_prisoner_number, na.first_prisoner_role, na.second_prisoner_number, na.second_prisoner_role, na.reason, na.restriction_type, DATE(na.when_created) AS created_date, DATE(na.when_updated) AS updated_date, TEXT(na.is_closed) AS is_closed, DATE(na.closed_at) AS closed_date FROM non_association AS na ORDER BY na.when_created DESC",
       "schema": {
         "field": [
           {
