@@ -15,11 +15,9 @@ configurations {
 }
 
 dependencies {
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:0.2.1")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-  implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-  implementation("org.springframework.boot:spring-boot-starter-security")
-  implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-validation")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:3.1.1")
@@ -35,13 +33,13 @@ dependencies {
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.1")
 
   implementation("com.zaxxer:HikariCP:5.1.0")
-  runtimeOnly("org.postgresql:postgresql:42.7.2")
+  runtimeOnly("org.postgresql:postgresql")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
   testImplementation("org.wiremock:wiremock-standalone:3.4.2")
-  testImplementation("org.testcontainers:postgresql:1.19.7")
+
   testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.5")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.5")
@@ -50,6 +48,7 @@ dependencies {
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("org.testcontainers:localstack:1.19.7")
+  testImplementation("org.testcontainers:postgresql:1.19.7")
 }
 
 kotlin {

@@ -7,6 +7,8 @@ class TopicHealthCheckTest : SqsIntegrationTestBase() {
 
   @Test
   fun `Outbound topic health ok`() {
+    hmppsAuthMockServer.stubHealthPing(200)
+    offenderSearchMockServer.stubHealthPing(200)
     webTestClient.get()
       .uri("/health")
       .exchange()

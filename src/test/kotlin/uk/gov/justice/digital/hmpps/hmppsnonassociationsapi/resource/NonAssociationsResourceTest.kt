@@ -3240,6 +3240,72 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
   }
 
+  @Test
+  fun `when an SAR is made non association data is returned`() {
+    val nonAssociation = createNonAssociation()
+
+    offenderSearchMockServer.stubSearchByPrisonerNumbers(
+      listOf(
+        nonAssociation.firstPrisonerNumber,
+        nonAssociation.secondPrisonerNumber,
+      ),
+      listOf(
+        offenderSearchPrisoners[nonAssociation.firstPrisonerNumber]!!,
+        offenderSearchPrisoners[nonAssociation.secondPrisonerNumber]!!,
+      ),
+    )
+
+    webTestClient.get()
+      .uri("/subject-access-request?prn=${nonAssociation.firstPrisonerNumber}")
+      .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json(
+        // language=json
+        """
+          {
+            "content": {
+              "prisonerNumber": "A1234BC",
+              "firstName": "John",
+              "lastName": "Doe",
+              "prisonId": "MDI",
+              "prisonName": "Moorland",
+              "cellLocation": "MDI-A-1",
+              "openCount": 1,
+              "closedCount": 0,
+              "nonAssociations": [
+                {
+                  "role": "VICTIM",
+                  "roleDescription": "Victim",
+                  "reason": "BULLYING",
+                  "reasonDescription": "Bullying",
+                  "restrictionType": "CELL",
+                  "restrictionTypeDescription": "Cell only",
+                  "comment": "They keep fighting",
+                  "authorisedBy": "Mr Bobby",
+                  "updatedBy": "A_DPS_USER",
+                  "isClosed": false,
+                  "otherPrisonerDetails": {
+                    "prisonerNumber": "D5678EF",
+                    "role": "PERPETRATOR",
+                    "roleDescription": "Perpetrator",
+                    "firstName": "Merlin",
+                    "lastName": "Somerplumbs",
+                    "prisonId": "MDI",
+                    "prisonName": "Moorland",
+                    "cellLocation": "MDI-A-2"
+                  },
+                  "isOpen": true
+                }
+              ]
+            }
+          }
+          """,
+        false,
+      )
+  }
+
   private fun createNonAssociation(
     firstPrisonerNumber: String = "A1234BC",
     secondPrisonerNumber: String = "D5678EF",
