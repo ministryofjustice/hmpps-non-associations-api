@@ -6,7 +6,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.hmpps.kotlin.health.HealthPingCheck
 
 @Component("offenderSearchApi")
-class NomisApiHealth(@Qualifier("offenderSearchHealthWebClient") webClient: WebClient) : HealthPingCheck(webClient)
+class OffenderSearchApiHealth(@Qualifier("offenderSearchHealthWebClient") webClient: WebClient) : HealthPingCheck(webClient)
 
 @Component("hmppsAuthApi")
 class HmppsAuthApiHealth(@Qualifier("authHealthWebClient") webClient: WebClient) : HealthPingCheck(webClient)
