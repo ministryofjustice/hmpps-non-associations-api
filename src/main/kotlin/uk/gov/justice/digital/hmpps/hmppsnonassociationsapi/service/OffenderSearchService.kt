@@ -10,13 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.O
 @Service
 class OffenderSearchService(
   private val offenderSearchWebClient: WebClient,
-  private val offenderSearchClientCredentials: WebClient,
 ) {
-
-  private fun getClient(useClientCredentials: Boolean = false): WebClient {
-    return if (useClientCredentials) offenderSearchClientCredentials else offenderSearchWebClient
-  }
-
   /**
    * Search prisoners by their prisoner number
    *
@@ -24,11 +18,10 @@ class OffenderSearchService(
    */
   fun searchByPrisonerNumbers(
     prisonerNumbers: Collection<String>,
-    useClientCredentials: Boolean = true,
   ): Map<String, OffenderSearchPrisoner> {
     val requestBody = mapOf("prisonerNumbers" to prisonerNumbers.toSet())
 
-    val foundPrisoners = getClient(useClientCredentials)
+    val foundPrisoners = offenderSearchWebClient
       .post()
       .uri("/prisoner-search/prisoner-numbers")
       .header("Content-Type", "application/json")

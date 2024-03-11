@@ -98,7 +98,7 @@ class NonAssociationsServiceTest {
         )
       }
 
-      whenever(offenderSearchService.searchByPrisonerNumbers(any(), any())).thenReturn(offenderSearchPrisoners)
+      whenever(offenderSearchService.searchByPrisonerNumbers(any())).thenReturn(offenderSearchPrisoners)
       whenever(nonAssociationsRepository.findAllByFirstPrisonerNumberOrSecondPrisonerNumber(eq(keyPrisoner), eq(keyPrisoner)))
         .thenReturn(nonAssociations)
     }

@@ -6,6 +6,8 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.post
+import com.github.tomakehurst.wiremock.http.HttpHeader
+import com.github.tomakehurst.wiremock.http.HttpHeaders
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
 
 class OffenderSearchMockServer : WireMockServer(WIREMOCK_PORT) {
@@ -16,11 +18,12 @@ class OffenderSearchMockServer : WireMockServer(WIREMOCK_PORT) {
   private val mapper = ObjectMapper().findAndRegisterModules()
 
   fun stubHealthPing(status: Int) {
+    val stat = if (status == 200) "UP" else "DOWN"
     stubFor(
       get("/health/ping").willReturn(
         aResponse()
-          .withHeader("Content-Type", "application/json")
-          .withBody(if (status == 200) "pong" else "some error")
+          .withHeaders(HttpHeaders(HttpHeader("Content-Type", "application/json")))
+          .withBody("""{"status": "$stat"}""")
           .withStatus(status),
       ),
     )
