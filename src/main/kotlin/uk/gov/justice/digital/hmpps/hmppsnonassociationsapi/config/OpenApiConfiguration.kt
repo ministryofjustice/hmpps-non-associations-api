@@ -22,14 +22,14 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class OpenApiConfiguration(
+open class OpenApiConfiguration(
   buildProperties: BuildProperties,
   @Value("\${api.base.url.oauth}") val oauthUrl: String,
 ) {
   private val version: String = buildProperties.version
 
   @Bean
-  fun customOpenAPI(): OpenAPI = OpenAPI()
+  open fun customOpenAPI(): OpenAPI = OpenAPI()
     .servers(
       listOf(
         Server().url("/").description("Current url"),
@@ -77,7 +77,7 @@ class OpenApiConfiguration(
   }
 
   @Bean
-  fun openAPICustomiser(): OpenApiCustomizer {
+  open fun openAPICustomiser(): OpenApiCustomizer {
     PrimitiveType.enablePartialTime() // Prevents generation of a LocalTime schema which causes conflicts with java.time.LocalTime
     return OpenApiCustomizer {
       it.components.schemas.forEach { (_, schema: Schema<*>) ->
