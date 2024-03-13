@@ -28,9 +28,9 @@ dependencies {
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
   implementation("org.hibernate.orm:hibernate-community-dialects:6.4.4.Final")
 
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0")
 
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.2")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.0")
 
   implementation("com.zaxxer:HikariCP:5.1.0")
   runtimeOnly("org.postgresql:postgresql")
