@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util
 
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
+import uk.gov.justice.digital.hmpps.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
