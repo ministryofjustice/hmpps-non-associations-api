@@ -106,6 +106,7 @@
           {
             "name": "$ref:first_prisoner_number",
             "display": "First prisoner number",
+            "formula": "make_url('https://prisoner-${env}.digital.prison.service.justice.gov.uk/prisoner/${first_prisoner_number}',${first_prisoner_number},TRUE)",
             "visible": "false",
             "sortable": true,
             "defaultsort": true
@@ -119,6 +120,7 @@
           {
             "name": "$ref:second_prisoner_number",
             "display": "Second prisoner number",
+            "formula": "make_url('https://prisoner-${env}.digital.prison.service.justice.gov.uk/prisoner/${second_prisoner_number}',${second_prisoner_number},TRUE)",
             "visible": "false",
             "sortable": true,
             "defaultsort": true
