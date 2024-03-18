@@ -40,7 +40,7 @@ dependencies {
 
   testImplementation("org.wiremock:wiremock-standalone:3.4.2")
 
-  testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
+  testImplementation("org.awaitility:awaitility-kotlin:4.2.1")
   testImplementation("io.jsonwebtoken:jjwt-impl:0.12.5")
   testImplementation("io.jsonwebtoken:jjwt-jackson:0.12.5")
   testImplementation("org.mockito:mockito-inline:5.2.0")
