@@ -84,10 +84,36 @@
             "defaultsort": true,
             "filter": {
               "type": "Radio",
-              "dynamicoptions": {
-                "minimumLength": 2,
-                "returnAsStaticOptions": true
-              }
+              "staticoptions": [
+                {
+                  "name": "BULLYING",
+                  "display": "Bullying"
+                },
+                {
+                  "name": "GANG_RELATED",
+                  "display": "Gang related"
+                },
+                {
+                  "name": "ORGANISED_CRIME",
+                  "display": "Organised crime"
+                },
+                {
+                  "name": "LEGAL_REQUEST",
+                  "display": "Police or legal request"
+                },
+                {
+                  "name": "THREAT",
+                  "display": "Threat"
+                },
+                {
+                  "name": "VIOLENCE",
+                  "display": "Violence"
+                },
+                {
+                  "name": "OTHER",
+                  "display": "Other"
+                }
+              ]
             }
           },
           {
@@ -97,10 +123,20 @@
             "defaultsort": true,
             "filter": {
               "type": "Radio",
-              "dynamicoptions": {
-                "minimumLength": 2,
-                "returnAsStaticOptions": true
-              }
+              "staticoptions": [
+                {
+                  "name": "CELL",
+                  "display": "Cell only"
+                },
+                {
+                  "name": "LANDING",
+                  "display": "Cell and landing"
+                },
+                {
+                  "name": "WING",
+                  "display": "Cell, landing and wing"
+                }
+              ]
             }
           },
           {
@@ -115,7 +151,28 @@
             "name": "$ref:first_prisoner_role",
             "display": "First prisoner role",
             "sortable": true,
-            "defaultsort": true
+            "defaultsort": true,
+            "filter": {
+              "type": "Radio",
+              "staticoptions": [
+                {
+                  "name": "VICTIM",
+                  "display": "Victim"
+                },
+                {
+                  "name": "PERPETRATOR",
+                  "display": "Perpetrator"
+                },
+                {
+                  "name": "NOT_RELEVANT",
+                  "display": "Not relevant"
+                },
+                {
+                  "name": "UNKNOWN",
+                  "display": "Unknown"
+                }
+              ]
+            }
           },
           {
             "name": "$ref:second_prisoner_number",
@@ -132,10 +189,24 @@
             "defaultsort": true,
             "filter": {
               "type": "Radio",
-              "dynamicoptions": {
-                "minimumLength": 2,
-                "returnAsStaticOptions": true
-              }
+              "staticoptions": [
+                {
+                  "name": "VICTIM",
+                  "display": "Victim"
+                },
+                {
+                  "name": "PERPETRATOR",
+                  "display": "Perpetrator"
+                },
+                {
+                  "name": "NOT_RELEVANT",
+                  "display": "Not relevant"
+                },
+                {
+                  "name": "UNKNOWN",
+                  "display": "Unknown"
+                }
+              ]
             }
           },
           {
@@ -162,10 +233,16 @@
             "sortable": true,
             "filter": {
               "type": "Radio",
-              "dynamicoptions": {
-                "minimumLength": 2,
-                "returnAsStaticOptions": true
-              }
+              "staticoptions": [
+                {
+                  "name": "false",
+                  "display": "Only open"
+                },
+                {
+                  "name": "true",
+                  "display": "Only closed"
+                }
+              ]
             }
           },
           {
