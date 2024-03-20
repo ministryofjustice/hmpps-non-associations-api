@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDO
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpHeaders
 import org.springframework.test.web.reactive.server.WebTestClient
-import uk.gov.justice.digital.hmpps.SYSTEM_USERNAME
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.HmppsAuthMockServer

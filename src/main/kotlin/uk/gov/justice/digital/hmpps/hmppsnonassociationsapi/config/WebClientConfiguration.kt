@@ -5,10 +5,11 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.web.reactive.function.client.WebClient
-import uk.gov.justice.digital.hmpps.SYSTEM_USERNAME
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import uk.gov.justice.hmpps.kotlin.auth.authorisedWebClient
 import uk.gov.justice.hmpps.kotlin.auth.healthWebClient
 import java.time.Duration
+import java.util.*
 
 @Configuration
 class WebClientConfiguration(
