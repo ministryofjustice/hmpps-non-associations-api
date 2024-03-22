@@ -233,6 +233,7 @@
             "sortable": true,
             "filter": {
               "type": "Radio",
+              "default": "false",
               "staticoptions": [
                 {
                   "name": "false",
