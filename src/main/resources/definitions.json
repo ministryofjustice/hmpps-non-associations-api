@@ -1,7 +1,7 @@
 {
   "id": "non-associations",
   "name": "Non-associations",
-  "description": "Non-associations prison reports",
+  "description": "Non-associations reports",
   "metadata": {
     "author": "hmpps-non-associations",
     "version": "0.0.1",
