@@ -1,0 +1,268 @@
+{
+  "id": "non-associations",
+  "name": "Non-associations",
+  "description": "Non-associations reports",
+  "metadata": {
+    "author": "hmpps-non-associations",
+    "version": "0.0.1",
+    "owner": "hmpps-non-associations"
+  },
+  "datasource": [
+    {
+      "id": "postgres",
+      "name": "PostgreSQL",
+      "connection": "postgres"
+    }
+  ],
+  "dataset": [
+    {
+      "id": "all",
+      "name": "All",
+      "query": "SELECT na.first_prisoner_number, na.first_prisoner_role, na.second_prisoner_number, na.second_prisoner_role, na.reason, na.restriction_type, na.when_created AS created_date, na.when_updated AS updated_date, TEXT(na.is_closed) AS is_closed, na.closed_at AS closed_date FROM non_association AS na ORDER BY na.when_created DESC",
+      "schema": {
+        "field": [
+          {
+            "name": "reason",
+            "type": "string"
+          },
+          {
+            "name": "restriction_type",
+            "type": "string"
+          },
+          {
+            "name": "first_prisoner_number",
+            "type": "string"
+          },
+          {
+            "name": "first_prisoner_role",
+            "type": "string"
+          },
+          {
+            "name": "second_prisoner_number",
+            "type": "string"
+          },
+          {
+            "name": "second_prisoner_role",
+            "type": "string"
+          },
+          {
+            "name": "created_date",
+            "type": "date"
+          },
+          {
+            "name": "updated_date",
+            "type": "date"
+          },
+          {
+            "name": "is_closed",
+            "type": "string"
+          },
+          {
+            "name": "closed_date",
+            "type": "date"
+          }
+        ]
+      }
+    }
+  ],
+  "report": [
+    {
+      "id": "all",
+      "name": "Last Week",
+      "description": "All non-associations, in the past week",
+      "version": "0.1.0",
+      "dataset": "$ref:all",
+      "policy": [],
+      "render": "HTML",
+      "specification": {
+        "template": "list",
+        "field": [
+          {
+            "name": "$ref:reason",
+            "display": "Reason",
+            "sortable": true,
+            "defaultsort": true,
+            "filter": {
+              "type": "Radio",
+              "staticoptions": [
+                {
+                  "name": "BULLYING",
+                  "display": "Bullying"
+                },
+                {
+                  "name": "GANG_RELATED",
+                  "display": "Gang related"
+                },
+                {
+                  "name": "ORGANISED_CRIME",
+                  "display": "Organised crime"
+                },
+                {
+                  "name": "LEGAL_REQUEST",
+                  "display": "Police or legal request"
+                },
+                {
+                  "name": "THREAT",
+                  "display": "Threat"
+                },
+                {
+                  "name": "VIOLENCE",
+                  "display": "Violence"
+                },
+                {
+                  "name": "OTHER",
+                  "display": "Other"
+                }
+              ]
+            }
+          },
+          {
+            "name": "$ref:restriction_type",
+            "display": "Restriction type",
+            "sortable": true,
+            "defaultsort": true,
+            "filter": {
+              "type": "Radio",
+              "staticoptions": [
+                {
+                  "name": "CELL",
+                  "display": "Cell only"
+                },
+                {
+                  "name": "LANDING",
+                  "display": "Cell and landing"
+                },
+                {
+                  "name": "WING",
+                  "display": "Cell, landing and wing"
+                }
+              ]
+            }
+          },
+          {
+            "name": "$ref:first_prisoner_number",
+            "display": "First prisoner number",
+            "formula": "make_url('https://prisoner-${env}.digital.prison.service.justice.gov.uk/prisoner/${first_prisoner_number}',${first_prisoner_number},TRUE)",
+            "visible": "false",
+            "sortable": true,
+            "defaultsort": true
+          },
+          {
+            "name": "$ref:first_prisoner_role",
+            "display": "First prisoner role",
+            "sortable": true,
+            "defaultsort": true,
+            "filter": {
+              "type": "Radio",
+              "staticoptions": [
+                {
+                  "name": "VICTIM",
+                  "display": "Victim"
+                },
+                {
+                  "name": "PERPETRATOR",
+                  "display": "Perpetrator"
+                },
+                {
+                  "name": "NOT_RELEVANT",
+                  "display": "Not relevant"
+                },
+                {
+                  "name": "UNKNOWN",
+                  "display": "Unknown"
+                }
+              ]
+            }
+          },
+          {
+            "name": "$ref:second_prisoner_number",
+            "display": "Second prisoner number",
+            "formula": "make_url('https://prisoner-${env}.digital.prison.service.justice.gov.uk/prisoner/${second_prisoner_number}',${second_prisoner_number},TRUE)",
+            "visible": "false",
+            "sortable": true,
+            "defaultsort": true
+          },
+          {
+            "name": "$ref:second_prisoner_role",
+            "display": "Second prisoner role",
+            "sortable": true,
+            "defaultsort": true,
+            "filter": {
+              "type": "Radio",
+              "staticoptions": [
+                {
+                  "name": "VICTIM",
+                  "display": "Victim"
+                },
+                {
+                  "name": "PERPETRATOR",
+                  "display": "Perpetrator"
+                },
+                {
+                  "name": "NOT_RELEVANT",
+                  "display": "Not relevant"
+                },
+                {
+                  "name": "UNKNOWN",
+                  "display": "Unknown"
+                }
+              ]
+            }
+          },
+          {
+            "name": "$ref:created_date",
+            "display": "Creation Date",
+            "formula" : "format_date(${created_date}, 'dd/MM/yyyy')",
+            "sortable": true,
+            "defaultsort": false,
+            "filter": {
+              "type": "daterange",
+              "default": "today(-1,weeks) - today()"
+            }
+          },
+          {
+            "name": "$ref:updated_date",
+            "display": "Update Date",
+            "formula" : "format_date(${updated_date}, 'dd/MM/yyyy')",
+            "sortable": true,
+            "defaultsort": false
+          },
+          {
+            "name": "$ref:is_closed",
+            "display": "Closed non-association?",
+            "sortable": true,
+            "filter": {
+              "type": "Radio",
+              "default": "false",
+              "staticoptions": [
+                {
+                  "name": "false",
+                  "display": "Only open"
+                },
+                {
+                  "name": "true",
+                  "display": "Only closed"
+                }
+              ]
+            }
+          },
+          {
+            "name": "$ref:closed_date",
+            "display": "Close Date",
+            "sortable": true,
+            "defaultsort": false
+          }
+        ]
+      },
+      "destination": []
+    }
+  ],
+  "policy": [
+    {
+      "id": "default",
+      "type": "row-level",
+      "action": ["TRUE"],
+      "rule": []
+    }
+  ]
+}
