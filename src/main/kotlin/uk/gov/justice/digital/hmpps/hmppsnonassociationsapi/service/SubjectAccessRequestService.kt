@@ -23,7 +23,7 @@ class SubjectAccessRequestService(
 
     val nonAssociations = try {
       nonAssociationsService.getPrisonerNonAssociations(prn, options)
-    } catch (e: NotFound)  {
+    } catch (e: NotFound) {
       throw SubjectAccessRequestNoContentException(prn)
     }
 
