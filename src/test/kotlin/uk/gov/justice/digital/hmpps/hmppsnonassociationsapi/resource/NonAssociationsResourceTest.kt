@@ -3312,7 +3312,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     val prisonerNumber = "A1111AA"
 
     webTestClient.get()
-      .uri("/subject-access-request?prn=${prisonerNumber}")
+      .uri("/subject-access-request?prn=$prisonerNumber")
       .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS")))
       .header("Content-Type", "application/json")
       .exchange()
