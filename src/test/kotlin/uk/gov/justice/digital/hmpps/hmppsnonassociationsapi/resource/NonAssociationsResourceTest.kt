@@ -3306,6 +3306,67 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       )
   }
 
+  @Test
+  fun `when SAR about prisoner with no non-associations, responds 204 No Content`() {
+    // Someone with no non-associations
+    val prisonerNumber = "A1111AA"
+
+    webTestClient.get()
+      .uri("/subject-access-request?prn=${prisonerNumber}")
+      .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isNoContent
+  }
+
+  @Test
+  fun `when SAR about prisoner with non-associations outside given date range`() {
+    val nonAssociation = createNonAssociation()
+    // Choose a toDate that would filter the non-association out
+    val toDate = nonAssociation.whenCreated.minusDays(42).toLocalDate()
+
+    offenderSearchMockServer.stubSearchByPrisonerNumbers(
+      listOf(
+        nonAssociation.firstPrisonerNumber,
+        nonAssociation.secondPrisonerNumber,
+      ),
+      listOf(
+        offenderSearchPrisoners[nonAssociation.firstPrisonerNumber]!!,
+        offenderSearchPrisoners[nonAssociation.secondPrisonerNumber]!!,
+      ),
+    )
+
+    webTestClient.get()
+      .uri("/subject-access-request?prn=${nonAssociation.firstPrisonerNumber}&toDate=$toDate")
+      .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isNoContent
+  }
+
+  @Test
+  fun `when SAR about prisoner with non-associations, but Offender Search doesn't know them, still responds 404 Not Found`() {
+    // Upstream problems with Offender Search API still lead with a 404 Not Found
+    // This is likely temporary and nothing to do with non-associations so we shouldn't
+    // mislead the clients by saying "no information on this subject"
+    val nonAssociation = createNonAssociation()
+
+    offenderSearchMockServer.stubSearchByPrisonerNumbers(
+      listOf(
+        nonAssociation.firstPrisonerNumber,
+        nonAssociation.secondPrisonerNumber,
+      ),
+      emptyList(),
+    )
+
+    webTestClient.get()
+      .uri("/subject-access-request?prn=${nonAssociation.firstPrisonerNumber}")
+      .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isNotFound
+  }
+
   private fun createNonAssociation(
     firstPrisonerNumber: String = "A1234BC",
     secondPrisonerNumber: String = "D5678EF",

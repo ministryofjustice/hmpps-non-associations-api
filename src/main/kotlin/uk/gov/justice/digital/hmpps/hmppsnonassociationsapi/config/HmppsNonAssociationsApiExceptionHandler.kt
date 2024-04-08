@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.CONFLICT
 import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
+import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.HttpStatus.UNAUTHORIZED
 import org.springframework.http.HttpStatus.UNSUPPORTED_MEDIA_TYPE
@@ -112,6 +113,20 @@ class HmppsNonAssociationsApiExceptionHandler {
         ErrorResponse(
           status = NOT_FOUND,
           userMessage = "Not Found: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
+  @ExceptionHandler(SubjectAccessRequestNoContentException::class)
+  fun handleSubjectAccessRequestNoContentException(e: SubjectAccessRequestNoContentException): ResponseEntity<ErrorResponse?>? {
+    log.debug("SAR No Content exception caught: {}", e.message)
+    return ResponseEntity
+      .status(NO_CONTENT)
+      .body(
+        ErrorResponse(
+          status = NO_CONTENT,
+          userMessage = "No Content: ${e.message}",
           developerMessage = e.message,
         ),
       )
@@ -321,3 +336,5 @@ class OpenNonAssociationAlreadyExistsException(prisoners: List<String>) : Except
 class NonAssociationNotFoundException(id: Long) : Exception("There is no non-association found for ID = $id")
 
 class NullPrisonerLocationsException(prisoners: List<String>) : Exception("Prisoners $prisoners have null locations")
+
+class SubjectAccessRequestNoContentException(prisoner: String) : Exception("No information on prisoner $prisoner")
