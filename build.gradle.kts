@@ -23,7 +23,7 @@ dependencies {
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:3.1.2")
   implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:3.7.2")
 
-  implementation("io.opentelemetry:opentelemetry-api:1.36.0")
+  implementation("io.opentelemetry:opentelemetry-api:1.37.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.2.0")
 
   implementation("org.flywaydb:flyway-core")
