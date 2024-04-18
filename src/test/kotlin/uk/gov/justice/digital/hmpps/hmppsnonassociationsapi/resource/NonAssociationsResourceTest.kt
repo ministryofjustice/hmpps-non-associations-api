@@ -3309,7 +3309,12 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   @Test
   fun `when SAR about prisoner with no non-associations, responds 204 No Content`() {
     // Someone with no non-associations
-    val prisonerNumber = "A1111AA"
+    val prisonerNumber = "G9012HI"
+
+    offenderSearchMockServer.stubSearchByPrisonerNumbers(
+      listOf(prisonerNumber),
+      listOf(offenderSearchPrisoners[prisonerNumber]!!),
+    )
 
     webTestClient.get()
       .uri("/subject-access-request?prn=$prisonerNumber")

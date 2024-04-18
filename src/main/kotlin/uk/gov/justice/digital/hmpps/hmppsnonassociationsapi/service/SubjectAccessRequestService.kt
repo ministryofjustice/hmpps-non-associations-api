@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.client.WebClientResponseException.NotFound
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.SubjectAccessRequestNoContentException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListInclusion
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListOptions
@@ -21,11 +20,7 @@ class SubjectAccessRequestService(
   ): HmppsSubjectAccessRequestContent? {
     val options = NonAssociationListOptions(includeOtherPrisons = true, inclusion = NonAssociationListInclusion.ALL)
 
-    val nonAssociations = try {
-      nonAssociationsService.getPrisonerNonAssociations(prn, options)
-    } catch (e: NotFound) {
-      throw SubjectAccessRequestNoContentException(prn)
-    }
+    val nonAssociations = nonAssociationsService.getPrisonerNonAssociations(prn, options)
 
     // Filter non-associations by given date range
     val content = nonAssociations.copy(
