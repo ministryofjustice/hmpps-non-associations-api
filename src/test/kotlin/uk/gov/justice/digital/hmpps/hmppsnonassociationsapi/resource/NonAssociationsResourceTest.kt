@@ -213,7 +213,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .expectStatus().isNotFound
         .expectBody()
         .jsonPath("userMessage").isEqualTo(
-          "Could not find the following prisoners: [X1111TT]",
+          "Missing prisoners: Could not find the following prisoners: [X1111TT]",
         )
     }
 
@@ -1984,7 +1984,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .expectStatus().isNotFound
         .expectBody()
         .jsonPath("userMessage")
-        .isEqualTo("Could not find the following prisoners: [${nonAssociation.firstPrisonerNumber}, ${nonAssociation.secondPrisonerNumber}]")
+        .isEqualTo("Missing prisoners: Could not find the following prisoners: [${nonAssociation.firstPrisonerNumber}, ${nonAssociation.secondPrisonerNumber}]")
     }
 
     @Test
