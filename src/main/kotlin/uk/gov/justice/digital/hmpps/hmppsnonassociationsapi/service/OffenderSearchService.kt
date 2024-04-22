@@ -1,10 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
-import org.springframework.web.server.ResponseStatusException
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.MissingPrisonersInSearchException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
 
 @Service
@@ -34,10 +33,7 @@ class OffenderSearchService(
     // Throw an exception if any of the prisoners searched were not found
     val missingPrisoners = prisonerNumbers.subtract(foundPrisoners.keys)
     if (missingPrisoners.any()) {
-      throw ResponseStatusException(
-        HttpStatus.NOT_FOUND,
-        "Could not find the following prisoners: $missingPrisoners",
-      )
+      throw MissingPrisonersInSearchException(missingPrisoners)
     }
 
     return foundPrisoners

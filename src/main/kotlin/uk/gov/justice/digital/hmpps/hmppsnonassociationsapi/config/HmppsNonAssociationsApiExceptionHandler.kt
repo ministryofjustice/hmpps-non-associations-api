@@ -161,6 +161,20 @@ class HmppsNonAssociationsApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(MissingPrisonersInSearchException::class)
+  fun handleMissingPrisonersInSearchException(e: MissingPrisonersInSearchException): ResponseEntity<ErrorResponse?>? {
+    log.debug("Missing prisoners in Offender Search API: {}", e.message)
+    return ResponseEntity
+      .status(NOT_FOUND)
+      .body(
+        ErrorResponse(
+          status = NOT_FOUND,
+          userMessage = "Missing prisoners: ${e.message}",
+          developerMessage = e.message,
+        ),
+      )
+  }
+
   @ExceptionHandler(ResponseStatusException::class)
   fun handleResponseStatusException(e: ResponseStatusException): ResponseEntity<ErrorResponse?>? {
     log.debug("Response status exception caught: {}", e.message)
@@ -338,3 +352,5 @@ class NonAssociationNotFoundException(id: Long) : Exception("There is no non-ass
 class NullPrisonerLocationsException(prisoners: List<String>) : Exception("Prisoners $prisoners have null locations")
 
 class SubjectAccessRequestNoContentException(prisoner: String) : Exception("No information on prisoner $prisoner")
+
+class MissingPrisonersInSearchException(prisoners: Iterable<String>) : Exception("Could not find the following prisoners: $prisoners")
