@@ -31,6 +31,7 @@ jobs:
       postgres_tag: << pipeline.parameters.postgres-version >>
       postgres_username: "non_associations"
       postgres_password: "non_associations"
+      postgres_db: "non_associations"
     steps:
       - checkout
       - restore_cache:
