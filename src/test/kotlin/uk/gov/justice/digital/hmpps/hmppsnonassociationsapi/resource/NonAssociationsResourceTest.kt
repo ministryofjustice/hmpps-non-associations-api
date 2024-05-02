@@ -3350,10 +3350,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   }
 
   @Test
-  fun `when SAR about prisoner with non-associations, but Offender Search doesn't know them, still responds 404 Not Found`() {
-    // Upstream problems with Offender Search API still lead with a 404 Not Found
-    // This is likely temporary and nothing to do with non-associations so we shouldn't
-    // mislead the clients by saying "no information on this subject"
+  fun `when SAR about prisoner with non-associations, but Offender Search doesn't know them, responds 209`() {
+    // A prisoner number not found in Offender Search API is different than "no non-associations found for this prisoner"
+    // and that's why it's not a 204 No Content: Responds 209 Subject Identifier is not recognised by this service.
     val nonAssociation = createNonAssociation()
 
     offenderSearchMockServer.stubSearchByPrisonerNumbers(
@@ -3369,7 +3368,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS")))
       .header("Content-Type", "application/json")
       .exchange()
-      .expectStatus().isNotFound
+      .expectStatus().isEqualTo(209)
   }
 
   private fun createNonAssociation(

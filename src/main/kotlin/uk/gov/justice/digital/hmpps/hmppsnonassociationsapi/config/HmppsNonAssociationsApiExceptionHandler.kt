@@ -132,6 +132,20 @@ class HmppsNonAssociationsApiExceptionHandler {
       )
   }
 
+  @ExceptionHandler(SubjectAccessRequestSubjectNotRecognisedException::class)
+  fun handleSubjectAccessRequestSubjectNotRecognisedException(e: SubjectAccessRequestSubjectNotRecognisedException): ResponseEntity<ErrorResponse?>? {
+    log.debug("SAR Subject not recognised exception caught: {}", e.message)
+    return ResponseEntity
+      .status(209)
+      .body(
+        ErrorResponse(
+          status = 209,
+          userMessage = e.message!!,
+          developerMessage = e.message!!,
+        ),
+      )
+  }
+
   @ExceptionHandler(NoResourceFoundException::class)
   fun handleNoResourceFoundException(e: NoResourceFoundException): ResponseEntity<ErrorResponse?>? {
     log.debug("No resource found exception caught: {}", e.message)
@@ -352,5 +366,7 @@ class NonAssociationNotFoundException(id: Long) : Exception("There is no non-ass
 class NullPrisonerLocationsException(prisoners: List<String>) : Exception("Prisoners $prisoners have null locations")
 
 class SubjectAccessRequestNoContentException(prisoner: String) : Exception("No information on prisoner $prisoner")
+
+class SubjectAccessRequestSubjectNotRecognisedException : Exception("Subject Identifier is not recognised by this service")
 
 class MissingPrisonersInSearchException(prisoners: Iterable<String>) : Exception("Could not find the following prisoners: $prisoners")
