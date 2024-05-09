@@ -21,7 +21,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-validation")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:3.1.3")
-  implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:3.7.6")
+  implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:3.7.7")
 
   implementation("io.opentelemetry:opentelemetry-api:1.37.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.3.0")
@@ -49,8 +49,8 @@ dependencies {
   testImplementation("io.swagger.parser.v3:swagger-parser:2.1.22")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  testImplementation("org.testcontainers:localstack:1.19.7")
-  testImplementation("org.testcontainers:postgresql:1.19.7")
+  testImplementation("org.testcontainers:localstack:1.19.8")
+  testImplementation("org.testcontainers:postgresql:1.19.8")
 }
 
 kotlin {
