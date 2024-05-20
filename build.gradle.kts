@@ -24,7 +24,7 @@ dependencies {
   implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:3.7.9")
 
   implementation("io.opentelemetry:opentelemetry-api:1.38.0")
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.3.0")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.4.0")
 
   implementation("org.flywaydb:flyway-core")
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
