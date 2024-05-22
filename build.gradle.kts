@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import uk.gov.justice.digital.hmpps.gradle.PortForwardRDSTask
 import uk.gov.justice.digital.hmpps.gradle.PortForwardRedisTask
@@ -5,8 +6,8 @@ import uk.gov.justice.digital.hmpps.gradle.RevealSecretsTask
 
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.15.6"
-  kotlin("plugin.spring") version "1.9.24"
-  kotlin("plugin.jpa") version "1.9.24"
+  kotlin("plugin.jpa") version "2.0.0"
+  kotlin("plugin.spring") version "2.0.0"
   idea
 }
 
@@ -71,8 +72,6 @@ tasks {
   }
 
   withType<KotlinCompile> {
-    kotlinOptions {
-      jvmTarget = JavaVersion.VERSION_21.toString()
-    }
+    compilerOptions.jvmTarget = JvmTarget.JVM_21
   }
 }
