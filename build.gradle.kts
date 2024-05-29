@@ -27,7 +27,6 @@ dependencies {
   implementation("io.opentelemetry:opentelemetry-api:1.38.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.4.0")
 
-  implementation("org.flywaydb:flyway-core")
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
   implementation("org.hibernate.orm:hibernate-community-dialects:6.5.2.Final")
 
