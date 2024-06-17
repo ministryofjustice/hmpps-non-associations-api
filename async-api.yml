@@ -1,0 +1,57 @@
+asyncapi: 3.0.0
+info:
+  title: Non-associations service
+  description: Publishes events relating to non-associations
+  version: 1.0.0
+
+servers:
+  development:
+    host: hmpps-domain-events-dev.live-1.cloud-platform.service.justice.gov.uk
+    protocol: sqs
+    description: Development environment
+  preproduction:
+    host: hmpps-domain-events-preprod.live-1.cloud-platform.service.justice.gov.uk
+    protocol: sqs
+    description: Pre-production environment
+  production:
+    host: hmpps-domain-events-prod.live-1.cloud-platform.service.justice.gov.uk
+    protocol: sqs
+    description: Production environment
+
+components:
+  messages:
+    non-associations.created:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/non-associations/non-association-created.yml
+    non-associations.amended:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/non-associations/non-association-amended.yml
+    non-associations.closed:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/non-associations/non-association-closed.yml
+    non-associations.deleted:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/non-associations/non-association-deleted.yml
+
+channels:
+  hmpps-domain-events:
+    description: HMPPS domain events SNS topic
+    bindings:
+      sns:
+        name: domainevents
+    messages:
+      non-associations.created:
+        $ref: '#/components/messages/non-associations.created'
+      non-associations.amended:
+        $ref: '#/components/messages/non-associations.amended'
+      non-associations.closed:
+        $ref: '#/components/messages/non-associations.closed'
+      non-associations.deleted:
+        $ref: '#/components/messages/non-associations.deleted'
+
+operations:
+  publish-event:
+    action: send
+    channel:
+      $ref: '#/channels/hmpps-domain-events'
+    messages:
+      - $ref: '#/channels/hmpps-domain-events/messages/non-associations.created'
+      - $ref: '#/channels/hmpps-domain-events/messages/non-associations.amended'
+      - $ref: '#/channels/hmpps-domain-events/messages/non-associations.closed'
+      - $ref: '#/channels/hmpps-domain-events/messages/non-associations.deleted'
