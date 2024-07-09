@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
-import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.transaction.TestTransaction
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ApplicationInsightsConfiguration
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
@@ -17,10 +16,11 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAs
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAllByPrisonerNumber
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAnyBetweenPrisonerNumbers
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
+import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(AuthenticationFacade::class, NonAssociationsMergeService::class, ClockConfiguration::class, ApplicationInsightsConfiguration::class)
-@WithMockUser(username = "A_DPS_USER")
+@WithMockAuthUser(username = "A_DPS_USER")
 @DataJpaTest
 class NonAssociationMergeServiceIntTest : TestBase() {
 
