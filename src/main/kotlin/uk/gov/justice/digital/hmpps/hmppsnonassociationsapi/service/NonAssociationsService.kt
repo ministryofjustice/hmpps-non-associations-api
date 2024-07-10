@@ -9,7 +9,6 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationAlreadyClosedException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationAlreadyOpenException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationNotFoundException
@@ -36,6 +35,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAs
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAllByPrisonerNumber
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAnyBetweenPrisonerNumbers
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAnyInvolvingPrisonerNumbers
+import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 import java.time.Clock
 import java.time.LocalDateTime
 import kotlin.jvm.optionals.getOrNull
@@ -47,7 +47,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation a
 class NonAssociationsService(
   private val nonAssociationsRepository: NonAssociationsRepository,
   private val offenderSearch: OffenderSearchService,
-  private val authenticationFacade: AuthenticationFacade,
+  private val authenticationHolder: HmppsAuthenticationHolder,
   private val telemetryClient: TelemetryClient,
   private val clock: Clock,
 ) {
@@ -57,6 +57,9 @@ class NonAssociationsService(
   }
 
   fun createNonAssociation(createNonAssociationRequest: CreateNonAssociationRequest): NonAssociationDTO {
+    val createdBy = authenticationHolder.authenticationOrNull?.userName
+      ?: throw UserInContextMissingException()
+
     val prisonersToKeepApart = listOf(
       createNonAssociationRequest.firstPrisonerNumber,
       createNonAssociationRequest.secondPrisonerNumber,
@@ -76,8 +79,7 @@ class NonAssociationsService(
     }
 
     val nonAssociationJpa = createNonAssociationRequest.toNewEntity(
-      createdBy = authenticationFacade.currentUsername
-        ?: throw UserInContextMissingException(),
+      createdBy = createdBy,
       clock = clock,
     )
     val nonAssociation = persistNonAssociation(nonAssociationJpa).toDto()
@@ -153,15 +155,22 @@ class NonAssociationsService(
   }
 
   fun updateNonAssociation(id: Long, update: PatchNonAssociationRequest): NonAssociationDTO {
+    val updatedBy = authenticationHolder.authenticationOrNull?.userName
+      ?: throw UserInContextMissingException()
+
     val nonAssociation = nonAssociationsRepository.findById(id).getOrNull() ?: throw NonAssociationNotFoundException(id)
 
-    nonAssociation.updateWith(update, authenticationFacade.getUserOrSystemInContext(), clock)
+    nonAssociation.updateWith(update, updatedBy, clock)
 
     log.info("Updated Non-association [$id]")
     return nonAssociation.toDto()
   }
 
   fun closeNonAssociation(id: Long, closeRequest: CloseNonAssociationRequest): NonAssociationDTO {
+    val closedBy = closeRequest.closedBy
+      ?: authenticationHolder.authenticationOrNull?.userName
+      ?: throw UserInContextMissingException()
+
     val nonAssociation = nonAssociationsRepository.findById(id).getOrNull() ?: throw NonAssociationNotFoundException(id)
 
     if (nonAssociation.isClosed) {
@@ -170,7 +179,7 @@ class NonAssociationsService(
 
     nonAssociation.close(
       closedAt = closeRequest.closedAt ?: LocalDateTime.now(clock),
-      closedBy = closeRequest.closedBy ?: authenticationFacade.currentUsername ?: throw UserInContextMissingException(),
+      closedBy = closedBy,
       closedReason = closeRequest.closedReason,
     )
 
@@ -179,6 +188,10 @@ class NonAssociationsService(
   }
 
   fun reopenNonAssociation(id: Long, reopenNonAssociationRequest: ReopenNonAssociationRequest): NonAssociationDTO {
+    val reopenedBy = reopenNonAssociationRequest.reopenedBy
+      ?: authenticationHolder.authenticationOrNull?.userName
+      ?: throw UserInContextMissingException()
+
     val nonAssociation = nonAssociationsRepository.findById(id).getOrNull() ?: throw NonAssociationNotFoundException(id)
 
     if (nonAssociationsRepository.findAnyBetweenPrisonerNumbers(
@@ -193,7 +206,7 @@ class NonAssociationsService(
 
     nonAssociation.reopen(
       reopenedAt = reopenNonAssociationRequest.reopenedAt ?: LocalDateTime.now(clock),
-      reopenedBy = reopenNonAssociationRequest.reopenedBy ?: authenticationFacade.currentUsername ?: throw UserInContextMissingException(),
+      reopenedBy = reopenedBy,
       reopenedReason = reopenNonAssociationRequest.reopenReason,
     )
 

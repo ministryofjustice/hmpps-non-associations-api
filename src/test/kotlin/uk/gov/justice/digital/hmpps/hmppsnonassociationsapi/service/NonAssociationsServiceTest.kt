@@ -10,7 +10,8 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.data.domain.Sort
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.oauth2.jwt.Jwt
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListOptions
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationsSort
@@ -20,6 +21,9 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAs
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchPrisoners
+import uk.gov.justice.hmpps.kotlin.auth.AuthAwareAuthenticationToken
+import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
+import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation as NonAssociationDTO
@@ -29,26 +33,49 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation a
  * This class contains unit tests for the NonAssociationsService class.
  */
 class NonAssociationsServiceTest {
-
   private val nonAssociationsRepository: NonAssociationsRepository = mock()
   private val offenderSearchService: OffenderSearchService = mock()
-  private val authenticationFacade: AuthenticationFacade = mock()
+  private val authenticationHolder: HmppsAuthenticationHolder = mock()
   private val telemetryClient: TelemetryClient = mock()
 
   private val service = NonAssociationsService(
     nonAssociationsRepository,
     offenderSearchService,
-    authenticationFacade,
+    authenticationHolder,
     telemetryClient,
     TestBase.clock,
   )
+
+  private fun makeAuthToken(
+    username: String,
+    roles: List<String> = listOf("ROLE_READ_NON_ASSOCIATIONS", "ROLE_WRITE_NON_ASSOCIATIONS"),
+    scopes: List<String> = listOf("read", "write"),
+  ): AuthAwareAuthenticationToken {
+    // adapted from uk.gov.justice.hmpps.test.kotlin.auth.WithMockUserSecurityContextFactory
+    return AuthAwareAuthenticationToken(
+      jwt = Jwt.withTokenValue(
+        JwtAuthorisationHelper().createJwtAccessToken(
+          username = username,
+          scope = scopes,
+          roles = roles,
+          clientId = "hmpps-non-associations-api",
+        ),
+      )
+        .header("head", "value")
+        .claim("sub", username)
+        .build(),
+      clientId = "hmpps-non-associations-api",
+      userName = username,
+      authorities = roles.map { SimpleGrantedAuthority(it) },
+    )
+  }
 
   @Test
   fun createNonAssociation() {
     val createNonAssociationRequest: CreateNonAssociationRequest = createNonAssociationRequest()
 
     val createdBy = "TEST_USER_GEN"
-    whenever(authenticationFacade.currentUsername).thenReturn(createdBy)
+    whenever(authenticationHolder.authenticationOrNull).thenReturn(makeAuthToken(createdBy))
 
     val expectedId = 42L
     val now = LocalDateTime.now(TestBase.clock)
