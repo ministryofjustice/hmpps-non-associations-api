@@ -5,6 +5,8 @@ info.app:
 spring:
   application:
     name: hmpps-non-associations-api
+  main:
+    web-application-type: servlet
   codec:
     max-in-memory-size: 10MB
 
