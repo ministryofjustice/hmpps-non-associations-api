@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -10,8 +11,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.data.domain.Sort
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListOptions
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationsSort
@@ -21,9 +21,9 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAs
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchPrisoners
-import uk.gov.justice.hmpps.kotlin.auth.AuthAwareAuthenticationToken
 import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
-import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
+import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
+import uk.gov.justice.hmpps.test.kotlin.auth.WithMockUserSecurityContextFactory
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation as NonAssociationDTO
@@ -35,7 +35,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation a
 class NonAssociationsServiceTest {
   private val nonAssociationsRepository: NonAssociationsRepository = mock()
   private val offenderSearchService: OffenderSearchService = mock()
-  private val authenticationHolder: HmppsAuthenticationHolder = mock()
+  private val authenticationHolder = HmppsAuthenticationHolder()
   private val telemetryClient: TelemetryClient = mock()
 
   private val service = NonAssociationsService(
@@ -46,27 +46,26 @@ class NonAssociationsServiceTest {
     TestBase.clock,
   )
 
-  private fun makeAuthToken(
+  @AfterEach
+  fun clearSecurityContext() {
+    SecurityContextHolder.clearContext()
+  }
+
+  private fun setUserInSecurityContext(
     username: String,
     roles: List<String> = listOf("ROLE_READ_NON_ASSOCIATIONS", "ROLE_WRITE_NON_ASSOCIATIONS"),
     scopes: List<String> = listOf("read", "write"),
-  ): AuthAwareAuthenticationToken {
-    // adapted from uk.gov.justice.hmpps.test.kotlin.auth.WithMockUserSecurityContextFactory
-    return AuthAwareAuthenticationToken(
-      jwt = Jwt.withTokenValue(
-        JwtAuthorisationHelper().createJwtAccessToken(
-          username = username,
-          scope = scopes,
-          roles = roles,
+  ) {
+    val authorities = roles.toMutableList()
+    authorities.addAll(scopes.map { "SCOPE_$it" })
+    SecurityContextHolder.setContext(
+      WithMockUserSecurityContextFactory().createSecurityContext(
+        WithMockAuthUser(
           clientId = "hmpps-non-associations-api",
+          username = username,
+          authorities = authorities.toTypedArray(),
         ),
-      )
-        .header("head", "value")
-        .claim("sub", username)
-        .build(),
-      clientId = "hmpps-non-associations-api",
-      userName = username,
-      authorities = roles.map { SimpleGrantedAuthority(it) },
+      ),
     )
   }
 
@@ -75,7 +74,7 @@ class NonAssociationsServiceTest {
     val createNonAssociationRequest: CreateNonAssociationRequest = createNonAssociationRequest()
 
     val createdBy = "TEST_USER_GEN"
-    whenever(authenticationHolder.authenticationOrNull).thenReturn(makeAuthToken(createdBy))
+    setUserInSecurityContext(createdBy)
 
     val expectedId = 42L
     val now = LocalDateTime.now(TestBase.clock)
