@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
-import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.reactive.server.returnResult
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteNonAssociationRequest
@@ -27,6 +26,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsInteg
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchPrisoners
+import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 import java.lang.String.format
 import java.time.Clock
 import java.time.LocalDateTime
@@ -35,7 +35,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation a
 // language=text
 const val EXPECTED_USERNAME = "A_TEST_USER"
 
-@WithMockUser(username = EXPECTED_USERNAME)
+@WithMockAuthUser(username = EXPECTED_USERNAME)
 class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   @TestConfiguration
   class FixedClockConfig {

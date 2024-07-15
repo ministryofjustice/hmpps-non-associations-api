@@ -12,11 +12,11 @@ import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpHeaders
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.HmppsAuthMockServer
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.OffenderSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
+import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
 import java.time.format.DateTimeFormatter
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -30,7 +30,7 @@ abstract class IntegrationTestBase : TestBase() {
   lateinit var webTestClient: WebTestClient
 
   @Autowired
-  protected lateinit var jwtAuthHelper: JwtAuthHelper
+  protected lateinit var jwtAuthorisationHelper: JwtAuthorisationHelper
 
   @SpyBean
   protected lateinit var telemetryClient: TelemetryClient
@@ -79,7 +79,12 @@ abstract class IntegrationTestBase : TestBase() {
     user: String = SYSTEM_USERNAME,
     roles: List<String> = listOf(),
     scopes: List<String> = listOf(),
-  ): (HttpHeaders) -> Unit = jwtAuthHelper.setAuthorisation(user, roles, scopes)
+  ): (HttpHeaders) -> Unit = jwtAuthorisationHelper.setAuthorisationHeader(
+    clientId = "hmpps-non-associations-api",
+    username = user,
+    scope = scopes,
+    roles = roles,
+  )
 
   protected fun jsonString(any: Any) = objectMapper.writeValueAsString(any) as String
 }

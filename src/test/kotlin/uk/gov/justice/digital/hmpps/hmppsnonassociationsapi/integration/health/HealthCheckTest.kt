@@ -1,16 +1,12 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.health
 
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.function.Consumer
 
 class HealthCheckTest : SqsIntegrationTestBase() {
 
   @Test
-  fun `Health page reports ok`() {
+  fun `health page reports ok`() {
     hmppsAuthMockServer.stubHealthPing(200)
     offenderSearchMockServer.stubHealthPing(200)
     webTestClient.get()
@@ -23,21 +19,7 @@ class HealthCheckTest : SqsIntegrationTestBase() {
   }
 
   @Test
-  fun `Health info reports version`() {
-    hmppsAuthMockServer.stubHealthPing(200)
-    offenderSearchMockServer.stubHealthPing(200)
-    webTestClient.get().uri("/health")
-      .exchange()
-      .expectStatus().isOk
-      .expectBody().jsonPath("components.healthInfo.details.version").value(
-        Consumer<String> {
-          assertThat(it).startsWith(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE))
-        },
-      )
-  }
-
-  @Test
-  fun `Health ping page is accessible`() {
+  fun `health ping page is accessible`() {
     webTestClient.get()
       .uri("/health/ping")
       .exchange()

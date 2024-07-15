@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
+import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import java.time.Clock
@@ -20,7 +20,7 @@ class AuditService(
   private val hmppsQueueService: HmppsQueueService,
   private val telemetryClient: TelemetryClient,
   private val objectMapper: ObjectMapper,
-  private val authenticationFacade: AuthenticationFacade,
+  private val authenticationHolder: HmppsAuthenticationHolder,
   private val clock: Clock,
 ) {
   private val auditQueue by lazy { hmppsQueueService.findByQueueId("audit") as HmppsQueue }
@@ -34,7 +34,7 @@ class AuditService(
   fun sendMessage(auditType: AuditType, id: String, details: Any, username: String? = null) {
     val auditEvent = AuditEvent(
       what = auditType.name,
-      who = username ?: authenticationFacade.getUserOrSystemInContext(),
+      who = username ?: authenticationHolder.principal,
       service = serviceName,
       details = details.toJson(),
       `when` = Instant.now(clock),

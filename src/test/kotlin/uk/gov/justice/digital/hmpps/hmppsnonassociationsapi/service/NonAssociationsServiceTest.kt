@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -10,7 +11,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.data.domain.Sort
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.AuthenticationFacade
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListOptions
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationsSort
@@ -20,6 +21,9 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAs
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchPrisoners
+import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
+import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
+import uk.gov.justice.hmpps.test.kotlin.auth.WithMockUserSecurityContextFactory
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation as NonAssociationDTO
@@ -29,26 +33,48 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation a
  * This class contains unit tests for the NonAssociationsService class.
  */
 class NonAssociationsServiceTest {
-
   private val nonAssociationsRepository: NonAssociationsRepository = mock()
   private val offenderSearchService: OffenderSearchService = mock()
-  private val authenticationFacade: AuthenticationFacade = mock()
+  private val authenticationHolder = HmppsAuthenticationHolder()
   private val telemetryClient: TelemetryClient = mock()
 
   private val service = NonAssociationsService(
     nonAssociationsRepository,
     offenderSearchService,
-    authenticationFacade,
+    authenticationHolder,
     telemetryClient,
     TestBase.clock,
   )
+
+  @AfterEach
+  fun clearSecurityContext() {
+    SecurityContextHolder.clearContext()
+  }
+
+  private fun setUserInSecurityContext(
+    username: String,
+    roles: List<String> = listOf("ROLE_READ_NON_ASSOCIATIONS", "ROLE_WRITE_NON_ASSOCIATIONS"),
+    scopes: List<String> = listOf("read", "write"),
+  ) {
+    val authorities = roles.toMutableList()
+    authorities.addAll(scopes.map { "SCOPE_$it" })
+    SecurityContextHolder.setContext(
+      WithMockUserSecurityContextFactory().createSecurityContext(
+        WithMockAuthUser(
+          clientId = "hmpps-non-associations-api",
+          username = username,
+          authorities = authorities.toTypedArray(),
+        ),
+      ),
+    )
+  }
 
   @Test
   fun createNonAssociation() {
     val createNonAssociationRequest: CreateNonAssociationRequest = createNonAssociationRequest()
 
     val createdBy = "TEST_USER_GEN"
-    whenever(authenticationFacade.currentUsername).thenReturn(createdBy)
+    setUserInSecurityContext(createdBy)
 
     val expectedId = 42L
     val now = LocalDateTime.now(TestBase.clock)
