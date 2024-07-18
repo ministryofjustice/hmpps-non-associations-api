@@ -20,9 +20,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssocia
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyNonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyNonAssociationOtherPrisonerDetails
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyOtherPrisonerDetails
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyPrisonerNonAssociation
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.LegacyPrisonerNonAssociations
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListInclusion
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociationListOptions
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PatchNonAssociationRequest
@@ -270,18 +267,6 @@ class NonAssociationsService(
     return nonAssociationsRepository.findById(id).getOrNull()?.toLegacy()
   }
 
-  fun getLegacyDetails(
-    prisonerNumber: String,
-    currentPrisonOnly: Boolean = true,
-    excludeInactive: Boolean = true,
-  ): LegacyPrisonerNonAssociations {
-    val inclusion = if (excludeInactive) NonAssociationListInclusion.OPEN_ONLY else NonAssociationListInclusion.ALL
-    return getPrisonerNonAssociations(
-      prisonerNumber,
-      NonAssociationListOptions(inclusion = inclusion, includeOtherPrisons = !currentPrisonOnly),
-    ).toLegacy()
-  }
-
   private fun filterByPrisonId(nonAssociations: List<NonAssociationJPA>, prisonId: String): List<NonAssociationJPA> {
     val prisonerNumbers = nonAssociations.flatMap { nonna ->
       listOf(nonna.firstPrisonerNumber, nonna.secondPrisonerNumber)
@@ -320,36 +305,3 @@ private fun NonAssociationJPA.toLegacy(): LegacyNonAssociation {
     ),
   )
 }
-
-private fun PrisonerNonAssociations.toLegacy() =
-  LegacyPrisonerNonAssociations(
-    offenderNo = this.prisonerNumber,
-    firstName = this.firstName,
-    lastName = this.lastName,
-    agencyId = this.prisonId,
-    agencyDescription = this.prisonName,
-    assignedLivingUnitDescription = this.cellLocation,
-    nonAssociations = this.nonAssociations.map {
-      val (reason, otherReason) = translateFromRolesAndReason(it.role, it.otherPrisonerDetails.role, it.reason)
-      LegacyPrisonerNonAssociation(
-        reasonCode = reason,
-        reasonDescription = reason.description,
-        typeCode = it.restrictionType.toLegacyRestrictionType(),
-        typeDescription = it.restrictionType.toLegacyRestrictionType().description,
-        effectiveDate = it.whenCreated,
-        expiryDate = it.closedAt,
-        authorisedBy = it.authorisedBy,
-        comments = it.comment,
-        offenderNonAssociation = LegacyOtherPrisonerDetails(
-          offenderNo = it.otherPrisonerDetails.prisonerNumber,
-          firstName = it.otherPrisonerDetails.firstName,
-          lastName = it.otherPrisonerDetails.lastName,
-          reasonCode = otherReason,
-          reasonDescription = otherReason.description,
-          agencyId = it.otherPrisonerDetails.prisonId,
-          agencyDescription = it.otherPrisonerDetails.prisonName,
-          assignedLivingUnitDescription = it.otherPrisonerDetails.cellLocation,
-        ),
-      )
-    },
-  )
