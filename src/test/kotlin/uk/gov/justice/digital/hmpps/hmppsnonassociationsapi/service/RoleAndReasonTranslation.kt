@@ -10,43 +10,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.translateToRoles
 
 class RoleAndReasonTranslation {
   @Test
-  fun `translating legacy reasons into modern roles and a reason`() {
-    fun assertThatLegacyReasons(firstPrisonerReason: LegacyReason, secondPrisonerReason: LegacyReason) = object {
-      fun translateInto(firstPrisonerRole: Role, secondPrisonerRole: Role, reason: Reason) {
-        assertThat(translateToRolesAndReason(firstPrisonerReason, secondPrisonerReason)).isEqualTo(Triple(firstPrisonerRole, secondPrisonerRole, reason))
-        assertThat(translateToRolesAndReason(secondPrisonerReason, firstPrisonerReason)).isEqualTo(Triple(secondPrisonerRole, firstPrisonerRole, reason))
-      }
-    }
-
-    assertThatLegacyReasons(LegacyReason.BUL, LegacyReason.BUL).translateInto(Role.UNKNOWN, Role.UNKNOWN, Reason.BULLYING)
-    assertThatLegacyReasons(LegacyReason.BUL, LegacyReason.RIV).translateInto(Role.UNKNOWN, Role.NOT_RELEVANT, Reason.GANG_RELATED)
-    assertThatLegacyReasons(LegacyReason.BUL, LegacyReason.PER).translateInto(Role.UNKNOWN, Role.PERPETRATOR, Reason.BULLYING)
-    assertThatLegacyReasons(LegacyReason.BUL, LegacyReason.VIC).translateInto(Role.UNKNOWN, Role.VICTIM, Reason.BULLYING)
-    assertThatLegacyReasons(LegacyReason.BUL, LegacyReason.NOT_REL).translateInto(Role.UNKNOWN, Role.NOT_RELEVANT, Reason.BULLYING)
-    assertThatLegacyReasons(LegacyReason.BUL, LegacyReason.UNKNOWN).translateInto(Role.UNKNOWN, Role.UNKNOWN, Reason.BULLYING)
-
-    assertThatLegacyReasons(LegacyReason.PER, LegacyReason.PER).translateInto(Role.PERPETRATOR, Role.PERPETRATOR, Reason.OTHER)
-    assertThatLegacyReasons(LegacyReason.PER, LegacyReason.RIV).translateInto(Role.PERPETRATOR, Role.NOT_RELEVANT, Reason.GANG_RELATED)
-    assertThatLegacyReasons(LegacyReason.PER, LegacyReason.VIC).translateInto(Role.PERPETRATOR, Role.VICTIM, Reason.OTHER)
-    assertThatLegacyReasons(LegacyReason.PER, LegacyReason.NOT_REL).translateInto(Role.PERPETRATOR, Role.NOT_RELEVANT, Reason.OTHER)
-    assertThatLegacyReasons(LegacyReason.PER, LegacyReason.UNKNOWN).translateInto(Role.PERPETRATOR, Role.UNKNOWN, Reason.OTHER)
-
-    assertThatLegacyReasons(LegacyReason.RIV, LegacyReason.RIV).translateInto(Role.NOT_RELEVANT, Role.NOT_RELEVANT, Reason.GANG_RELATED)
-    assertThatLegacyReasons(LegacyReason.RIV, LegacyReason.VIC).translateInto(Role.NOT_RELEVANT, Role.VICTIM, Reason.GANG_RELATED)
-    assertThatLegacyReasons(LegacyReason.RIV, LegacyReason.NOT_REL).translateInto(Role.NOT_RELEVANT, Role.NOT_RELEVANT, Reason.GANG_RELATED)
-    assertThatLegacyReasons(LegacyReason.RIV, LegacyReason.UNKNOWN).translateInto(Role.NOT_RELEVANT, Role.UNKNOWN, Reason.GANG_RELATED)
-
-    assertThatLegacyReasons(LegacyReason.VIC, LegacyReason.VIC).translateInto(Role.VICTIM, Role.VICTIM, Reason.OTHER)
-    assertThatLegacyReasons(LegacyReason.VIC, LegacyReason.NOT_REL).translateInto(Role.VICTIM, Role.NOT_RELEVANT, Reason.OTHER)
-    assertThatLegacyReasons(LegacyReason.VIC, LegacyReason.UNKNOWN).translateInto(Role.VICTIM, Role.UNKNOWN, Reason.OTHER)
-
-    assertThatLegacyReasons(LegacyReason.NOT_REL, LegacyReason.NOT_REL).translateInto(Role.NOT_RELEVANT, Role.NOT_RELEVANT, Reason.OTHER)
-    assertThatLegacyReasons(LegacyReason.NOT_REL, LegacyReason.UNKNOWN).translateInto(Role.NOT_RELEVANT, Role.UNKNOWN, Reason.OTHER)
-
-    assertThatLegacyReasons(LegacyReason.UNKNOWN, LegacyReason.UNKNOWN).translateInto(Role.UNKNOWN, Role.UNKNOWN, Reason.OTHER)
-  }
-
-  @Test
   fun `translating modern roles and a reason into legacy reasons`() {
     val allButBullyingAndGangRelatedReasons = Reason.entries.filter { it != Reason.BULLYING && it != Reason.GANG_RELATED }
 

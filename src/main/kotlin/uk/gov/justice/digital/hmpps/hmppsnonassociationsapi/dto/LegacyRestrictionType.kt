@@ -8,20 +8,5 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto
 enum class LegacyRestrictionType(val description: String) {
   CELL("Do Not Locate in Same Cell"),
   LAND("Do Not Locate on Same Landing"),
-  NONEX("Do Not Exercise Together"),
-
-  // following legacy restriction types do not have "modern" counterpart
-  TNA("Total Non Association"),
   WING("Do Not Locate on Same Wing"),
-  ;
-
-  fun toRestrictionType(): RestrictionType = when (this) {
-    CELL -> RestrictionType.CELL
-    LAND -> RestrictionType.LANDING
-    WING -> RestrictionType.WING
-
-    // following legacy restriction types do not map clearly
-    NONEX -> RestrictionType.WING
-    TNA -> RestrictionType.WING
-  }
 }
