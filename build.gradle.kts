@@ -21,8 +21,8 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-validation")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.0.1")
-  implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:4.8.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.1.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:4.11.1")
 
   implementation("io.opentelemetry:opentelemetry-api:1.40.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.6.0")
@@ -41,7 +41,7 @@ dependencies {
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-  testImplementation("org.wiremock:wiremock-standalone:3.9.0")
+  testImplementation("org.wiremock:wiremock-standalone:3.9.1")
 
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.0.2")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.1")
