@@ -5,6 +5,7 @@ interface EnumerationItem {
   code: string
   description: string
 }
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface Constants extends Record<'roles' | 'reasons' | 'restrictionTypes', EnumerationItem[]> {}
 
 interface BaseNonAssociationsListItem extends ObjectWithDates {
