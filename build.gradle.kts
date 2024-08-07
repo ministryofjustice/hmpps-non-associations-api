@@ -6,8 +6,8 @@ import uk.gov.justice.digital.hmpps.gradle.RevealSecretsTask
 
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.2"
-  kotlin("plugin.jpa") version "2.0.0"
-  kotlin("plugin.spring") version "2.0.0"
+  kotlin("plugin.jpa") version "2.0.10"
+  kotlin("plugin.spring") version "2.0.10"
   idea
 }
 
@@ -22,7 +22,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-validation")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.1.0")
-  implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:5.1.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:5.1.2")
 
   implementation("io.opentelemetry:opentelemetry-api:1.40.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.6.0")
@@ -44,7 +44,7 @@ dependencies {
   testImplementation("org.wiremock:wiremock-standalone:3.9.1")
 
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.0.3")
-  testImplementation("org.awaitility:awaitility-kotlin:4.2.1")
+  testImplementation("org.awaitility:awaitility-kotlin:4.2.2")
   testImplementation("org.mockito:mockito-inline:5.2.0")
   testImplementation("io.swagger.parser.v3:swagger-parser:2.1.22")
   testImplementation("org.springframework.security:spring-security-test")
