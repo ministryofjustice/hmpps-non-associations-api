@@ -21,7 +21,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-validation")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.2.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.3.0")
   implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:5.1.4")
 
   implementation("io.opentelemetry:opentelemetry-api:1.41.0")
