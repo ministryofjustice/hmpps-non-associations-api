@@ -4,6 +4,7 @@ import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -32,6 +33,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation a
 /**
  * This class contains unit tests for the NonAssociationsService class.
  */
+@DisplayName("Non-associations service")
 class NonAssociationsServiceTest {
   private val nonAssociationsRepository: NonAssociationsRepository = mock()
   private val offenderSearchService: OffenderSearchService = mock()
@@ -106,8 +108,9 @@ class NonAssociationsServiceTest {
     assertThat(createdNonAssociationDTO).isEqualTo(expectedCreatedNonAssociationDTO)
   }
 
+  @DisplayName("sorting of prisoner non-associations")
   @Nested
-  inner class `sorting of prisoner non-associations` {
+  inner class Sorting {
     private val keyPrisoner = "A1234BC"
     private val otherPrisoners = offenderSearchPrisoners.keys.filter { it != keyPrisoner }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import io.swagger.v3.oas.annotations.media.Schema
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.TestConfiguration
@@ -35,6 +36,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation a
 // language=text
 const val EXPECTED_USERNAME = "A_TEST_USER"
 
+@DisplayName("Non-associations resource")
 @WithMockAuthUser(username = EXPECTED_USERNAME)
 class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   @TestConfiguration
@@ -44,8 +46,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     fun fixedClock(): Clock = clock
   }
 
+  @DisplayName("Constants and enumerations")
   @Nested
-  inner class `Constants and enumerations` {
+  inner class ConstantsAndEnumerations {
     private val url = "/constants"
 
     @Test
@@ -77,8 +80,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
   }
 
+  @DisplayName("Create a non-association")
   @Nested
-  inner class `Create a non-association` {
+  inner class Create {
 
     private val url = "/non-associations"
 
@@ -428,8 +432,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
   }
 
+  @DisplayName("Update a non-association")
   @Nested
-  inner class `Update a non-association` {
+  inner class Update {
 
     private lateinit var nonAssociation: NonAssociationJPA
     private lateinit var url: String
@@ -583,8 +588,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
   }
 
+  @DisplayName("Get a legacy non-association")
   @Nested
-  inner class `Get a legacy non-association` {
+  inner class GetLegacy {
     @Test
     fun `without a valid token responds 401 Unauthorized`() {
       val nonAssociation = createNonAssociation()
@@ -690,8 +696,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
   }
 
+  @DisplayName("Get legacy non-associations list")
   @Nested
-  inner class `Get legacy non-associations list` {
+  inner class GetLegacyList {
     private lateinit var prisonerJohn: OffenderSearchPrisoner
     private lateinit var prisonerMerlin: OffenderSearchPrisoner
     private lateinit var prisonerJosh: OffenderSearchPrisoner
@@ -748,8 +755,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
   }
 
+  @DisplayName("Close a non-association")
   @Nested
-  inner class `Close a non-association` {
+  inner class Close {
 
     private lateinit var nonAssociation: NonAssociationJPA
     private lateinit var closedNonAssociation: NonAssociationJPA
@@ -925,8 +933,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
   }
 
+  @DisplayName("Re-open a non-association")
   @Nested
-  inner class `Re-open a non-association` {
+  inner class Reopen {
 
     private lateinit var naWhichHasAnAnotherOpenRecord: NonAssociationJPA
     private lateinit var naToBeReopened: NonAssociationJPA
@@ -1102,8 +1111,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
   }
 
+  @DisplayName("Delete a non-association")
   @Nested
-  inner class `Delete a non-association` {
+  inner class Delete {
 
     private lateinit var nonAssociation: NonAssociationJPA
     private lateinit var url: String
@@ -1225,8 +1235,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
   }
 
+  @DisplayName("Get a non-association")
   @Nested
-  inner class `Get a non-association` {
+  inner class GetOne {
 
     @Test
     fun `without a valid token responds 401 Unauthorized`() {
@@ -1291,8 +1302,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
   }
 
+  @DisplayName("Get complete non-associations lists")
   @Nested
-  inner class `Get complete non-associations lists` {
+  inner class GetAll {
     private lateinit var na1: NonAssociationJPA
     private lateinit var na2: NonAssociationJPA
     private lateinit var na3: NonAssociationJPA
@@ -1673,8 +1685,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
   }
 
+  @DisplayName("Get non-associations lists for a prisoner")
   @Nested
-  inner class `Get non-associations lists for a prisoner` {
+  inner class GetForPrisoner {
     private val prisonerNumber = "A1234BC"
 
     @Test
@@ -2231,8 +2244,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
   }
 
+  @DisplayName("Get non-associations between a group of prisoners")
   @Nested
-  inner class `Get non-associations between a group of prisoners` {
+  inner class GetBetweenPrisoners {
     private val prisonerJohnNumber = "A1234BC"
     private val prisonerMerlinNumber = "D5678EF"
 
@@ -2602,9 +2616,13 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
   }
 
+  @DisplayName("Get non-associations involving a group of prisoners")
   @Nested
-  inner class `Get non-associations involving a group of prisoners` {
+  inner class GetInvolvingPrisoners {
+    // language=text
     private val prisonerJohnNumber = "A1234BC"
+
+    // language=text
     private val prisonerMerlinNumber = "D5678EF"
 
     private val urlPath = "/non-associations/involving"

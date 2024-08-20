@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -10,6 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findA
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
 import java.time.LocalDateTime
 
+@DisplayName("Non-associations merge service, unit tests")
 class NonAssociationsMergeServiceTest {
 
   private val nonAssociationsRepository: NonAssociationsRepository = mock()
