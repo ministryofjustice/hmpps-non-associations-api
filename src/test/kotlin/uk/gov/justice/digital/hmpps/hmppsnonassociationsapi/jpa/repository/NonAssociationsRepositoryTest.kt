@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,6 +23,7 @@ import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 import java.time.LocalDateTime
 
+@DisplayName("Non-associations repository")
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(HmppsAuthenticationHolder::class)
@@ -85,8 +87,9 @@ class NonAssociationsRepositoryTest : TestBase() {
     }
   }
 
+  @DisplayName("find any between prisoner numbers")
   @Nested
-  inner class `find any between prisoner numbers` {
+  inner class AnyBetweenPrisonerNumbers {
     @Test
     fun openNonAssociations() {
       repository.saveAll(
@@ -176,8 +179,9 @@ class NonAssociationsRepositoryTest : TestBase() {
     }
   }
 
+  @DisplayName("find any involving prisoner numbers")
   @Nested
-  inner class `find any involving prisoner numbers` {
+  inner class AnyInvolvingPrisonerNumbers {
     @Test
     fun openNonAssociations() {
       repository.saveAll(
