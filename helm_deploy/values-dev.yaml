@@ -16,7 +16,7 @@ generic-service:
     URL_ENV_SUFFIX: dev
 
 generic-prometheus-alerts:
-  alertSeverity: digital-prison-service-dev
+  alertSeverity: hmpps-non-associations-dev
   businessHoursOnly: true
   rdsAlertsDatabases:
     cloud-platform-7534158a562cce9e: non-associations-api
