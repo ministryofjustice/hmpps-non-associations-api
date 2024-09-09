@@ -24,7 +24,7 @@ dependencies {
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.3.2")
   implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:6.0.2")
 
-  implementation("io.opentelemetry:opentelemetry-api:1.41.0")
+  implementation("io.opentelemetry:opentelemetry-api:1.42.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.7.0")
 
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
