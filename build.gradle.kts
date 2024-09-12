@@ -22,7 +22,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-validation")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.4.2")
-  implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:6.0.4")
+  implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:6.1.0")
 
   implementation("io.opentelemetry:opentelemetry-api:1.42.1")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.7.0")
