@@ -32,7 +32,7 @@ dependencies {
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.2")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.0")
 
   implementation("com.zaxxer:HikariCP:6.0.0")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
