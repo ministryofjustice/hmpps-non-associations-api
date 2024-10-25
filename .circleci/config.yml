@@ -110,7 +110,7 @@ workflows:
       - test-node-client:
           matrix:
             parameters:
-              node-version: ["18.20", "20.16"]
+              node-version: ["18.20", "20.18", "22.10"]
       - hmpps/helm_lint:
           name: helm_lint
       - hmpps/build_multiplatform_docker:

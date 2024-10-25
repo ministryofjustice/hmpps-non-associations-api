@@ -27,16 +27,16 @@
     "test": "jest"
   },
   "engines": {
-    "node": "18 || 20"
+    "node": "18 || 20 || 22"
   },
   "dependencies": {
     "agentkeepalive": ">=4",
     "superagent": ">=9"
   },
   "devDependencies": {
-    "@tsconfig/node20": "^20.1.4",
+    "@tsconfig/node22": "^22.0.0",
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.16.1",
+    "@types/node": "^22.8.0",
     "@types/superagent": "^8.1.9",
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^8.0.1",
