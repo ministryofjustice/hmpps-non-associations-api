@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
+import jakarta.validation.constraints.NotEmpty
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
@@ -16,6 +17,7 @@ class OffenderSearchService(
    * Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role.
    */
   fun searchByPrisonerNumbers(
+    @NotEmpty
     prisonerNumbers: Collection<String>,
   ): Map<String, OffenderSearchPrisoner> {
     val requestBody = mapOf("prisonerNumbers" to prisonerNumbers.toSet())

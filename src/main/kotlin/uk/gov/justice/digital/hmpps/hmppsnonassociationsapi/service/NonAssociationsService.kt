@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.transaction.Transactional
+import jakarta.validation.constraints.NotEmpty
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -123,7 +124,7 @@ class NonAssociationsService(
     var nonAssociations = nonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonerNumbers, inclusion)
 
     // return only non-associations where both prisoners are in given prison
-    if (prisonId != null) {
+    if (prisonId != null && nonAssociations.isNotEmpty()) {
       nonAssociations = filterByPrisonId(nonAssociations, prisonId)
     }
 
@@ -144,7 +145,7 @@ class NonAssociationsService(
     var nonAssociations = nonAssociationsRepository.findAnyInvolvingPrisonerNumbers(prisonerNumbers, inclusion)
 
     // return only non-associations where both prisoners are in given prison
-    if (prisonId != null) {
+    if (prisonId != null && nonAssociations.isNotEmpty()) {
       nonAssociations = filterByPrisonId(nonAssociations, prisonId)
     }
 
@@ -267,7 +268,7 @@ class NonAssociationsService(
     return nonAssociationsRepository.findById(id).getOrNull()?.toLegacy()
   }
 
-  private fun filterByPrisonId(nonAssociations: List<NonAssociationJPA>, prisonId: String): List<NonAssociationJPA> {
+  private fun filterByPrisonId(@NotEmpty nonAssociations: List<NonAssociationJPA>, prisonId: String): List<NonAssociationJPA> {
     val prisonerNumbers = nonAssociations.flatMap { nonna ->
       listOf(nonna.firstPrisonerNumber, nonna.secondPrisonerNumber)
     }
