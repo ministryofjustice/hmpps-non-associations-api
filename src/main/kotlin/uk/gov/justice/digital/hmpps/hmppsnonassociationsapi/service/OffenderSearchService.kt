@@ -18,6 +18,10 @@ class OffenderSearchService(
   fun searchByPrisonerNumbers(
     prisonerNumbers: Collection<String>,
   ): Map<String, OffenderSearchPrisoner> {
+    if (prisonerNumbers.isEmpty()) {
+      return emptyMap()
+    }
+
     val requestBody = mapOf("prisonerNumbers" to prisonerNumbers.toSet())
 
     val foundPrisoners = offenderSearchWebClient

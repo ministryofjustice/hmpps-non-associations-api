@@ -47,4 +47,15 @@ class OffenderSearchMockServer : WireMockServer(WIREMOCK_PORT) {
         ),
     )
   }
+
+  fun stubSearchFails() {
+    stubFor(
+      post("/prisoner-search/prisoner-numbers")
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(500),
+        ),
+    )
+  }
 }
