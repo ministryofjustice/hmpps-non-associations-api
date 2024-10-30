@@ -2334,6 +2334,25 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
+    fun `when prisonId is provided and there are no non-associations between the prisoners`() {
+      createNonAssociation("A0011AA", prisonerJohnNumber)
+      // offender search fails when given an empty list of prisoner numbers
+      offenderSearchMockServer.stubSearchFails()
+
+      webTestClient.post()
+        .uri {
+          it.path(urlPath)
+            .queryParam("prisonId", "MDI")
+            .build()
+        }
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
+        .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json("[]", true)
+    }
+
+    @Test
     fun `when there are non-associations between the prisoners`() {
       createNonAssociation()
       createNonAssociation(isClosed = true)
@@ -2683,6 +2702,25 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
       webTestClient.post()
         .uri(urlPath)
+        .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
+        .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json("[]", true)
+    }
+
+    @Test
+    fun `when prisonId is provided and there are no non-associations involving the prisoners`() {
+      createNonAssociation("A0011AA", "D4444DD")
+      // offender search fails when given an empty list of prisoner numbers
+      offenderSearchMockServer.stubSearchFails()
+
+      webTestClient.post()
+        .uri {
+          it.path(urlPath)
+            .queryParam("prisonId", "MDI")
+            .build()
+        }
         .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
