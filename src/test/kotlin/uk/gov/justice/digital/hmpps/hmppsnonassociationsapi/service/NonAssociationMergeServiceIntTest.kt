@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -42,59 +41,22 @@ class NonAssociationMergeServiceIntTest : TestBase() {
   @Test
   fun testJsonDeserialization() {
     val eventListener = PrisonOffenderEventListener(mapper = mapper, nonAssociationsMergeService = service)
+
+    repository.save(
+      genNonAssociation(
+        firstPrisonerNumber = "A7777BB",
+        secondPrisonerNumber = "B8888CC",
+      ),
+    )
+
     eventListener.onPrisonOffenderEvent("/messages/prisonerMerged.json".readResourceAsText())
 
-    assertThat(repository.findAllByPrisonerNumber("B1234AA")).hasSize(6)
-    assertThat(repository.findAllByPrisonerNumber("A1234AA")).hasSize(0)
+    assertThat(repository.findAllByPrisonerNumber("A7777BB")).hasSize(0)
+    assertThat(repository.findAllByPrisonerNumber("B8888CC")).hasSize(0)
   }
 
   @Test
   fun testMerge() {
-    assertThat(repository.findAllByPrisonerNumber("A1234AA")).hasSize(6)
-    assertThat(repository.findAllByPrisonerNumber("B1234AA")).hasSize(4)
-
-    assertThat(repository.findAnyBetweenPrisonerNumbers(listOf("X1234AA", "A1234AA"), NonAssociationListInclusion.CLOSED_ONLY)).hasSize(0)
-    assertThat(repository.findAnyBetweenPrisonerNumbers(listOf("X1234AA", "B1234AA"), NonAssociationListInclusion.CLOSED_ONLY)).hasSize(0)
-
-    val mergedAssociations = service.mergePrisonerNumbers("A1234AA", "B1234AA")
-
-    assertThat(mergedAssociations[MergeResult.CLOSED]).hasSize(2)
-    assertThat(mergedAssociations[MergeResult.MERGED]).hasSize(2)
-    assertThat(mergedAssociations[MergeResult.DELETED]).hasSize(2)
-
-    assertThat(mergedAssociations[MergeResult.MERGED]).isEqualTo(
-      listOf(
-        genNonAssociation(firstPrisonerNumber = "B1234AA", secondPrisonerNumber = "C1234FF"),
-        genNonAssociation(firstPrisonerNumber = "D1234RR", secondPrisonerNumber = "B1234AA"),
-      ),
-    )
-
-    assertThat(mergedAssociations[MergeResult.CLOSED]).isEqualTo(
-      listOf(
-        genNonAssociation(firstPrisonerNumber = "B1234AA", secondPrisonerNumber = "X1234AA"),
-        genNonAssociation(firstPrisonerNumber = "X1234AB", secondPrisonerNumber = "B1234AA"),
-      ),
-    )
-
-    assertThat(mergedAssociations[MergeResult.DELETED]).isEqualTo(
-      listOf(
-        genNonAssociation(firstPrisonerNumber = "B1234AA", secondPrisonerNumber = "B1234AA"),
-        genNonAssociation(firstPrisonerNumber = "B1234AA", secondPrisonerNumber = "B1234AA"),
-      ),
-    )
-
-    TestTransaction.flagForCommit()
-    TestTransaction.end()
-    TestTransaction.start()
-
-    assertThat(repository.findAllByPrisonerNumber("B1234AA")).hasSize(6)
-    assertThat(repository.findAllByPrisonerNumber("A1234AA")).hasSize(0)
-
-    assertThat(repository.findAnyBetweenPrisonerNumbers(listOf("X1234AA", "B1234AA"), NonAssociationListInclusion.CLOSED_ONLY)).hasSize(1)
-  }
-
-  @BeforeEach
-  fun setupData() {
     repository.save(
       genNonAssociation(
         firstPrisonerNumber = "A1234AA",
@@ -143,6 +105,48 @@ class NonAssociationMergeServiceIntTest : TestBase() {
         secondPrisonerNumber = "A1234AA",
       ),
     )
+
+    assertThat(repository.findAllByPrisonerNumber("A1234AA")).hasSize(6)
+    assertThat(repository.findAllByPrisonerNumber("B1234AA")).hasSize(4)
+
+    assertThat(repository.findAnyBetweenPrisonerNumbers(listOf("X1234AA", "A1234AA"), NonAssociationListInclusion.CLOSED_ONLY)).hasSize(0)
+    assertThat(repository.findAnyBetweenPrisonerNumbers(listOf("X1234AA", "B1234AA"), NonAssociationListInclusion.CLOSED_ONLY)).hasSize(0)
+
+    val mergedAssociations = service.mergePrisonerNumbers("A1234AA", "B1234AA")
+
+    assertThat(mergedAssociations[MergeResult.CLOSED]).hasSize(2)
+    assertThat(mergedAssociations[MergeResult.MERGED]).hasSize(2)
+    assertThat(mergedAssociations[MergeResult.DELETED]).hasSize(2)
+
+    assertThat(mergedAssociations[MergeResult.MERGED]).isEqualTo(
+      listOf(
+        genNonAssociation(firstPrisonerNumber = "B1234AA", secondPrisonerNumber = "C1234FF"),
+        genNonAssociation(firstPrisonerNumber = "D1234RR", secondPrisonerNumber = "B1234AA"),
+      ),
+    )
+
+    assertThat(mergedAssociations[MergeResult.CLOSED]).isEqualTo(
+      listOf(
+        genNonAssociation(firstPrisonerNumber = "B1234AA", secondPrisonerNumber = "X1234AA"),
+        genNonAssociation(firstPrisonerNumber = "X1234AB", secondPrisonerNumber = "B1234AA"),
+      ),
+    )
+
+    assertThat(mergedAssociations[MergeResult.DELETED]).isEqualTo(
+      listOf(
+        genNonAssociation(firstPrisonerNumber = "B1234AA", secondPrisonerNumber = "B1234AA"),
+        genNonAssociation(firstPrisonerNumber = "B1234AA", secondPrisonerNumber = "B1234AA"),
+      ),
+    )
+
+    TestTransaction.flagForCommit()
+    TestTransaction.end()
+    TestTransaction.start()
+
+    assertThat(repository.findAllByPrisonerNumber("B1234AA")).hasSize(6)
+    assertThat(repository.findAllByPrisonerNumber("A1234AA")).hasSize(0)
+
+    assertThat(repository.findAnyBetweenPrisonerNumbers(listOf("X1234AA", "B1234AA"), NonAssociationListInclusion.CLOSED_ONLY)).hasSize(1)
   }
 
   @AfterEach
