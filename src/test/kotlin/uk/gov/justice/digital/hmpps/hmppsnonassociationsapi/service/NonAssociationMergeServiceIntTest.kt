@@ -1,9 +1,12 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
@@ -21,16 +24,36 @@ import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 
 @DisplayName("Non-associations merge service, integration tests")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(HmppsAuthenticationHolder::class, NonAssociationsMergeService::class, ClockConfiguration::class, ApplicationInsightsConfiguration::class)
+@Import(JacksonAutoConfiguration::class, HmppsAuthenticationHolder::class, NonAssociationsMergeService::class, ClockConfiguration::class, ApplicationInsightsConfiguration::class)
 @WithMockAuthUser(username = "A_DPS_USER")
 @DataJpaTest
 class NonAssociationMergeServiceIntTest : TestBase() {
+
+  @Autowired
+  lateinit var mapper: ObjectMapper
 
   @Autowired
   lateinit var service: NonAssociationsMergeService
 
   @Autowired
   lateinit var repository: NonAssociationsRepository
+
+  @Test
+  fun testJsonDeserialization() {
+    val eventListener = PrisonOffenderEventListener(mapper = mapper, nonAssociationsMergeService = service)
+
+    repository.save(
+      genNonAssociation(
+        firstPrisonerNumber = "A7777BB",
+        secondPrisonerNumber = "B8888CC",
+      ),
+    )
+
+    eventListener.onPrisonOffenderEvent("/messages/prisonerMerged.json".readResourceAsText())
+
+    assertThat(repository.findAllByPrisonerNumber("A7777BB")).hasSize(0)
+    assertThat(repository.findAllByPrisonerNumber("B8888CC")).hasSize(0)
+  }
 
   @Test
   fun testMerge() {
@@ -82,6 +105,7 @@ class NonAssociationMergeServiceIntTest : TestBase() {
         secondPrisonerNumber = "A1234AA",
       ),
     )
+
     assertThat(repository.findAllByPrisonerNumber("A1234AA")).hasSize(6)
     assertThat(repository.findAllByPrisonerNumber("B1234AA")).hasSize(4)
 
@@ -123,7 +147,15 @@ class NonAssociationMergeServiceIntTest : TestBase() {
     assertThat(repository.findAllByPrisonerNumber("A1234AA")).hasSize(0)
 
     assertThat(repository.findAnyBetweenPrisonerNumbers(listOf("X1234AA", "B1234AA"), NonAssociationListInclusion.CLOSED_ONLY)).hasSize(1)
-
-    repository.deleteAll(mergedAssociations.values.flatten())
   }
+
+  @AfterEach
+  fun tearDown() {
+    repository.deleteAll()
+  }
+}
+
+private fun String.readResourceAsText(): String {
+  return NonAssociationMergeServiceIntTest::class.java.getResource(this)?.readText()
+    ?: throw AssertionError("can not find file")
 }
