@@ -22,6 +22,7 @@ class PrisonOffenderEventListener(
   @SqsListener("nonassociations", factory = "hmppsQueueContainerFactoryProxy")
   @WithSpan(value = "hmpps-non-associations-prisoner-event-queue", kind = SpanKind.SERVER)
   fun onPrisonOffenderEvent(requestJson: String) {
+    log.info("Received event: [$requestJson]")
     val (message, messageAttributes) = mapper.readValue(requestJson, HMPPSMessage::class.java)
     val eventType = messageAttributes.eventType.Value
     log.info("Received message $message, type $eventType")
