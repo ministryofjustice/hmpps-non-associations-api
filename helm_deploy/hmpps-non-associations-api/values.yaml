@@ -12,10 +12,20 @@ generic-service:
     tag: app_version    # override at deployment time
     port: 8080
 
+  retryDlqCronjob:
+    enabled: true
+
   ingress:
     enabled: true
     host: app-hostname.local    # override per environment
     tlsSecretName: hmpps-non-associations-api-cert
+    annotations:
+      nginx.ingress.kubernetes.io/server-snippet: |
+        server_tokens off;
+        location /queue-admin/retry-all-dlqs {
+          deny all;
+          return 401;
+        }
 
   env:
     JAVA_OPTS: "-Xmx512m"
