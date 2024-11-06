@@ -22,7 +22,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-validation")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.1.0")
-  implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:6.3.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:6.3.2")
 
   implementation("io.opentelemetry:opentelemetry-api:1.43.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.9.0")
@@ -32,7 +32,7 @@ dependencies {
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
-  implementation("com.zaxxer:HikariCP:6.0.0")
+  implementation("com.zaxxer:HikariCP:6.1.0")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
