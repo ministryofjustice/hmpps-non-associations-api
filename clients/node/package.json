@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "agentkeepalive": ">=4",
-    "superagent": ">=9"
+    "superagent": ">=10.1.1"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.0",
