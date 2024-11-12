@@ -24,11 +24,11 @@ dependencies {
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.1.0")
   implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:6.3.2")
 
-  implementation("io.opentelemetry:opentelemetry-api:1.43.0")
+  implementation("io.opentelemetry:opentelemetry-api:1.44.1")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.9.0")
 
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
-  implementation("org.hibernate.orm:hibernate-community-dialects:6.6.1.Final")
+  implementation("org.hibernate.orm:hibernate-community-dialects:6.6.2.Final")
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
