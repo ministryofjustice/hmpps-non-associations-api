@@ -12,12 +12,11 @@ import java.time.format.DateTimeFormatter
 
 @Configuration
 class CustomisedJacksonObjectMapper(
-  @Value("\${spring.jackson.time-zone}") private val timeZone: String,
+  private val zoneId: ZoneId,
   @Value("\${spring.jackson.date-format}") private val zonedDateTimeFormat: String,
 ) {
   @Bean
   fun serialiser() = Jackson2ObjectMapperBuilderCustomizer {
-    val zoneId = ZoneId.of(timeZone)
     val naiveDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(zoneId)
     val naiveDateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss").withZone(zoneId)
     val zonedDateTimeFormatter = DateTimeFormatter.ofPattern(zonedDateTimeFormat).withZone(zoneId)

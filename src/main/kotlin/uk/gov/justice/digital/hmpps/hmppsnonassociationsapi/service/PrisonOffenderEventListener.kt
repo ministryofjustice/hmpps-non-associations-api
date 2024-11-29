@@ -7,6 +7,7 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.ZonedDateTime
 
 @Service
 class PrisonOffenderEventListener(
@@ -43,7 +44,7 @@ data class HMPPSMergeDomainEvent(
   val eventType: String? = null,
   val additionalInformation: AdditionalInformationMerge,
   val version: String,
-  val occurredAt: String,
+  val occurredAt: ZonedDateTime,
   val description: String,
 )
 
