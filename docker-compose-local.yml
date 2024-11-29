@@ -1,11 +1,10 @@
-version: "3"
 services:
 
   localstack:
-    image: localstack/localstack:3
+    image: localstack/localstack:4
     networks:
       - hmpps
-    container_name: localstack
+    container_name: non-localstack
     ports:
       - "4566:4566"
       - "8999:8080"
@@ -17,10 +16,10 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
 
   non-associations-db:
-    image: postgres
+    image: postgres:15
     networks:
       - hmpps
-    container_name: non-associations-db
+    container_name: non-postgres
     restart: unless-stopped
     ports:
       - "5432:5432"

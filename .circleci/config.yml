@@ -19,7 +19,7 @@ parameters:
     default: "15"
   localstack-version:
     type: string
-    default: "3"
+    default: "4"
 
 jobs:
   validate:
