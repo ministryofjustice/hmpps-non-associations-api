@@ -1,7 +1,7 @@
-version: "3"
 services:
+
   database:
-    image: postgres
+    image: postgres:15
     networks:
       - hmpps
     container_name: non-db
@@ -31,7 +31,7 @@ services:
       - API_BASE_URL_OFFENDER_SEARCH=http://prisoner-search:8080
 
   localstack:
-    image: localstack/localstack:3
+    image: localstack/localstack:4
     networks:
       - hmpps
     container_name: localstack
@@ -60,7 +60,7 @@ services:
       - NOMIS_ENDPOINT_URL=http://nomis-user-roles-api:8080
 
   prisoner-search:
-    image: wiremock/wiremock:2.35.0
+    image: wiremock/wiremock:3x
     networks:
       - hmpps
     container_name: prisoner-search
