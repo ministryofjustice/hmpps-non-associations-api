@@ -29,9 +29,13 @@ class SubjectAccessRequestService(
     }
 
     // Filter non-associations by given date range
+    val fromDateExclusive = fromDate?.minusDays(1)
+    val toDateExclusive = toDate?.plusDays(1)
     val content = nonAssociations.copy(
       nonAssociations = nonAssociations.nonAssociations.filter {
-        (fromDate == null || it.whenCreated.toLocalDate().isAfter(fromDate)) && (toDate == null || it.whenCreated.toLocalDate().isBefore(toDate))
+        val updatedDate = it.whenUpdated.toLocalDate()
+        (fromDateExclusive == null || updatedDate.isAfter(fromDateExclusive)) &&
+          (toDateExclusive == null || updatedDate.isBefore(toDateExclusive))
       },
     )
 

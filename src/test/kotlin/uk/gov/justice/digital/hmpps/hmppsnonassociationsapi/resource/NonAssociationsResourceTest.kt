@@ -7,6 +7,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
@@ -3032,135 +3034,193 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
   }
 
-  @Test
-  fun `when an SAR is made non association data is returned`() {
-    val nonAssociation = createNonAssociation()
+  @DisplayName("Subject access requests")
+  @Nested
+  inner class SAR {
+    @Test
+    fun `when an SAR is made non-associations are returned`() {
+      val nonAssociation = createNonAssociation()
 
-    offenderSearchMockServer.stubSearchByPrisonerNumbers(
-      listOf(
-        nonAssociation.firstPrisonerNumber,
-        nonAssociation.secondPrisonerNumber,
-      ),
-      listOf(
-        offenderSearchPrisoners[nonAssociation.firstPrisonerNumber]!!,
-        offenderSearchPrisoners[nonAssociation.secondPrisonerNumber]!!,
-      ),
-    )
-
-    webTestClient.get()
-      .uri("/subject-access-request?prn=${nonAssociation.firstPrisonerNumber}")
-      .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS")))
-      .header("Content-Type", "application/json")
-      .exchange()
-      .expectStatus().isOk
-      .expectBody().json(
-        // language=json
-        """
-          {
-            "content": {
-              "prisonerNumber": "A1234BC",
-              "firstName": "John",
-              "lastName": "Doe",
-              "prisonId": "MDI",
-              "prisonName": "Moorland",
-              "cellLocation": "MDI-A-1",
-              "openCount": 1,
-              "closedCount": 0,
-              "nonAssociations": [
-                {
-                  "role": "VICTIM",
-                  "roleDescription": "Victim",
-                  "reason": "BULLYING",
-                  "reasonDescription": "Bullying",
-                  "restrictionType": "CELL",
-                  "restrictionTypeDescription": "Cell only",
-                  "comment": "They keep fighting",
-                  "authorisedBy": "Mr Bobby",
-                  "updatedBy": "A_DPS_USER",
-                  "isClosed": false,
-                  "otherPrisonerDetails": {
-                    "prisonerNumber": "D5678EF",
-                    "role": "PERPETRATOR",
-                    "roleDescription": "Perpetrator",
-                    "firstName": "Merlin",
-                    "lastName": "Somerplumbs",
-                    "prisonId": "MDI",
-                    "prisonName": "Moorland",
-                    "cellLocation": "MDI-A-2"
-                  },
-                  "isOpen": true
-                }
-              ]
-            }
-          }
-          """,
-        false,
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        listOf(
+          nonAssociation.firstPrisonerNumber,
+          nonAssociation.secondPrisonerNumber,
+        ),
+        listOf(
+          offenderSearchPrisoners[nonAssociation.firstPrisonerNumber]!!,
+          offenderSearchPrisoners[nonAssociation.secondPrisonerNumber]!!,
+        ),
       )
-  }
 
-  @Test
-  fun `when SAR about prisoner with no non-associations, responds 204 No Content`() {
-    // Someone with no non-associations
-    val prisonerNumber = "G9012HI"
+      webTestClient.get()
+        .uri("/subject-access-request?prn=${nonAssociation.firstPrisonerNumber}")
+        .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isOk
+        .expectBody().json(
+          // language=json
+          """
+            {
+              "content": {
+                "prisonerNumber": "A1234BC",
+                "firstName": "John",
+                "lastName": "Doe",
+                "prisonId": "MDI",
+                "prisonName": "Moorland",
+                "cellLocation": "MDI-A-1",
+                "openCount": 1,
+                "closedCount": 0,
+                "nonAssociations": [
+                  {
+                    "role": "VICTIM",
+                    "roleDescription": "Victim",
+                    "reason": "BULLYING",
+                    "reasonDescription": "Bullying",
+                    "restrictionType": "CELL",
+                    "restrictionTypeDescription": "Cell only",
+                    "comment": "They keep fighting",
+                    "authorisedBy": "Mr Bobby",
+                    "updatedBy": "A_DPS_USER",
+                    "isClosed": false,
+                    "otherPrisonerDetails": {
+                      "prisonerNumber": "D5678EF",
+                      "role": "PERPETRATOR",
+                      "roleDescription": "Perpetrator",
+                      "firstName": "Merlin",
+                      "lastName": "Somerplumbs",
+                      "prisonId": "MDI",
+                      "prisonName": "Moorland",
+                      "cellLocation": "MDI-A-2"
+                    },
+                    "isOpen": true
+                  }
+                ]
+              }
+            }
+            """,
+          false,
+        )
+    }
 
-    offenderSearchMockServer.stubSearchByPrisonerNumbers(
-      listOf(prisonerNumber),
-      listOf(offenderSearchPrisoners[prisonerNumber]!!),
+    @Test
+    fun `SAR about prisoner with no non-associations responds with 204 No Content`() {
+      // Someone with no non-associations
+      val prisonerNumber = "G9012HI"
+
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        listOf(prisonerNumber),
+        listOf(offenderSearchPrisoners[prisonerNumber]!!),
+      )
+
+      webTestClient.get()
+        .uri("/subject-access-request?prn=$prisonerNumber")
+        .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isNoContent
+    }
+
+    @Test
+    fun `SAR with non-associations outside given date range responds with 204 No Content`() {
+      val nonAssociation = createNonAssociation()
+      // Choose a toDate that would filter the non-association out
+      val toDate = nonAssociation.whenCreated.minusDays(42).toLocalDate()
+
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        listOf(
+          nonAssociation.firstPrisonerNumber,
+          nonAssociation.secondPrisonerNumber,
+        ),
+        listOf(
+          offenderSearchPrisoners[nonAssociation.firstPrisonerNumber]!!,
+          offenderSearchPrisoners[nonAssociation.secondPrisonerNumber]!!,
+        ),
+      )
+
+      webTestClient.get()
+        .uri("/subject-access-request?prn=${nonAssociation.firstPrisonerNumber}&toDate=$toDate")
+        .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isNoContent
+    }
+
+    @ParameterizedTest(name = "SAR for date range {0} to {1} should return something? {2}")
+    @CsvSource(
+      value = [
+        "           |            | true",
+        "2023-07-15 |            | true",
+        "2023-07-16 |            | false",
+        "           | 2023-07-15 | true",
+        "           | 2023-07-14 | false",
+        "2023-07-14 | 2023-07-14 | false",
+        "2023-07-16 | 2023-07-16 | false",
+        "2023-07-15 | 2023-07-15 | true",
+        "2023-07-14 | 2023-07-16 | true",
+      ],
+      delimiter = '|',
     )
+    fun `SAR for date ranges`(fromDate: String?, toDate: String?, expectNonAssociationFound: Boolean) {
+      val nonAssociation = createNonAssociation()
+      // Choose a toDate that would filter the non-association out
 
-    webTestClient.get()
-      .uri("/subject-access-request?prn=$prisonerNumber")
-      .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS")))
-      .header("Content-Type", "application/json")
-      .exchange()
-      .expectStatus().isNoContent
-  }
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        listOf(
+          nonAssociation.firstPrisonerNumber,
+          nonAssociation.secondPrisonerNumber,
+        ),
+        listOf(
+          offenderSearchPrisoners[nonAssociation.firstPrisonerNumber]!!,
+          offenderSearchPrisoners[nonAssociation.secondPrisonerNumber]!!,
+        ),
+      )
 
-  @Test
-  fun `when SAR about prisoner with non-associations outside given date range`() {
-    val nonAssociation = createNonAssociation()
-    // Choose a toDate that would filter the non-association out
-    val toDate = nonAssociation.whenCreated.minusDays(42).toLocalDate()
+      val url = buildString {
+        append("/subject-access-request?prn=${nonAssociation.firstPrisonerNumber}")
+        if (fromDate != null) {
+          append("&fromDate=$fromDate")
+        }
+        if (toDate != null) {
+          append("&toDate=$toDate")
+        }
+      }
 
-    offenderSearchMockServer.stubSearchByPrisonerNumbers(
-      listOf(
-        nonAssociation.firstPrisonerNumber,
-        nonAssociation.secondPrisonerNumber,
-      ),
-      listOf(
-        offenderSearchPrisoners[nonAssociation.firstPrisonerNumber]!!,
-        offenderSearchPrisoners[nonAssociation.secondPrisonerNumber]!!,
-      ),
-    )
+      webTestClient.get()
+        .uri(url)
+        .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().run {
+          if (expectNonAssociationFound) {
+            isOk
+          } else {
+            isNoContent
+          }
+        }
+    }
 
-    webTestClient.get()
-      .uri("/subject-access-request?prn=${nonAssociation.firstPrisonerNumber}&toDate=$toDate")
-      .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS")))
-      .header("Content-Type", "application/json")
-      .exchange()
-      .expectStatus().isNoContent
-  }
+    @Test
+    fun `SAR about prisoner with non-associations not found in Offender Search responds 209`() {
+      // A prisoner number not found in Offender Search API is different than "no non-associations found for this prisoner"
+      // and that's why it's not a 204 No Content: Responds 209 Subject Identifier is not recognised by this service.
+      val nonAssociation = createNonAssociation()
 
-  @Test
-  fun `when SAR about prisoner with non-associations, but Offender Search doesn't know them, responds 209`() {
-    // A prisoner number not found in Offender Search API is different than "no non-associations found for this prisoner"
-    // and that's why it's not a 204 No Content: Responds 209 Subject Identifier is not recognised by this service.
-    val nonAssociation = createNonAssociation()
+      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+        listOf(
+          nonAssociation.firstPrisonerNumber,
+          nonAssociation.secondPrisonerNumber,
+        ),
+        emptyList(),
+      )
 
-    offenderSearchMockServer.stubSearchByPrisonerNumbers(
-      listOf(
-        nonAssociation.firstPrisonerNumber,
-        nonAssociation.secondPrisonerNumber,
-      ),
-      emptyList(),
-    )
-
-    webTestClient.get()
-      .uri("/subject-access-request?prn=${nonAssociation.firstPrisonerNumber}")
-      .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS")))
-      .header("Content-Type", "application/json")
-      .exchange()
-      .expectStatus().isEqualTo(209)
+      webTestClient.get()
+        .uri("/subject-access-request?prn=${nonAssociation.firstPrisonerNumber}")
+        .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isEqualTo(209)
+    }
   }
 
   private fun createNonAssociation(
