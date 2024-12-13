@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
 import org.springframework.test.context.transaction.TestTransaction
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ApplicationInsightsConfiguration
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ClockConfiguration
@@ -21,6 +24,8 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findA
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
 import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
+import java.time.Clock
+import java.time.ZoneId
 
 @DisplayName("Non-associations merge service, integration tests")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -28,6 +33,16 @@ import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 @WithMockAuthUser(username = "A_DPS_USER")
 @DataJpaTest
 class NonAssociationMergeServiceIntTest : TestBase() {
+  @TestConfiguration
+  class FixedClockConfig {
+    @Primary
+    @Bean
+    fun timeZoneId(): ZoneId = zoneId
+
+    @Primary
+    @Bean
+    fun fixedClock(): Clock = clock
+  }
 
   @Autowired
   lateinit var mapper: ObjectMapper

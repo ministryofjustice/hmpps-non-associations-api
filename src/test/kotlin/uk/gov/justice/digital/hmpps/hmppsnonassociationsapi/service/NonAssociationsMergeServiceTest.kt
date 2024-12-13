@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase.Companion.clock
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase.Companion.now
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findAllByPrisonerNumber
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
-import java.time.LocalDateTime
 
 @DisplayName("Non-associations merge service, unit tests")
 class NonAssociationsMergeServiceTest {
@@ -23,8 +23,6 @@ class NonAssociationsMergeServiceTest {
 
   @Test
   fun mergeNonAssociationPrisonerNumbers() {
-    val now = LocalDateTime.now(clock)
-
     whenever(nonAssociationsRepository.findAllByPrisonerNumber("A1234AA")).thenReturn(
       listOf(
         genNonAssociation(1, "A1234AA", "X1234AA", now),

@@ -32,7 +32,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchP
 import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 import java.lang.String.format
 import java.time.Clock
-import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
 // language=text
@@ -321,7 +320,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         genNonAssociation(
           firstPrisonerNumber = secondPrisoner.prisonerNumber,
           secondPrisonerNumber = firstPrisoner.prisonerNumber,
-          createTime = LocalDateTime.now(clock),
+          createTime = now,
         ),
       )
 
@@ -403,7 +402,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         genNonAssociation(
           firstPrisonerNumber = firstPrisoner.prisonerNumber,
           secondPrisonerNumber = secondPrisoner.prisonerNumber,
-          createTime = LocalDateTime.now(clock),
+          createTime = now,
           closed = true,
         ),
       )
@@ -885,7 +884,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           "isClosed": true,
           "closedReason": "$closedReason",
           "closedBy": $EXPECTED_USERNAME,
-          "closedAt": "${LocalDateTime.now(clock)}"
+          "closedAt": "$now"
         }
         """
 
@@ -916,7 +915,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       val request = CloseNonAssociationRequest(
         closedReason = "Please close again",
         closedBy = "MWILLIS",
-        closedAt = LocalDateTime.now(clock),
+        closedAt = now,
       )
 
       webTestClient.put()
@@ -1095,7 +1094,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       val request = ReopenNonAssociationRequest(
         reopenReason = "Please open again",
         reopenedBy = "MWILLIS",
-        reopenedAt = LocalDateTime.now(clock),
+        reopenedAt = now,
       )
 
       webTestClient.put()
@@ -3231,7 +3230,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     firstPrisonerRole: Role = Role.VICTIM,
     secondPrisonerRole: Role = Role.PERPETRATOR,
   ): NonAssociationJPA {
-    val now = LocalDateTime.now(clock)
     val nonna = NonAssociationJPA(
       firstPrisonerNumber = firstPrisonerNumber,
       firstPrisonerRole = firstPrisonerRole,

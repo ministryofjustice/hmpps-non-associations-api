@@ -21,7 +21,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
 import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
-import java.time.LocalDateTime
 
 @DisplayName("Non-associations repository")
 @DataJpaTest
@@ -321,7 +320,7 @@ class NonAssociationsRepositoryTest : TestBase() {
 
     val closedBy = "Aldo"
     val closedReason = "They're friends now"
-    val closedAt = LocalDateTime.now(clock)
+    val closedAt = now
     createdNonna.close(closedBy, closedReason, closedAt)
     repository.save(createdNonna)
 
@@ -369,7 +368,7 @@ class NonAssociationsRepositoryTest : TestBase() {
     TestTransaction.start()
 
     created.comment = "John attacked Bob after being provoked"
-    created.whenUpdated = LocalDateTime.now(clock).plusMinutes(1)
+    created.whenUpdated = now.plusMinutes(1)
     val updated = repository.save(created)
     TestTransaction.flagForCommit()
     TestTransaction.end()
@@ -381,7 +380,6 @@ class NonAssociationsRepositoryTest : TestBase() {
   }
 
   private fun nonAssociation(firstPrisonerNumber: String, secondPrisonerNumber: String, closed: Boolean = false): NonAssociation {
-    val now = LocalDateTime.now(clock)
     return NonAssociation(
       firstPrisonerNumber = firstPrisonerNumber,
       firstPrisonerRole = Role.VICTIM,
