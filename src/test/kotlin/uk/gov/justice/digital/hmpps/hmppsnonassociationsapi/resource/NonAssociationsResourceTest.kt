@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.CsvSource
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
+import org.springframework.test.json.JsonCompareMode
 import org.springframework.test.web.reactive.server.returnResult
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteNonAssociationRequest
@@ -282,7 +283,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(jsonString(request))
         .exchange()
         .expectStatus().isCreated
-        .expectBody().json(expectedResponse, false)
+        .expectBody().json(expectedResponse, JsonCompareMode.LENIENT)
         .consumeWith {
           val nonAssociation = objectMapper.readValue(it.responseBody, NonAssociation::class.java)
           assertThat(nonAssociation.id).isGreaterThan(0)
@@ -579,7 +580,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(jsonString(request))
         .exchange()
         .expectStatus().isOk
-        .expectBody().json(expectedResponse, false)
+        .expectBody().json(expectedResponse, JsonCompareMode.LENIENT)
         .consumeWith {
           val nonAssociation = objectMapper.readValue(it.responseBody, NonAssociation::class.java)
           assertThat(nonAssociation.id).isGreaterThan(0)
@@ -658,7 +659,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -692,7 +693,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
   }
@@ -901,7 +902,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(jsonString(request))
         .exchange()
         .expectStatus().isOk
-        .expectBody().json(expectedResponse, false)
+        .expectBody().json(expectedResponse, JsonCompareMode.LENIENT)
         .consumeWith {
           val nonAssociation = objectMapper.readValue(it.responseBody, NonAssociation::class.java)
           assertThat(nonAssociation.id).isGreaterThan(0)
@@ -1080,7 +1081,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(jsonString(request))
         .exchange()
         .expectStatus().isOk
-        .expectBody().json(expectedResponse, false)
+        .expectBody().json(expectedResponse, JsonCompareMode.LENIENT)
         .consumeWith {
           val nonAssociation = objectMapper.readValue(it.responseBody, NonAssociation::class.java)
           assertThat(nonAssociation.id).isGreaterThan(0)
@@ -1397,7 +1398,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "empty": false
            }
            """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -1434,7 +1435,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "empty": false
           }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -1471,7 +1472,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "empty": false
           }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -1524,7 +1525,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "empty": false
           }
            """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -1592,7 +1593,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "empty": false
           }
            """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -1639,7 +1640,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "empty": false
           }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -1681,7 +1682,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "empty": false
           }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
   }
@@ -1764,10 +1765,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus().isOk
-        .expectBody().json(
-          expectedResponse,
-          true,
-        )
+        .expectBody().json(expectedResponse, JsonCompareMode.STRICT)
     }
 
     @Test
@@ -1863,7 +1861,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               ]
             }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -1974,7 +1972,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               ]
             }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2060,7 +2058,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               ]
             }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2172,7 +2170,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               ]
             }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2350,7 +2348,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
-        .expectBody().json("[]", true)
+        .expectBody().json("[]", JsonCompareMode.STRICT)
     }
 
     @Test
@@ -2388,7 +2386,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2448,7 +2446,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2491,7 +2489,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2547,7 +2545,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
 
       webTestClient.post()
@@ -2576,7 +2574,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2631,7 +2629,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
   }
@@ -2707,7 +2705,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
-        .expectBody().json("[]", true)
+        .expectBody().json("[]", JsonCompareMode.STRICT)
     }
 
     @Test
@@ -2726,7 +2724,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
-        .expectBody().json("[]", true)
+        .expectBody().json("[]", JsonCompareMode.STRICT)
     }
 
     @Test
@@ -2764,7 +2762,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2824,7 +2822,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2867,7 +2865,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2933,7 +2931,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
 
       webTestClient.post()
@@ -2972,7 +2970,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -3028,7 +3026,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
   }
@@ -3098,7 +3096,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               }
             }
             """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
