@@ -24,17 +24,44 @@ class NonAssociationsMergeService(
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun mergePrisonerNumbers(
+  /**
+   * Replaces an old prisoner number for a new one in all non-associations,
+   * closing newly-duplicate records and deleting non-associations with the same prisoner number on both sides.
+   */
+  fun replacePrisonerNumber(oldPrisonerNumber: String, newPrisonerNumber: String): Map<MergeResult, List<NonAssociation>> =
+    replacePrisonerNumberInDateRange(oldPrisonerNumber, newPrisonerNumber, null, null)
+
+  /**
+   * Replaces an old prisoner number for a new one in non-associations created within given date range (inclusive),
+   * closing newly-duplicate records and deleting non-associations with the same prisoner number on both sides.
+   */
+  fun replacePrisonerNumberInDateRange(
     oldPrisonerNumber: String,
     newPrisonerNumber: String,
+    since: LocalDateTime?,
+    until: LocalDateTime?,
   ): Map<MergeResult, List<NonAssociation>> {
-    log.info("Replacing prisoner number $oldPrisonerNumber to $newPrisonerNumber")
+    log.info(
+      "Replacing prisoner number $oldPrisonerNumber to $newPrisonerNumber " +
+        "(created between ${since ?: "whenever"} and ${until ?: "now"})",
+    )
 
     val updatedRecords = mutableListOf<Pair<MergeResult, NonAssociation>>()
 
-    nonAssociationsRepository.findAllByPrisonerNumber(oldPrisonerNumber)
-      .forEach { nonAssociation ->
+    val createdAtFilter: (NonAssociation) -> Boolean = when {
+      // created between `since` and `until`
+      since != null && until != null -> { nonAssociation -> nonAssociation.whenCreated >= since && nonAssociation.whenCreated <= until }
+      // created after `since`
+      since != null -> { nonAssociation -> nonAssociation.whenCreated >= since }
+      // created before `until`
+      until != null -> { nonAssociation -> nonAssociation.whenCreated <= until }
+      // created at any time
+      else -> { _ -> true }
+    }
 
+    nonAssociationsRepository.findAllByPrisonerNumber(oldPrisonerNumber)
+      .filter(createdAtFilter)
+      .forEach { nonAssociation ->
         log.debug("Looking at record {}", nonAssociation)
         if (nonAssociation.firstPrisonerNumber == oldPrisonerNumber) {
           nonAssociationsRepository.findByFirstPrisonerNumberAndSecondPrisonerNumber(
@@ -100,15 +127,15 @@ class NonAssociationsMergeService(
     if (duplicateRecord != null) {
       nonAssociation.close(SYSTEM_USERNAME, "MERGE", LocalDateTime.now(clock))
       log.info("Closed non-association record $nonAssociation - Duplicate")
-      return Pair(MergeResult.CLOSED, nonAssociation)
+      return MergeResult.CLOSED to nonAssociation
     } else if (newPrisonerNumber == otherPrisonerNumber) {
       log.info("Deleting non-association record $nonAssociation - same prisoner number")
       nonAssociationsRepository.delete(nonAssociation)
-      return Pair(MergeResult.DELETED, nonAssociation)
+      return MergeResult.DELETED to nonAssociation
     }
 
     log.info("Merged non-association record $nonAssociation")
-    return Pair(MergeResult.MERGED, nonAssociation)
+    return MergeResult.MERGED to nonAssociation
   }
 }
 

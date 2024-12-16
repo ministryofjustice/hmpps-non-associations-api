@@ -35,4 +35,9 @@ abstract class TestBase {
       }
     }
   }
+
+  fun String.readResourceAsText(): String {
+    return TestBase::class.java.getResource(this)?.readText()
+      ?: throw AssertionError("Cannot find file $this")
+  }
 }
