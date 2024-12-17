@@ -65,9 +65,6 @@ jobs:
       tag: << parameters.node-version >>
     steps:
       - checkout
-      - run:
-          name: Update npm
-          command: sudo npm install -g npm@latest
       - restore_cache:
           key: dependency-cache-node<< parameters.node-version >>-{{ checksum "clients/node/package-lock.json" }}
       - run:
@@ -110,7 +107,7 @@ workflows:
       - test-node-client:
           matrix:
             parameters:
-              node-version: ["18.20", "20.18", "22.10"]
+              node-version: ["18.20", "20.18", "22.12"]
       - hmpps/helm_lint:
           name: helm_lint
       - hmpps/build_multiplatform_docker:
