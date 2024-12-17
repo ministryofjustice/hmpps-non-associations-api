@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.CsvSource
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
+import org.springframework.test.json.JsonCompareMode
 import org.springframework.test.web.reactive.server.returnResult
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CloseNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.DeleteNonAssociationRequest
@@ -32,7 +33,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchP
 import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 import java.lang.String.format
 import java.time.Clock
-import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
 // language=text
@@ -283,7 +283,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(jsonString(request))
         .exchange()
         .expectStatus().isCreated
-        .expectBody().json(expectedResponse, false)
+        .expectBody().json(expectedResponse, JsonCompareMode.LENIENT)
         .consumeWith {
           val nonAssociation = objectMapper.readValue(it.responseBody, NonAssociation::class.java)
           assertThat(nonAssociation.id).isGreaterThan(0)
@@ -321,7 +321,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         genNonAssociation(
           firstPrisonerNumber = secondPrisoner.prisonerNumber,
           secondPrisonerNumber = firstPrisoner.prisonerNumber,
-          createTime = LocalDateTime.now(clock),
+          createTime = now,
         ),
       )
 
@@ -403,7 +403,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         genNonAssociation(
           firstPrisonerNumber = firstPrisoner.prisonerNumber,
           secondPrisonerNumber = secondPrisoner.prisonerNumber,
-          createTime = LocalDateTime.now(clock),
+          createTime = now,
           closed = true,
         ),
       )
@@ -580,7 +580,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(jsonString(request))
         .exchange()
         .expectStatus().isOk
-        .expectBody().json(expectedResponse, false)
+        .expectBody().json(expectedResponse, JsonCompareMode.LENIENT)
         .consumeWith {
           val nonAssociation = objectMapper.readValue(it.responseBody, NonAssociation::class.java)
           assertThat(nonAssociation.id).isGreaterThan(0)
@@ -659,7 +659,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -693,7 +693,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
   }
@@ -885,7 +885,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           "isClosed": true,
           "closedReason": "$closedReason",
           "closedBy": $EXPECTED_USERNAME,
-          "closedAt": "${LocalDateTime.now(clock)}"
+          "closedAt": "$now"
         }
         """
 
@@ -902,7 +902,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(jsonString(request))
         .exchange()
         .expectStatus().isOk
-        .expectBody().json(expectedResponse, false)
+        .expectBody().json(expectedResponse, JsonCompareMode.LENIENT)
         .consumeWith {
           val nonAssociation = objectMapper.readValue(it.responseBody, NonAssociation::class.java)
           assertThat(nonAssociation.id).isGreaterThan(0)
@@ -916,7 +916,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       val request = CloseNonAssociationRequest(
         closedReason = "Please close again",
         closedBy = "MWILLIS",
-        closedAt = LocalDateTime.now(clock),
+        closedAt = now,
       )
 
       webTestClient.put()
@@ -1081,7 +1081,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(jsonString(request))
         .exchange()
         .expectStatus().isOk
-        .expectBody().json(expectedResponse, false)
+        .expectBody().json(expectedResponse, JsonCompareMode.LENIENT)
         .consumeWith {
           val nonAssociation = objectMapper.readValue(it.responseBody, NonAssociation::class.java)
           assertThat(nonAssociation.id).isGreaterThan(0)
@@ -1095,7 +1095,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       val request = ReopenNonAssociationRequest(
         reopenReason = "Please open again",
         reopenedBy = "MWILLIS",
-        reopenedAt = LocalDateTime.now(clock),
+        reopenedAt = now,
       )
 
       webTestClient.put()
@@ -1398,7 +1398,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "empty": false
            }
            """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -1435,7 +1435,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "empty": false
           }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -1472,7 +1472,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "empty": false
           }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -1525,7 +1525,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "empty": false
           }
            """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -1593,7 +1593,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "empty": false
           }
            """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -1640,7 +1640,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "empty": false
           }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -1682,7 +1682,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "empty": false
           }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
   }
@@ -1765,10 +1765,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
         .exchange()
         .expectStatus().isOk
-        .expectBody().json(
-          expectedResponse,
-          true,
-        )
+        .expectBody().json(expectedResponse, JsonCompareMode.STRICT)
     }
 
     @Test
@@ -1864,7 +1861,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               ]
             }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -1975,7 +1972,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               ]
             }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2061,7 +2058,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               ]
             }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2173,7 +2170,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               ]
             }
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2351,7 +2348,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
-        .expectBody().json("[]", true)
+        .expectBody().json("[]", JsonCompareMode.STRICT)
     }
 
     @Test
@@ -2389,7 +2386,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2449,7 +2446,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2492,7 +2489,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2548,7 +2545,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
 
       webTestClient.post()
@@ -2577,7 +2574,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2632,7 +2629,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
   }
@@ -2708,7 +2705,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
-        .expectBody().json("[]", true)
+        .expectBody().json("[]", JsonCompareMode.STRICT)
     }
 
     @Test
@@ -2727,7 +2724,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
-        .expectBody().json("[]", true)
+        .expectBody().json("[]", JsonCompareMode.STRICT)
     }
 
     @Test
@@ -2765,7 +2762,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2825,7 +2822,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2868,7 +2865,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -2934,7 +2931,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
 
       webTestClient.post()
@@ -2973,7 +2970,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -3029,7 +3026,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             }
           ]
           """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
   }
@@ -3099,7 +3096,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
               }
             }
             """,
-          false,
+          JsonCompareMode.LENIENT,
         )
     }
 
@@ -3231,7 +3228,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     firstPrisonerRole: Role = Role.VICTIM,
     secondPrisonerRole: Role = Role.PERPETRATOR,
   ): NonAssociationJPA {
-    val now = LocalDateTime.now(clock)
     val nonna = NonAssociationJPA(
       firstPrisonerNumber = firstPrisonerNumber,
       firstPrisonerRole = firstPrisonerRole,
