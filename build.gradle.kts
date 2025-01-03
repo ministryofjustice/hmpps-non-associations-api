@@ -5,7 +5,7 @@ import uk.gov.justice.digital.hmpps.gradle.PortForwardRedisTask
 import uk.gov.justice.digital.hmpps.gradle.RevealSecretsTask
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.1.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.1.2"
   kotlin("plugin.jpa") version "2.0.21"
   kotlin("plugin.spring") version "2.0.21"
   idea
@@ -16,19 +16,19 @@ configurations {
 }
 
 dependencies {
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.1.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.1.1")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-validation")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.2.0")
-  implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:7.2.2")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.2.2")
+  implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:7.3.13")
 
-  implementation("io.opentelemetry:opentelemetry-api:1.44.1")
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.10.0")
+  implementation("io.opentelemetry:opentelemetry-api:1.45.0")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.11.0")
 
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
-  implementation("org.hibernate.orm:hibernate-community-dialects:6.6.3.Final")
+  implementation("org.hibernate.orm:hibernate-community-dialects:6.6.4.Final")
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
 
@@ -41,7 +41,7 @@ dependencies {
 
   testImplementation("org.wiremock:wiremock-standalone:3.10.0")
 
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.1.0")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.1.1")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.2")
   testImplementation("org.mockito:mockito-inline:5.2.0")
   testImplementation("io.swagger.parser.v3:swagger-parser:2.1.24")
