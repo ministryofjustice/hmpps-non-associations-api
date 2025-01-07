@@ -20,6 +20,8 @@ spring:
     url: jdbc:postgresql://localhost:5432/non_associations?sslmode=prefer
     username: non_associations
     password: non_associations
+    hikari:
+      maximum-pool-size: 10
 
   main:
     allow-bean-definition-overriding: true
