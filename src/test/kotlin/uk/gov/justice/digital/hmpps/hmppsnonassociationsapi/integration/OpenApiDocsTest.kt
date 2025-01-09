@@ -1,20 +1,15 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration
 
 import io.swagger.v3.parser.OpenAPIV3Parser
-import net.minidev.json.JSONArray
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.MediaType
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DisplayName("OpenApi docs")
 class OpenApiDocsTest : SqsIntegrationTestBase() {
-  @LocalServerPort
-  private var port: Int = 0
-
   @Test
   fun `open api docs are available`() {
     webTestClient.get()
@@ -31,7 +26,9 @@ class OpenApiDocsTest : SqsIntegrationTestBase() {
       .accept(MediaType.APPLICATION_JSON)
       .exchange()
       .expectStatus().is3xxRedirection
-      .expectHeader().value("Location") { it.contains("/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config") }
+      .expectHeader().value("Location") {
+        it.contains("/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config")
+      }
   }
 
   @Test
@@ -41,14 +38,12 @@ class OpenApiDocsTest : SqsIntegrationTestBase() {
       .accept(MediaType.APPLICATION_JSON)
       .exchange()
       .expectStatus().isOk
-      .expectBody().jsonPath("messages").doesNotExist()
-  }
-
-  @Test
-  fun `the open api json is valid and contains documentation`() {
-    val result = OpenAPIV3Parser().readLocation("http://localhost:$port/v3/api-docs", null, null)
-    assertThat(result.messages).isEmpty()
-    assertThat(result.openAPI.paths).isNotEmpty
+      .expectBody().consumeWith {
+        val contents = it.responseBody!!.decodeToString()
+        val result = OpenAPIV3Parser().readContents(contents)
+        assertThat(result.messages).isEmpty()
+        assertThat(result.openAPI.paths).isNotEmpty
+      }
   }
 
   @Test
@@ -63,8 +58,6 @@ class OpenApiDocsTest : SqsIntegrationTestBase() {
 
   @Test
   fun `the security scheme is setup for bearer tokens`() {
-    val bearerJwts = JSONArray()
-    bearerJwts.addAll(listOf("read", "write"))
     webTestClient.get()
       .uri("/v3/api-docs")
       .accept(MediaType.APPLICATION_JSON)
@@ -74,8 +67,7 @@ class OpenApiDocsTest : SqsIntegrationTestBase() {
       .jsonPath("$.components.securitySchemes.bearer-jwt.type").isEqualTo("http")
       .jsonPath("$.components.securitySchemes.bearer-jwt.scheme").isEqualTo("bearer")
       .jsonPath("$.components.securitySchemes.bearer-jwt.bearerFormat").isEqualTo("JWT")
-      .jsonPath("$.security[0].bearer-jwt")
-      .isEqualTo(bearerJwts)
+      .jsonPath("$.security[0].bearer-jwt").isEqualTo(listOf("read", "write"))
   }
 
   @Test
