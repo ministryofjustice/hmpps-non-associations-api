@@ -40,7 +40,7 @@ class OpenApiConfiguration(
         .version(version)
         .description("API for viewing and managing non-associations for prisoners")
         .contact(Contact().name("HMPPS Digital Studio").email("feedback@digital.justice.gov.uk"))
-        .license(License().name("MIT")),
+        .license(License().name("MIT").identifier("MIT")),
     )
     .components(
       Components()
