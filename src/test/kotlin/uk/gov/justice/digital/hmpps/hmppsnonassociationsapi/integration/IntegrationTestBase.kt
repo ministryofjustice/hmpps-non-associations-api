@@ -8,8 +8,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpHeaders
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
@@ -32,7 +32,7 @@ abstract class IntegrationTestBase : TestBase() {
   @Autowired
   protected lateinit var jwtAuthorisationHelper: JwtAuthorisationHelper
 
-  @SpyBean
+  @MockitoSpyBean
   protected lateinit var telemetryClient: TelemetryClient
 
   @Autowired
