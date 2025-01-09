@@ -9,6 +9,7 @@ plugins {
   kotlin("plugin.jpa") version "2.0.21"
   kotlin("plugin.spring") version "2.0.21"
   idea
+  id("org.springdoc.openapi-gradle-plugin") version "1.9.0"
 }
 
 configurations {
@@ -71,4 +72,8 @@ tasks {
   withType<KotlinCompile> {
     compilerOptions.jvmTarget = JvmTarget.JVM_21
   }
+}
+
+openApi {
+  customBootRun.args.set(listOf("--spring.profiles.active=dev,localstack"))
 }
