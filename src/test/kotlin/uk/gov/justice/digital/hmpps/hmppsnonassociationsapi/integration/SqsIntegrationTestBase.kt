@@ -8,8 +8,7 @@ import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.LocalStackContainer
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.LocalStackContainer.setLocalStackProperties
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.LocalStackTestcontainer
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
@@ -20,6 +19,17 @@ import uk.gov.justice.hmpps.sqs.countMessagesOnQueue
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 class SqsIntegrationTestBase : IntegrationTestBase() {
+
+  companion object {
+    private val localstackInstance = LocalStackTestcontainer.instance
+
+    @Suppress("unused")
+    @JvmStatic
+    @DynamicPropertySource
+    fun localstackProperties(registry: DynamicPropertyRegistry) {
+      localstackInstance?.also { LocalStackTestcontainer.setupProperties(localstackInstance, registry) }
+    }
+  }
 
   @Autowired
   private lateinit var hmppsQueueService: HmppsQueueService
@@ -47,17 +57,6 @@ class SqsIntegrationTestBase : IntegrationTestBase() {
     nonAssociationsQueue.sqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(nonAssociationsQueue.queueUrl).build())
     auditQueue.sqsClient.countMessagesOnQueue(auditQueue.queueUrl).get()
     nonAssociationsQueue.sqsClient.countMessagesOnQueue(nonAssociationsQueue.queueUrl).get()
-  }
-
-  companion object {
-    private val localStackContainer = LocalStackContainer.instance
-
-    @Suppress("unused")
-    @JvmStatic
-    @DynamicPropertySource
-    fun testcontainers(registry: DynamicPropertyRegistry) {
-      localStackContainer?.also { setLocalStackProperties(it, registry) }
-    }
   }
 
   fun getNumberOfMessagesCurrentlyOnQueue(): Int? =
