@@ -29,10 +29,7 @@ class OffenderSearchMockServer : WireMockServer(WIREMOCK_PORT) {
     )
   }
 
-  fun stubSearchByPrisonerNumbers(
-    prisonerNumbers: List<String>,
-    prisoners: List<OffenderSearchPrisoner>,
-  ) {
+  fun stubSearchByPrisonerNumbers(prisonerNumbers: List<String>, prisoners: List<OffenderSearchPrisoner>) {
     val requestBody = mapper.writeValueAsString(mapOf("prisonerNumbers" to prisonerNumbers.toSet()))
 
     stubFor(

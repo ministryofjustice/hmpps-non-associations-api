@@ -31,7 +31,13 @@ import java.time.ZoneId
 
 @DisplayName("Non-associations merge service, integration tests")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(JacksonAutoConfiguration::class, HmppsAuthenticationHolder::class, NonAssociationsMergeService::class, ClockConfiguration::class, ApplicationInsightsConfiguration::class)
+@Import(
+  JacksonAutoConfiguration::class,
+  HmppsAuthenticationHolder::class,
+  NonAssociationsMergeService::class,
+  ClockConfiguration::class,
+  ApplicationInsightsConfiguration::class,
+)
 @WithMockAuthUser(username = "A_DPS_USER")
 @DataJpaTest
 class NonAssociationMergeServiceIntTest : TestBase() {
@@ -99,7 +105,9 @@ class NonAssociationMergeServiceIntTest : TestBase() {
     )
 
     // moved booking (with start date of 2 days ago) from A7777BB to B8888CC
-    eventListener.onPrisonOffenderEvent("/messages/prison-offender-events.prisoner.booking.moved.json".readResourceAsText())
+    eventListener.onPrisonOffenderEvent(
+      "/messages/prison-offender-events.prisoner.booking.moved.json".readResourceAsText(),
+    )
 
     // expect deletion
     assertThat(repository.findAllByPrisonerNumber("A7777BB")).isEmpty()
@@ -168,8 +176,12 @@ class NonAssociationMergeServiceIntTest : TestBase() {
     assertThat(repository.findAllByPrisonerNumber("A1234AA")).hasSize(6)
     assertThat(repository.findAllByPrisonerNumber("B1234AA")).hasSize(4)
 
-    assertThat(repository.findAnyBetweenPrisonerNumbers(listOf("X1234AA", "A1234AA"), NonAssociationListInclusion.CLOSED_ONLY)).isEmpty()
-    assertThat(repository.findAnyBetweenPrisonerNumbers(listOf("X1234AA", "B1234AA"), NonAssociationListInclusion.CLOSED_ONLY)).isEmpty()
+    assertThat(
+      repository.findAnyBetweenPrisonerNumbers(listOf("X1234AA", "A1234AA"), NonAssociationListInclusion.CLOSED_ONLY),
+    ).isEmpty()
+    assertThat(
+      repository.findAnyBetweenPrisonerNumbers(listOf("X1234AA", "B1234AA"), NonAssociationListInclusion.CLOSED_ONLY),
+    ).isEmpty()
 
     val nonAssociationMap = service.replacePrisonerNumber("A1234AA", "B1234AA")
 
@@ -197,7 +209,9 @@ class NonAssociationMergeServiceIntTest : TestBase() {
     assertThat(repository.findAllByPrisonerNumber("B1234AA")).hasSize(6)
     assertThat(repository.findAllByPrisonerNumber("A1234AA")).isEmpty()
 
-    assertThat(repository.findAnyBetweenPrisonerNumbers(listOf("X1234AA", "B1234AA"), NonAssociationListInclusion.CLOSED_ONLY)).hasSize(1)
+    assertThat(
+      repository.findAnyBetweenPrisonerNumbers(listOf("X1234AA", "B1234AA"), NonAssociationListInclusion.CLOSED_ONLY),
+    ).hasSize(1)
   }
 
   @Test
@@ -229,7 +243,9 @@ class NonAssociationMergeServiceIntTest : TestBase() {
     )
   }
 
-  @ParameterizedTest(name = "can move a booking between prisoner numbers in date range (since {0} days, until {1} days)")
+  @ParameterizedTest(
+    name = "can move a booking between prisoner numbers in date range (since {0} days, until {1} days)",
+  )
   @CsvSource(
     value = [
       "   |    | 2 | 2 | 2",
@@ -240,7 +256,13 @@ class NonAssociationMergeServiceIntTest : TestBase() {
     ],
     delimiter = '|',
   )
-  fun `can move a booking between prisoner numbers in date range`(sinceDays: Long?, untilDays: Long?, mergeCount: Int, closedCount: Int, deletedCount: Int) {
+  fun `can move a booking between prisoner numbers in date range`(
+    sinceDays: Long?,
+    untilDays: Long?,
+    mergeCount: Int,
+    closedCount: Int,
+    deletedCount: Int,
+  ) {
     setupManyNonAssociations()
 
     val nonAssociationMap = service.replacePrisonerNumberInDateRange(

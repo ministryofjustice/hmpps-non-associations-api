@@ -313,7 +313,8 @@ class NonAssociationsResource(
   @PreAuthorize("hasRole('ROLE_READ_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
-    summary = "Get non-associations between two or more prisoners by prisoner number. Both people in the non-associations must be in the provided list.",
+    summary = "Get non-associations between two or more prisoners by prisoner number. " +
+      "Both people in the non-associations must be in the provided list.",
     description = "Requires READ_NON_ASSOCIATIONS role.",
     responses = [
       ApiResponse(
@@ -322,7 +323,8 @@ class NonAssociationsResource(
       ),
       ApiResponse(
         responseCode = "400",
-        description = "When fewer than two distinct prisoner numbers are provided or neither open nor closed non-associations are included",
+        description = "When fewer than two distinct prisoner numbers are provided " +
+          "or neither open nor closed non-associations are included",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
@@ -399,7 +401,8 @@ class NonAssociationsResource(
   @PreAuthorize("hasRole('ROLE_READ_NON_ASSOCIATIONS')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
-    summary = "Get non-associations involving any of the given prisoners. Either person in the non-association must be in the provided list.",
+    summary = "Get non-associations involving any of the given prisoners. " +
+      "Either person in the non-association must be in the provided list.",
     description = "Requires READ_NON_ASSOCIATIONS role.",
     responses = [
       ApiResponse(
@@ -408,7 +411,8 @@ class NonAssociationsResource(
       ),
       ApiResponse(
         responseCode = "400",
-        description = "When fewer than one distinct prisoner numbers are provided or neither open nor closed non-associations are included",
+        description = "When fewer than one distinct prisoner numbers are provided " +
+          "or neither open nor closed non-associations are included",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
@@ -516,10 +520,9 @@ class NonAssociationsResource(
     @RequestBody
     @Validated
     nonAssociationPatch: PatchNonAssociationRequest,
-  ): NonAssociation =
-    eventPublishWrapper(NonAssociationDomainEventType.NON_ASSOCIATION_UPSERT) {
-      nonAssociationsService.updateNonAssociation(id, nonAssociationPatch)
-    }
+  ): NonAssociation = eventPublishWrapper(NonAssociationDomainEventType.NON_ASSOCIATION_UPSERT) {
+    nonAssociationsService.updateNonAssociation(id, nonAssociationPatch)
+  }
 
   @PutMapping("/non-associations/{id}/close")
   @PreAuthorize("hasRole('ROLE_WRITE_NON_ASSOCIATIONS') and hasAuthority('SCOPE_write')")
@@ -556,10 +559,9 @@ class NonAssociationsResource(
     @RequestBody
     @Validated
     closeNonAssociationRequest: CloseNonAssociationRequest,
-  ): NonAssociation =
-    eventPublishWrapper(NonAssociationDomainEventType.NON_ASSOCIATION_CLOSED) {
-      nonAssociationsService.closeNonAssociation(id, closeNonAssociationRequest)
-    }
+  ): NonAssociation = eventPublishWrapper(NonAssociationDomainEventType.NON_ASSOCIATION_CLOSED) {
+    nonAssociationsService.closeNonAssociation(id, closeNonAssociationRequest)
+  }
 
   @PostMapping("/non-associations/{id}/delete")
   @PreAuthorize("hasRole('ROLE_DELETE_NON_ASSOCIATIONS') and hasAuthority('SCOPE_write')")
@@ -567,7 +569,8 @@ class NonAssociationsResource(
   @Operation(
     summary = "Delete a non-association",
     description = "Requires DELETE_NON_ASSOCIATIONS role with write scope.\n" +
-      "**Please note**: This is a special endpoint which should NOT be exposed to regular users, they should instead close non-associations.",
+      "**Please note**: This is a special endpoint which should NOT be exposed to regular users, " +
+      "they should instead close non-associations.",
     responses = [
       ApiResponse(
         responseCode = "204",
@@ -608,7 +611,8 @@ class NonAssociationsResource(
   @Operation(
     summary = "Re-open a non-association",
     description = "Requires REOPEN_NON_ASSOCIATIONS role with write scope.\n" +
-      "**Please note**: This is a special endpoint which should NOT be exposed to regular users, they should instead create a new non-association.",
+      "**Please note**: This is a special endpoint which should NOT be exposed to regular users, " +
+      "they should instead create a new non-association.",
     responses = [
       ApiResponse(
         responseCode = "200",
@@ -638,10 +642,9 @@ class NonAssociationsResource(
     @RequestBody
     @Validated
     reopenNonAssociationRequest: ReopenNonAssociationRequest,
-  ): NonAssociation =
-    eventPublishWrapper(NonAssociationDomainEventType.NON_ASSOCIATION_REOPENED) {
-      nonAssociationsService.reopenNonAssociation(id, reopenNonAssociationRequest)
-    }
+  ): NonAssociation = eventPublishWrapper(NonAssociationDomainEventType.NON_ASSOCIATION_REOPENED) {
+    nonAssociationsService.reopenNonAssociation(id, reopenNonAssociationRequest)
+  }
 
   @GetMapping("/constants")
   @ResponseStatus(HttpStatus.OK)
@@ -663,4 +666,7 @@ class NonAssociationsResource(
   }
 }
 
-data class Constant(val code: String, val description: String)
+data class Constant(
+  val code: String,
+  val description: String,
+)

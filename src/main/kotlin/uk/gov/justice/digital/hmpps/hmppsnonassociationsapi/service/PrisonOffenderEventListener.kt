@@ -91,8 +91,13 @@ data class AdditionalInformationBookingMoved(
   val bookingStartDateTime: LocalDateTime?,
 )
 
-data class HMPPSEventType(val Value: String, val Type: String)
-data class HMPPSMessageAttributes(val eventType: HMPPSEventType)
+data class HMPPSEventType(
+  val Value: String,
+  val Type: String,
+)
+data class HMPPSMessageAttributes(
+  val eventType: HMPPSEventType,
+)
 data class HMPPSMessage(
   val Message: String,
   val MessageAttributes: HMPPSMessageAttributes,

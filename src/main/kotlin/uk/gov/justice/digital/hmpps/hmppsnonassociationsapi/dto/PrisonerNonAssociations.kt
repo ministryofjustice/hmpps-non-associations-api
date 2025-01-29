@@ -18,13 +18,31 @@ data class PrisonerNonAssociations(
   val lastName: String,
   @Schema(description = "ID of the prison the prisoner is assigned to", required = false, example = "MDI")
   val prisonId: String?,
-  @Schema(description = "Name of the prison the prisoner is assigned to", required = false, example = "Moorland (HMP & YOI)")
+  @Schema(
+    description = "Name of the prison the prisoner is assigned to",
+    required = false,
+    example = "Moorland (HMP & YOI)",
+  )
   val prisonName: String?,
   @Schema(description = "Cell the prisoner is assigned to", required = false, example = "A-1-002")
   val cellLocation: String?,
-  @Schema(description = "Number of open non-associations (follows includeOtherPrisons filter)", required = true, example = "1", minimum = "0", type = "integer", format = "int32")
+  @Schema(
+    description = "Number of open non-associations (follows includeOtherPrisons filter)",
+    required = true,
+    example = "1",
+    minimum = "0",
+    type = "integer",
+    format = "int32",
+  )
   val openCount: Int,
-  @Schema(description = "Number of closed non-associations (follows includeOtherPrisons filter)", required = true, example = "0", minimum = "0", type = "integer", format = "int32")
+  @Schema(
+    description = "Number of closed non-associations (follows includeOtherPrisons filter)",
+    required = true,
+    example = "0",
+    minimum = "0",
+    type = "integer",
+    format = "int32",
+  )
   val closedCount: Int,
   @Schema(description = "Non-associations with other prisoners", required = true)
   val nonAssociations: List<PrisonerNonAssociation>,
@@ -44,31 +62,68 @@ data class PrisonerNonAssociation(
   val roleDescription: String,
   @Schema(description = "Reason code why these prisoners should be kept apart", required = true, example = "BULLYING")
   val reason: Reason,
-  @Schema(description = "Reason description why these prisoners should be kept apart", required = true, example = "Bullying")
+  @Schema(
+    description = "Reason description why these prisoners should be kept apart",
+    required = true,
+    example = "Bullying",
+  )
   val reasonDescription: String,
   @Schema(description = "Location-based restriction code", required = true, example = "CELL")
   val restrictionType: RestrictionType,
   @Schema(description = "Location-based restriction description", required = true, example = "Cell only")
   val restrictionTypeDescription: String,
 
-  @Schema(description = "Explanation of why prisoners are non-associated", required = true, example = "John and Luke always end up fighting")
+  @Schema(
+    description = "Explanation of why prisoners are non-associated",
+    required = true,
+    example = "John and Luke always end up fighting",
+  )
   val comment: String,
-  @Schema(description = "User ID of the person who created the non-association. NOTE: For records migrated from NOMIS/Prison API this is free text and may not be a valid User ID. Additionally, migrated records might use an internal system username. It can be an empty string", required = true, example = "OFF3_GEN")
+  @Schema(
+    description = "User ID of the person who created the non-association. " +
+      "NOTE: For records migrated from NOMIS/Prison API this is free text and may not be a valid User ID. " +
+      "Additionally, migrated records might use an internal system username. It can be an empty string",
+    required = true,
+    example = "OFF3_GEN",
+  )
   val authorisedBy: String,
   @Schema(description = "When the non-association was created", required = true, example = "2021-12-31T12:34:56.789012")
   val whenCreated: LocalDateTime,
-  @Schema(description = "When the non-association was last updated", required = true, example = "2022-01-03T12:34:56.789012")
+  @Schema(
+    description = "When the non-association was last updated",
+    required = true,
+    example = "2022-01-03T12:34:56.789012",
+  )
   val whenUpdated: LocalDateTime,
-  @Schema(description = "User ID of the person who last updated the non-association", required = true, example = "OFF3_GEN")
+  @Schema(
+    description = "User ID of the person who last updated the non-association",
+    required = true,
+    example = "OFF3_GEN",
+  )
   val updatedBy: String,
 
   @Schema(description = "Whether the non-association is closed or is in effect", required = true, example = "false")
   val isClosed: Boolean = false,
-  @Schema(description = "User ID of the person who closed the non-association. Only present when the non-association is closed, null for open non-associations", required = false, example = "null")
+  @Schema(
+    description = "User ID of the person who closed the non-association. " +
+      "Only present when the non-association is closed, null for open non-associations",
+    required = false,
+    example = "null",
+  )
   val closedBy: String? = null,
-  @Schema(description = "Reason why the non-association was closed. Only present when the non-association is closed, null for open non-associations", required = false, example = "null")
+  @Schema(
+    description = "Reason why the non-association was closed. " +
+      "Only present when the non-association is closed, null for open non-associations",
+    required = false,
+    example = "null",
+  )
   val closedReason: String? = null,
-  @Schema(description = "Date and time of when the non-association was closed. Only present when the non-association is closed, null for open non-associations", required = false, example = "null")
+  @Schema(
+    description = "Date and time of when the non-association was closed. " +
+      "Only present when the non-association is closed, null for open non-associations",
+    required = false,
+    example = "null",
+  )
   val closedAt: LocalDateTime? = null,
 
   @Schema(description = "Details about the other person in the non-association.", required = true)
@@ -87,7 +142,11 @@ data class OtherPrisonerDetails(
   val prisonerNumber: String,
   @Schema(description = "Other prisoner’s role code in the non-association", required = true, example = "PERPETRATOR")
   val role: Role,
-  @Schema(description = "Other prisoner’s role description in the non-association", required = true, example = "Perpetrator")
+  @Schema(
+    description = "Other prisoner’s role description in the non-association",
+    required = true,
+    example = "Perpetrator",
+  )
   val roleDescription: String,
   @Schema(description = "First name", required = true, example = "Joseph")
   val firstName: String,
@@ -95,7 +154,11 @@ data class OtherPrisonerDetails(
   val lastName: String,
   @Schema(description = "ID of the prison the prisoner is assigned to", required = false, example = "MDI")
   val prisonId: String?,
-  @Schema(description = "Name of the prison the prisoner is assigned to", required = false, example = "Moorland (HMP & YOI)")
+  @Schema(
+    description = "Name of the prison the prisoner is assigned to",
+    required = false,
+    example = "Moorland (HMP & YOI)",
+  )
   val prisonName: String?,
   @Schema(description = "Cell the prisoner is assigned to", required = false, example = "B-2-007")
   val cellLocation: String?,
@@ -166,7 +229,10 @@ private fun List<NonAssociationJPA>.mapPrisonerNonAssociationItems(
     val (_, otherPrisoner, role, otherRole) = prisonersInfo
 
     PrisonerNonAssociation(
-      id = nonna.id ?: throw Exception("Only persisted non-associations can by used to build a PrisonerNonAssociations instance"),
+      id = nonna.id
+        ?: throw Exception(
+          "Only persisted non-associations can by used to build a PrisonerNonAssociations instance",
+        ),
       role = role,
       roleDescription = role.description,
       reason = nonna.reason,

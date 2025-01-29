@@ -47,14 +47,15 @@ class SqsIntegrationTestBase : IntegrationTestBase() {
   protected val auditQueue by lazy { hmppsQueueService.findByQueueId("audit") as HmppsQueue }
   protected val nonAssociationsQueue by lazy { hmppsQueueService.findByQueueId("nonassociations") as HmppsQueue }
 
-  fun HmppsSqsProperties.domaineventsTopicConfig() =
-    topics["domainevents"]
-      ?: throw MissingTopicException("domainevents has not been loaded from configuration properties")
+  fun HmppsSqsProperties.domaineventsTopicConfig() = topics["domainevents"]
+    ?: throw MissingTopicException("domainevents has not been loaded from configuration properties")
 
   @BeforeEach
   fun cleanQueue() {
     auditQueue.sqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(auditQueue.queueUrl).build())
-    nonAssociationsQueue.sqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(nonAssociationsQueue.queueUrl).build())
+    nonAssociationsQueue.sqsClient.purgeQueue(
+      PurgeQueueRequest.builder().queueUrl(nonAssociationsQueue.queueUrl).build(),
+    )
     auditQueue.sqsClient.countMessagesOnQueue(auditQueue.queueUrl).get()
     nonAssociationsQueue.sqsClient.countMessagesOnQueue(nonAssociationsQueue.queueUrl).get()
   }

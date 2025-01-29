@@ -52,7 +52,11 @@ class NonAssociation(
 
   var updatedBy: String,
 ) {
-  fun close(closedBy: String, closedReason: String, closedAt: LocalDateTime) {
+  fun close(
+    closedBy: String,
+    closedReason: String,
+    closedAt: LocalDateTime,
+  ) {
     this.isClosed = true
     this.closedBy = closedBy
     this.closedReason = closedReason
@@ -61,7 +65,11 @@ class NonAssociation(
     this.whenUpdated = closedAt
   }
 
-  fun reopen(reopenedAt: LocalDateTime, reopenedBy: String, reopenedReason: String) {
+  fun reopen(
+    reopenedAt: LocalDateTime,
+    reopenedBy: String,
+    reopenedReason: String,
+  ) {
     this.isClosed = false
     this.closedBy = null
     this.closedReason = null
@@ -123,6 +131,11 @@ class NonAssociation(
   }
 
   override fun toString(): String {
-    return "NonAssociation(id=$id, firstPrisonerNumber='$firstPrisonerNumber', firstPrisonerRole=$firstPrisonerRole, secondPrisonerNumber='$secondPrisonerNumber', secondPrisonerRole=$secondPrisonerRole, reason=$reason, restrictionType=$restrictionType, comment='$comment', authorisedBy=$authorisedBy, isClosed=$isClosed, closedBy=$closedBy, closedReason=$closedReason, closedAt=$closedAt, whenCreated=$whenCreated, whenUpdated=$whenUpdated, updatedBy='$updatedBy')"
+    return "NonAssociation(id=$id, " +
+      "firstPrisonerNumber='$firstPrisonerNumber', firstPrisonerRole=$firstPrisonerRole, " +
+      "secondPrisonerNumber='$secondPrisonerNumber', secondPrisonerRole=$secondPrisonerRole, " +
+      "reason=$reason, restrictionType=$restrictionType, comment='$comment', authorisedBy=$authorisedBy, " +
+      "isClosed=$isClosed, closedBy=$closedBy, closedReason=$closedReason, closedAt=$closedAt, " +
+      "whenCreated=$whenCreated, whenUpdated=$whenUpdated, updatedBy='$updatedBy')"
   }
 }

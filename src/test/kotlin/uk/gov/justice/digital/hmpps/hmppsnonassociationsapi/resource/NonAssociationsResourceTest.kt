@@ -66,7 +66,12 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     fun `returns all enumerations`() {
       val expectedRoles = Role.entries.map { mapOf("code" to it.name, "description" to it.description) }
       val expectedReasons = Reason.entries.map { mapOf("code" to it.name, "description" to it.description) }
-      val expectedRestrictionTypes = RestrictionType.entries.map { mapOf("code" to it.name, "description" to it.description) }
+      val expectedRestrictionTypes = RestrictionType.entries.map {
+        mapOf(
+          "code" to it.name,
+          "description" to it.description,
+        )
+      }
 
       webTestClient.get()
         .uri(url)
@@ -74,7 +79,10 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus().isOk
         .expectBody().consumeWith { response ->
-          val body = objectMapper.readValue(response.responseBody, object : TypeReference<Map<String, List<Map<String, String>>>>() {})
+          val body = objectMapper.readValue(
+            response.responseBody,
+            object : TypeReference<Map<String, List<Map<String, String>>>>() {},
+          )
           assertThat(body["roles"]).isEqualTo(expectedRoles)
           assertThat(body["reasons"]).isEqualTo(expectedReasons)
           assertThat(body["restrictionTypes"]).isEqualTo(expectedRestrictionTypes)
@@ -947,7 +955,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     fun setUp() {
       naToBeReopened = createNonAssociation(isClosed = true)
       createNonAssociation(firstPrisonerNumber = "A1111GH", secondPrisonerNumber = "A1111GK")
-      naWhichHasAnAnotherOpenRecord = createNonAssociation(firstPrisonerNumber = "A1111GH", secondPrisonerNumber = "A1111GK", isClosed = true)
+      naWhichHasAnAnotherOpenRecord =
+        createNonAssociation(firstPrisonerNumber = "A1111GH", secondPrisonerNumber = "A1111GK", isClosed = true)
       url = "/non-associations/%d/reopen"
     }
 
@@ -1217,7 +1226,10 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `for a valid request deletes the non-association`() {
-      val request = mapOf("deletionReason" to "Raised in error, please remove", "staffUserNameRequestingDeletion" to "A Test Staff Member")
+      val request = mapOf(
+        "deletionReason" to "Raised in error, please remove",
+        "staffUserNameRequestingDeletion" to "A Test Staff Member",
+      )
 
       webTestClient.post()
         .uri(format(url, nonAssociation.id))
@@ -1694,7 +1706,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `list endpoint documents all sorting options`() {
-      val sortByParameter = NonAssociationsResource::getPrisonerNonAssociations.parameters.find { it.name == "sortBy" }!!
+      val sortByParameter = NonAssociationsResource::getPrisonerNonAssociations.parameters.find {
+        it.name == "sortBy"
+      }!!
       val schemaAnnotation = sortByParameter.annotations.filterIsInstance<Schema>()[0]
       assertThat(NonAssociationsSort.entries).allMatch {
         schemaAnnotation.allowableValues.contains(it.name)
@@ -1735,7 +1749,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .expectStatus().isNotFound
         .expectBody()
         .jsonPath("userMessage")
-        .isEqualTo("Missing prisoners: Could not find the following prisoners: [${nonAssociation.firstPrisonerNumber}, ${nonAssociation.secondPrisonerNumber}]")
+        .isEqualTo(
+          "Missing prisoners: Could not find the following prisoners: [${nonAssociation.firstPrisonerNumber}, ${nonAssociation.secondPrisonerNumber}]",
+        )
     }
 
     @Test
@@ -2220,7 +2236,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       )
 
       // NOTE: Non-associations for Merlin
-      val url = "/prisoner/${prisonerMerlin.prisonerNumber}/non-associations?includeOtherPrisons=true&includeClosed=true&sortBy=LAST_NAME&sortDirection=DESC"
+      val url = "/prisoner/${prisonerMerlin.prisonerNumber}/non-associations?" +
+        "includeOtherPrisons=true&includeClosed=true&sortBy=LAST_NAME&sortDirection=DESC"
       val prisonerNonAssociations = webTestClient.get()
         .uri(url)
         .headers(setAuthorisation(roles = listOf("ROLE_READ_NON_ASSOCIATIONS")))
@@ -3158,7 +3175,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       ],
       delimiter = '|',
     )
-    fun `SAR for date ranges`(fromDate: String?, toDate: String?, expectNonAssociationFound: Boolean) {
+    fun `SAR for date ranges`(
+      fromDate: String?,
+      toDate: String?,
+      expectNonAssociationFound: Boolean,
+    ) {
       val nonAssociation = createNonAssociation()
       // Choose a toDate that would filter the non-association out
 

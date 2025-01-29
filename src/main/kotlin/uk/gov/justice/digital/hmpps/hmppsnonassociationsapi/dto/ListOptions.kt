@@ -10,10 +10,7 @@ enum class NonAssociationListInclusion {
   ;
 
   companion object {
-    fun of(
-      includeOpen: Boolean = true,
-      includeClosed: Boolean = false,
-    ): NonAssociationListInclusion? =
+    fun of(includeOpen: Boolean = true, includeClosed: Boolean = false): NonAssociationListInclusion? =
       if (!includeOpen && !includeClosed) {
         null
       } else if (!includeClosed) {
@@ -59,7 +56,9 @@ data class NonAssociationListOptions(
     }
 }
 
-enum class NonAssociationsSort(val defaultSortDirection: Sort.Direction) {
+enum class NonAssociationsSort(
+  val defaultSortDirection: Sort.Direction,
+) {
   WHEN_CREATED(Sort.Direction.DESC),
   WHEN_UPDATED(Sort.Direction.DESC),
   WHEN_CLOSED(Sort.Direction.DESC),

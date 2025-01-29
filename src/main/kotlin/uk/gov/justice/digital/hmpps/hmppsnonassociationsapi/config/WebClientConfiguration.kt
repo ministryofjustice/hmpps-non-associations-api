@@ -21,9 +21,17 @@ class WebClientConfiguration(
   fun authHealthWebClient(builder: WebClient.Builder): WebClient = builder.healthWebClient(authBaseUri, healthTimeout)
 
   @Bean
-  fun offenderSearchHealthWebClient(builder: WebClient.Builder): WebClient = builder.healthWebClient(offenderSearchUri, healthTimeout)
+  fun offenderSearchHealthWebClient(builder: WebClient.Builder): WebClient =
+    builder.healthWebClient(offenderSearchUri, healthTimeout)
 
   @Bean
-  fun offenderSearchWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: WebClient.Builder): WebClient =
-    builder.authorisedWebClient(authorizedClientManager, registrationId = SYSTEM_USERNAME, url = offenderSearchUri, healthTimeout)
+  fun offenderSearchWebClient(
+    authorizedClientManager: OAuth2AuthorizedClientManager,
+    builder: WebClient.Builder,
+  ): WebClient = builder.authorisedWebClient(
+    authorizedClientManager,
+    registrationId = SYSTEM_USERNAME,
+    url = offenderSearchUri,
+    healthTimeout,
+  )
 }

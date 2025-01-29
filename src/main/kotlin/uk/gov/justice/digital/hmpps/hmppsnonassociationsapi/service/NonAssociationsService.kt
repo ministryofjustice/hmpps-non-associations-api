@@ -285,7 +285,11 @@ class NonAssociationsService(
 }
 
 private fun NonAssociationJPA.toLegacy(): LegacyNonAssociation {
-  val (firstPrisonerReason, secondPrisonerReason) = translateFromRolesAndReason(firstPrisonerRole, secondPrisonerRole, reason)
+  val (firstPrisonerReason, secondPrisonerReason) = translateFromRolesAndReason(
+    firstPrisonerRole,
+    secondPrisonerRole,
+    reason,
+  )
   val typeCode = restrictionType.toLegacyRestrictionType()
   return LegacyNonAssociation(
     id = id!!,
