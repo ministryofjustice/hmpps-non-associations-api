@@ -78,7 +78,9 @@ class OpenApiConfiguration(
 
   @Bean
   fun openAPICustomiser(): OpenApiCustomizer {
-    PrimitiveType.enablePartialTime() // Prevents generation of a LocalTime schema which causes conflicts with java.time.LocalTime
+    // Prevents generation of a LocalTime schema which causes conflicts with java.time.LocalTime
+    PrimitiveType.enablePartialTime()
+
     return OpenApiCustomizer {
       it.components.schemas.forEach { (_, schema: Schema<*>) ->
         val properties = schema.properties ?: mutableMapOf()

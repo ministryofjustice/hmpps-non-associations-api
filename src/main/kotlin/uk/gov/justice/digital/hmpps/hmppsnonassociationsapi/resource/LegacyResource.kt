@@ -24,7 +24,8 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociati
 @RequestMapping("/legacy/api", produces = [MediaType.APPLICATION_JSON_VALUE])
 @Tag(
   name = "Legacy non-associations-details",
-  description = "Mimics the NOMIS/Prison API interface for retrieving non-associations. <em>**IMPORTANT**</em>: Use new `GET /prisoner/{prisonerNumber}/non-associations` endpoint if possible",
+  description = "Mimics the NOMIS/Prison API interface for retrieving non-associations. " +
+    "<em>**IMPORTANT**</em>: Use new `GET /prisoner/{prisonerNumber}/non-associations` endpoint if possible",
 )
 class LegacyResource(
   val nonAssociationsService: NonAssociationsService,

@@ -28,7 +28,10 @@ class NonAssociationsMergeService(
    * Replaces an old prisoner number for a new one in all non-associations,
    * closing newly-duplicate records and deleting non-associations with the same prisoner number on both sides.
    */
-  fun replacePrisonerNumber(oldPrisonerNumber: String, newPrisonerNumber: String): Map<MergeResult, List<NonAssociation>> =
+  fun replacePrisonerNumber(
+    oldPrisonerNumber: String,
+    newPrisonerNumber: String,
+  ): Map<MergeResult, List<NonAssociation>> =
     replacePrisonerNumberInDateRange(oldPrisonerNumber, newPrisonerNumber, null, null)
 
   /**
@@ -50,7 +53,10 @@ class NonAssociationsMergeService(
 
     val createdAtFilter: (NonAssociation) -> Boolean = when {
       // created between `since` and `until`
-      since != null && until != null -> { nonAssociation -> nonAssociation.whenCreated >= since && nonAssociation.whenCreated <= until }
+      since != null && until != null -> { nonAssociation ->
+        nonAssociation.whenCreated >= since &&
+          nonAssociation.whenCreated <= until
+      }
       // created after `since`
       since != null -> { nonAssociation -> nonAssociation.whenCreated >= since }
       // created before `until`

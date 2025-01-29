@@ -128,11 +128,15 @@ class NonAssociationsServiceTest {
       }
 
       whenever(offenderSearchService.searchByPrisonerNumbers(any())).thenReturn(offenderSearchPrisoners)
-      whenever(nonAssociationsRepository.findAllByFirstPrisonerNumberOrSecondPrisonerNumber(eq(keyPrisoner), eq(keyPrisoner)))
+      whenever(
+        nonAssociationsRepository.findAllByFirstPrisonerNumberOrSecondPrisonerNumber(eq(keyPrisoner), eq(keyPrisoner)),
+      )
         .thenReturn(nonAssociations)
     }
 
-    private infix fun NonAssociationListOptions.assertSortsNonAssociationsBy(comparator: Comparator<PrisonerNonAssociation>) {
+    private infix fun NonAssociationListOptions.assertSortsNonAssociationsBy(
+      comparator: Comparator<PrisonerNonAssociation>,
+    ) {
       val prisonerNonAssociations = service.getPrisonerNonAssociations(keyPrisoner, this)
       assertThat(prisonerNonAssociations.nonAssociations).isSortedAccordingTo(comparator)
     }
@@ -176,7 +180,8 @@ class NonAssociationsServiceTest {
 
     @Test
     fun `by prisoner number in specified direction`() {
-      val listOptions = NonAssociationListOptions(sortBy = NonAssociationsSort.PRISONER_NUMBER, sortDirection = Sort.Direction.DESC)
+      val listOptions =
+        NonAssociationListOptions(sortBy = NonAssociationsSort.PRISONER_NUMBER, sortDirection = Sort.Direction.DESC)
       listOptions assertSortsNonAssociationsBy { n1, n2 ->
         // descending by updated date
         n2.otherPrisonerDetails.prisonerNumber.compareTo(n1.otherPrisonerDetails.prisonerNumber)

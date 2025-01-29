@@ -16,9 +16,7 @@ class OffenderSearchService(
    *
    * Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role.
    */
-  fun searchByPrisonerNumbers(
-    prisonerNumbers: Collection<String>,
-  ): Map<String, OffenderSearchPrisoner> {
+  fun searchByPrisonerNumbers(prisonerNumbers: Collection<String>): Map<String, OffenderSearchPrisoner> {
     if (prisonerNumbers.isEmpty()) {
       return emptyMap()
     }

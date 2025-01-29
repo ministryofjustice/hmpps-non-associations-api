@@ -18,13 +18,31 @@ data class LegacyNonAssociation(
   val typeCode: LegacyRestrictionType,
   @Schema(description = "The non-association type description", required = true, example = "Do Not Locate on Same Wing")
   val typeDescription: String,
-  @Schema(description = "Date and time the non-association is effective from. In Europe/London (ISO 8601) format without timezone offset e.g. YYYY-MM-DDTHH:MM:SS.", required = true, example = "2021-07-05T00:00:00")
+  @Schema(
+    description = "Date and time the non-association is effective from. " +
+      "In Europe/London (ISO 8601) format without timezone offset e.g. YYYY-MM-DDTHH:MM:SS.",
+    required = true,
+    example = "2021-07-05T00:00:00",
+  )
   val effectiveDate: LocalDateTime,
-  @Schema(description = "Date and time the non-association expires. In Europe/London (ISO 8601) format without timezone offset e.g. YYYY-MM-DDTHH:MM:SS.", required = false, example = "2021-07-05T00:00:00")
+  @Schema(
+    description = "Date and time the non-association expires. " +
+      "In Europe/London (ISO 8601) format without timezone offset e.g. YYYY-MM-DDTHH:MM:SS.",
+    required = false,
+    example = "2021-07-05T00:00:00",
+  )
   val expiryDate: LocalDateTime?,
-  @Schema(description = "The person who authorised the non-association (free text).", required = false, example = "Officer Alice B.")
+  @Schema(
+    description = "The person who authorised the non-association (free text).",
+    required = false,
+    example = "Officer Alice B.",
+  )
   val authorisedBy: String?,
-  @Schema(description = "Additional free text comments related to the non-association.", required = false, example = "Mr. Bloggs assaulted Mr. Hall")
+  @Schema(
+    description = "Additional free text comments related to the non-association.",
+    required = false,
+    example = "Mr. Bloggs assaulted Mr. Hall",
+  )
   val comments: String,
 
   @Schema(description = "Details about the other non-association person", required = true)

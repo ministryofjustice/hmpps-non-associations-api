@@ -132,7 +132,10 @@ class NonAssociationsRepositoryTest : TestBase() {
       )
 
       val prisonerNumbers = listOf("A0000AA", "A1111AA", "A2222AA")
-      val nonAssociations = repository.findAnyBetweenPrisonerNumbers(prisonerNumbers, NonAssociationListInclusion.CLOSED_ONLY)
+      val nonAssociations = repository.findAnyBetweenPrisonerNumbers(
+        prisonerNumbers,
+        NonAssociationListInclusion.CLOSED_ONLY,
+      )
       assertThat(nonAssociations).hasSize(2)
       assertThat(nonAssociations).allMatch {
         prisonerNumbers.contains(it.firstPrisonerNumber) && prisonerNumbers.contains(it.secondPrisonerNumber)
@@ -229,7 +232,10 @@ class NonAssociationsRepositoryTest : TestBase() {
       )
 
       val prisonerNumbers = listOf("A0000AA", "B1111BB")
-      val nonAssociations = repository.findAnyInvolvingPrisonerNumbers(prisonerNumbers, NonAssociationListInclusion.CLOSED_ONLY)
+      val nonAssociations = repository.findAnyInvolvingPrisonerNumbers(
+        prisonerNumbers,
+        NonAssociationListInclusion.CLOSED_ONLY,
+      )
       assertThat(nonAssociations).hasSize(3)
       assertThat(nonAssociations).allMatch {
         it.isClosed &&
@@ -379,7 +385,11 @@ class NonAssociationsRepositoryTest : TestBase() {
     assertThat(updated.whenUpdated).isAfter(updated.whenCreated)
   }
 
-  private fun nonAssociation(firstPrisonerNumber: String, secondPrisonerNumber: String, closed: Boolean = false): NonAssociation {
+  private fun nonAssociation(
+    firstPrisonerNumber: String,
+    secondPrisonerNumber: String,
+    closed: Boolean = false,
+  ): NonAssociation {
     return NonAssociation(
       firstPrisonerNumber = firstPrisonerNumber,
       firstPrisonerRole = Role.VICTIM,

@@ -14,16 +14,29 @@ interface NonAssociationsRepository : JpaRepository<NonAssociation, Long> {
   fun findAllByIsClosed(isClosed: Boolean, pageable: Pageable): Page<NonAssociation>
 
   /** Use findAllByPrisonerNumber convenience extension function instead */
-  fun findAllByFirstPrisonerNumberOrSecondPrisonerNumber(firstPrisonerNumber: String, secondPrisonerNumber: String): List<NonAssociation>
+  fun findAllByFirstPrisonerNumberOrSecondPrisonerNumber(
+    firstPrisonerNumber: String,
+    secondPrisonerNumber: String,
+  ): List<NonAssociation>
 
   /** Use findAnyInvolvingPrisonerNumbers convenience extension function instead */
-  fun findAllByFirstPrisonerNumberInOrSecondPrisonerNumberIn(p1: Collection<String>, p2: Collection<String>): List<NonAssociation>
+  fun findAllByFirstPrisonerNumberInOrSecondPrisonerNumberIn(
+    p1: Collection<String>,
+    p2: Collection<String>,
+  ): List<NonAssociation>
 
   /** Use findAnyBetweenPrisonerNumbers convenience extension function instead */
-  fun findAllByFirstPrisonerNumberInAndSecondPrisonerNumberIn(p1: Collection<String>, p2: Collection<String>): List<NonAssociation>
+  fun findAllByFirstPrisonerNumberInAndSecondPrisonerNumberIn(
+    p1: Collection<String>,
+    p2: Collection<String>,
+  ): List<NonAssociation>
 
   /** Use findAnyBetweenPrisonerNumbers convenience extension function instead */
-  fun findAllByFirstPrisonerNumberInAndSecondPrisonerNumberInAndIsClosed(p1: Collection<String>, p2: Collection<String>, isClosed: Boolean): List<NonAssociation>
+  fun findAllByFirstPrisonerNumberInAndSecondPrisonerNumberInAndIsClosed(
+    p1: Collection<String>,
+    p2: Collection<String>,
+    isClosed: Boolean,
+  ): List<NonAssociation>
 
   /** Use findAnyInvolvingPrisonerNumbers convenience extension function instead */
   @Query(
@@ -41,7 +54,10 @@ interface NonAssociationsRepository : JpaRepository<NonAssociation, Long> {
 
   // TODO: Assumes that there can only be 1 non-association given a pair of prisoner numbers.
   //       In future, this will only be true for open non-associations.
-  fun findByFirstPrisonerNumberAndSecondPrisonerNumber(firstPrisonerNumber: String, secondPrisonerNumber: String): NonAssociation?
+  fun findByFirstPrisonerNumberAndSecondPrisonerNumber(
+    firstPrisonerNumber: String,
+    secondPrisonerNumber: String,
+  ): NonAssociation?
 }
 
 /**
@@ -53,19 +69,45 @@ fun NonAssociationsRepository.findAllByPrisonerNumber(prisonerNumber: String): L
 /**
  * Returns non-associations between any prisoners in given prisoner numbers
  */
-fun NonAssociationsRepository.findAnyBetweenPrisonerNumbers(prisonerNumbers: Collection<String>, inclusion: NonAssociationListInclusion = NonAssociationListInclusion.OPEN_ONLY): List<NonAssociation> =
-  when (inclusion) {
-    NonAssociationListInclusion.OPEN_ONLY -> findAllByFirstPrisonerNumberInAndSecondPrisonerNumberInAndIsClosed(prisonerNumbers, prisonerNumbers, false)
-    NonAssociationListInclusion.CLOSED_ONLY -> findAllByFirstPrisonerNumberInAndSecondPrisonerNumberInAndIsClosed(prisonerNumbers, prisonerNumbers, true)
-    NonAssociationListInclusion.ALL -> findAllByFirstPrisonerNumberInAndSecondPrisonerNumberIn(prisonerNumbers, prisonerNumbers)
-  }
+fun NonAssociationsRepository.findAnyBetweenPrisonerNumbers(
+  prisonerNumbers: Collection<String>,
+  inclusion: NonAssociationListInclusion = NonAssociationListInclusion.OPEN_ONLY,
+): List<NonAssociation> = when (inclusion) {
+  NonAssociationListInclusion.OPEN_ONLY -> findAllByFirstPrisonerNumberInAndSecondPrisonerNumberInAndIsClosed(
+    prisonerNumbers,
+    prisonerNumbers,
+    false,
+  )
+  NonAssociationListInclusion.CLOSED_ONLY -> findAllByFirstPrisonerNumberInAndSecondPrisonerNumberInAndIsClosed(
+    prisonerNumbers,
+    prisonerNumbers,
+    true,
+  )
+  NonAssociationListInclusion.ALL -> findAllByFirstPrisonerNumberInAndSecondPrisonerNumberIn(
+    prisonerNumbers,
+    prisonerNumbers,
+  )
+}
 
 /**
  * Returns non-associations involving any prisoners in given prisoner numbers
  */
-fun NonAssociationsRepository.findAnyInvolvingPrisonerNumbers(prisonerNumbers: Collection<String>, inclusion: NonAssociationListInclusion = NonAssociationListInclusion.OPEN_ONLY): List<NonAssociation> =
-  when (inclusion) {
-    NonAssociationListInclusion.OPEN_ONLY -> findAllByFirstPrisonerNumberInOrSecondPrisonerNumberInAndIsClosed(prisonerNumbers, prisonerNumbers, false)
-    NonAssociationListInclusion.CLOSED_ONLY -> findAllByFirstPrisonerNumberInOrSecondPrisonerNumberInAndIsClosed(prisonerNumbers, prisonerNumbers, true)
-    NonAssociationListInclusion.ALL -> findAllByFirstPrisonerNumberInOrSecondPrisonerNumberIn(prisonerNumbers, prisonerNumbers)
-  }
+fun NonAssociationsRepository.findAnyInvolvingPrisonerNumbers(
+  prisonerNumbers: Collection<String>,
+  inclusion: NonAssociationListInclusion = NonAssociationListInclusion.OPEN_ONLY,
+): List<NonAssociation> = when (inclusion) {
+  NonAssociationListInclusion.OPEN_ONLY -> findAllByFirstPrisonerNumberInOrSecondPrisonerNumberInAndIsClosed(
+    prisonerNumbers,
+    prisonerNumbers,
+    false,
+  )
+  NonAssociationListInclusion.CLOSED_ONLY -> findAllByFirstPrisonerNumberInOrSecondPrisonerNumberInAndIsClosed(
+    prisonerNumbers,
+    prisonerNumbers,
+    true,
+  )
+  NonAssociationListInclusion.ALL -> findAllByFirstPrisonerNumberInOrSecondPrisonerNumberIn(
+    prisonerNumbers,
+    prisonerNumbers,
+  )
+}

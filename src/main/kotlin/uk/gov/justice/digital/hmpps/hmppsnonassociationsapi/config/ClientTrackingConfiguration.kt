@@ -16,7 +16,9 @@ import java.text.ParseException
 import java.util.Optional
 
 @Configuration
-class ClientTrackingConfiguration(private val clientTrackingInterceptor: ClientTrackingInterceptor) : WebMvcConfigurer {
+class ClientTrackingConfiguration(
+  private val clientTrackingInterceptor: ClientTrackingInterceptor,
+) : WebMvcConfigurer {
   override fun addInterceptors(registry: InterceptorRegistry) {
     registry.addInterceptor(clientTrackingInterceptor).addPathPatterns("/**")
   }
@@ -24,7 +26,11 @@ class ClientTrackingConfiguration(private val clientTrackingInterceptor: ClientT
 
 @Configuration
 class ClientTrackingInterceptor : HandlerInterceptor {
-  override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
+  override fun preHandle(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    handler: Any,
+  ): Boolean {
     val token = request.getHeader(HttpHeaders.AUTHORIZATION)
     val bearer = "Bearer "
     if (StringUtils.startsWithIgnoreCase(token, bearer)) {
@@ -44,8 +50,7 @@ class ClientTrackingInterceptor : HandlerInterceptor {
   }
 
   @Throws(ParseException::class)
-  private fun getClaimsFromJWT(token: String): JWTClaimsSet =
-    SignedJWT.parse(token.replace("Bearer ", "")).jwtClaimsSet
+  private fun getClaimsFromJWT(token: String): JWTClaimsSet = SignedJWT.parse(token.replace("Bearer ", "")).jwtClaimsSet
 
   companion object {
     private val log = LoggerFactory.getLogger(ClientTrackingInterceptor::class.java)

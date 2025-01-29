@@ -3,7 +3,9 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto
 /**
  * Reason why a prisoner should not be associated with another, e.g. Victim
  */
-enum class LegacyReason(val description: String) {
+enum class LegacyReason(
+  val description: String,
+) {
   BUL("Anti Bullying Strategy"),
   PER("Perpetrator"),
   RIV("Rival Gang"),
@@ -15,7 +17,10 @@ enum class LegacyReason(val description: String) {
 /**
  * Translate a pair of "legacy" reasons from NOMIS into a "modern" pair of roles and a "modern" reason
  */
-fun translateToRolesAndReason(firstPrisonerReason: LegacyReason, secondPrisonerReason: LegacyReason): Triple<Role, Role, Reason> {
+fun translateToRolesAndReason(
+  firstPrisonerReason: LegacyReason,
+  secondPrisonerReason: LegacyReason,
+): Triple<Role, Role, Reason> {
   var firstPrisonerRole = Role.UNKNOWN
   var secondPrisonerRole = Role.UNKNOWN
   var reason = Reason.OTHER
@@ -65,7 +70,11 @@ fun translateToRolesAndReason(firstPrisonerReason: LegacyReason, secondPrisonerR
 /**
  * Translate a "modern" pair of roles and a "modern" reason into a pair of "legacy" reasons for NOMIS
  */
-fun translateFromRolesAndReason(firstPrisonerRole: Role, secondPrisonerRole: Role, reason: Reason): Pair<LegacyReason, LegacyReason> {
+fun translateFromRolesAndReason(
+  firstPrisonerRole: Role,
+  secondPrisonerRole: Role,
+  reason: Reason,
+): Pair<LegacyReason, LegacyReason> {
   return when (reason) {
     Reason.GANG_RELATED -> LegacyReason.RIV to LegacyReason.RIV
     Reason.BULLYING -> LegacyReason.BUL to LegacyReason.BUL

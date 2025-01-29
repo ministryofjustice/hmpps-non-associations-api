@@ -119,7 +119,9 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(SubjectAccessRequestNoContentException::class)
-  fun handleSubjectAccessRequestNoContentException(e: SubjectAccessRequestNoContentException): ResponseEntity<ErrorResponse?>? {
+  fun handleSubjectAccessRequestNoContentException(
+    e: SubjectAccessRequestNoContentException,
+  ): ResponseEntity<ErrorResponse?>? {
     log.debug("SAR No Content exception caught: {}", e.message)
     return ResponseEntity
       .status(NO_CONTENT)
@@ -133,7 +135,9 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(SubjectAccessRequestSubjectNotRecognisedException::class)
-  fun handleSubjectAccessRequestSubjectNotRecognisedException(e: SubjectAccessRequestSubjectNotRecognisedException): ResponseEntity<ErrorResponse?>? {
+  fun handleSubjectAccessRequestSubjectNotRecognisedException(
+    e: SubjectAccessRequestSubjectNotRecognisedException,
+  ): ResponseEntity<ErrorResponse?>? {
     log.debug("SAR Subject not recognised exception caught: {}", e.message)
     return ResponseEntity
       .status(209)
@@ -219,7 +223,9 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(NonAssociationAlreadyClosedException::class)
-  fun handleNonAssociationAlreadyClosedException(e: NonAssociationAlreadyClosedException): ResponseEntity<ErrorResponse?>? {
+  fun handleNonAssociationAlreadyClosedException(
+    e: NonAssociationAlreadyClosedException,
+  ): ResponseEntity<ErrorResponse?>? {
     log.debug("Already Closed Non-Association caught: {}", e.message)
     return ResponseEntity
       .status(CONFLICT)
@@ -280,7 +286,9 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(OpenNonAssociationAlreadyExistsException::class)
-  fun handleOpenNonAssociationAlreadyExistsException(e: OpenNonAssociationAlreadyExistsException): ResponseEntity<ErrorResponse?>? {
+  fun handleOpenNonAssociationAlreadyExistsException(
+    e: OpenNonAssociationAlreadyExistsException,
+  ): ResponseEntity<ErrorResponse?>? {
     log.debug("Non-association already exists for these prisoners that is open: {}", e.message)
     return ResponseEntity
       .status(CONFLICT)
@@ -320,7 +328,9 @@ class HmppsNonAssociationsApiExceptionHandler {
  *
  * NB: Once defined, the values must not be changed
  */
-enum class ErrorCode(val errorCode: Int) {
+enum class ErrorCode(
+  val errorCode: Int,
+) {
   NonAssociationAlreadyClosed(100),
   UserInContextMissing(401),
   OpenNonAssociationAlreadyExist(101),
@@ -334,11 +344,22 @@ enum class ErrorCode(val errorCode: Int) {
 data class ErrorResponse(
   @Schema(description = "HTTP status code", example = "500", required = true)
   val status: Int,
-  @Schema(description = "User message for the error", example = "No non-association found for ID `324234`", required = true)
+  @Schema(
+    description = "User message for the error",
+    example = "No non-association found for ID `324234`",
+    required = true,
+  )
   val userMessage: String,
   @Schema(description = "More detailed error message", example = "[Details, sometimes a stack trace]", required = true)
   val developerMessage: String,
-  @Schema(description = "When present, uniquely identifies the type of error making it easier for clients to discriminate without relying on error description or HTTP status code; see `uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorCode` enumeration in hmpps-non-associations-api", example = "101", required = false)
+  @Schema(
+    description = "When present, uniquely identifies the type of error " +
+      "making it easier for clients to discriminate without relying on error description or HTTP status code; " +
+      "see `uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.ErrorCode` enumeration " +
+      "in hmpps-non-associations-api",
+    example = "101",
+    required = false,
+  )
   val errorCode: Int? = null,
   @Schema(description = "More information about the error", example = "[Rarely used, error-specific]", required = false)
   val moreInfo: String? = null,
@@ -353,20 +374,35 @@ data class ErrorResponse(
     this(status.value(), userMessage, developerMessage ?: userMessage, errorCode?.errorCode, moreInfo)
 }
 
-class NonAssociationAlreadyOpenException(id: Long) : Exception("Non-association [ID=$id] already open")
+class NonAssociationAlreadyOpenException(
+  id: Long,
+) : Exception("Non-association [ID=$id] already open")
 
-class NonAssociationAlreadyClosedException(id: Long) : Exception("Non-association [ID=$id] already closed")
+class NonAssociationAlreadyClosedException(
+  id: Long,
+) : Exception("Non-association [ID=$id] already closed")
 
 class UserInContextMissingException : Exception("There is no user in context for this request")
 
-class OpenNonAssociationAlreadyExistsException(prisoners: List<String>) : Exception("Prisoners $prisoners already have open non-associations")
+class OpenNonAssociationAlreadyExistsException(
+  prisoners: List<String>,
+) : Exception("Prisoners $prisoners already have open non-associations")
 
-class NonAssociationNotFoundException(id: Long) : Exception("There is no non-association found for ID = $id")
+class NonAssociationNotFoundException(
+  id: Long,
+) : Exception("There is no non-association found for ID = $id")
 
-class NullPrisonerLocationsException(prisoners: List<String>) : Exception("Prisoners $prisoners have null locations")
+class NullPrisonerLocationsException(
+  prisoners: List<String>,
+) : Exception("Prisoners $prisoners have null locations")
 
-class SubjectAccessRequestNoContentException(prisoner: String) : Exception("No information on prisoner $prisoner")
+class SubjectAccessRequestNoContentException(
+  prisoner: String,
+) : Exception("No information on prisoner $prisoner")
 
-class SubjectAccessRequestSubjectNotRecognisedException : Exception("Subject Identifier is not recognised by this service")
+class SubjectAccessRequestSubjectNotRecognisedException :
+  Exception("Subject Identifier is not recognised by this service")
 
-class MissingPrisonersInSearchException(prisoners: Iterable<String>) : Exception("Could not find the following prisoners: $prisoners")
+class MissingPrisonersInSearchException(
+  prisoners: Iterable<String>,
+) : Exception("Could not find the following prisoners: $prisoners")
