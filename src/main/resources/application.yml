@@ -103,4 +103,4 @@ management:
 dpr:
   lib:
     definition:
-      locations: definitions.json
+      locations: "reports/definitions.json"

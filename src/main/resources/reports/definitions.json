@@ -260,10 +260,21 @@
   ],
   "policy": [
     {
-      "id": "default",
-      "type": "row-level",
-      "action": ["TRUE"],
-      "rule": []
+      "id": "access",
+      "type": "access",
+      "rule": [
+        {
+          "effect": "permit",
+          "condition": [
+            {
+              "match": [
+                "${role}",
+                "ROLE_PRISON"
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }
