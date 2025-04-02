@@ -69,5 +69,8 @@ generic-service:
       - digital_staff_and_mojo
       - moj_cloud_platform
 
+  scheduledDowntime:
+    timeZone: Europe/London
+
 generic-prometheus-alerts:
   targetApplication: hmpps-non-associations-api
