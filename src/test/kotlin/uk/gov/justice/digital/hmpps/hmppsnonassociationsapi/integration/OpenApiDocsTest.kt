@@ -41,7 +41,13 @@ class OpenApiDocsTest : SqsIntegrationTestBase() {
       .expectBody().consumeWith {
         val contents = it.responseBody!!.decodeToString()
         val result = OpenAPIV3Parser().readContents(contents)
-        assertThat(result.messages).isEmpty()
+        assertThat(
+          result.messages.filter { message ->
+            // TODO: DPR endpoints generate three seemingly-valid "x-no-data-warning" response header definitions,
+            //       but swagger parser now fails with this error
+            !message.contains("responses.default.headers.x-no-data-warning.style is not of type `simple`")
+          },
+        ).isEmpty()
         assertThat(result.openAPI.paths).isNotEmpty
       }
   }

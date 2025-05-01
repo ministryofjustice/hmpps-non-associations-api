@@ -5,9 +5,9 @@ import uk.gov.justice.digital.hmpps.gradle.PortForwardRedisTask
 import uk.gov.justice.digital.hmpps.gradle.RevealSecretsTask
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "7.1.4"
-  kotlin("plugin.jpa") version "2.1.10"
-  kotlin("plugin.spring") version "2.1.10"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.1.0"
+  kotlin("plugin.jpa") version "2.1.20"
+  kotlin("plugin.spring") version "2.1.20"
   idea
   id("org.springdoc.openapi-gradle-plugin") version "1.9.0"
 }
@@ -17,39 +17,41 @@ configurations {
 }
 
 dependencies {
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.4.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.4.3")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("org.springframework.boot:spring-boot-starter-validation")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.3.2")
-  implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:7.12.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.4")
+  implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:7.13.0")
 
-  implementation("io.opentelemetry:opentelemetry-api:1.48.0")
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.14.0")
+  implementation("io.opentelemetry:opentelemetry-api:1.49.0")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.15.0")
 
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
-  implementation("org.hibernate.orm:hibernate-community-dialects:6.6.10.Final")
+  implementation("org.hibernate.orm:hibernate-community-dialects:6.6.13.Final")
 
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
 
-  implementation("com.zaxxer:HikariCP:6.2.1")
+  implementation("com.zaxxer:HikariCP:6.3.0")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-  testImplementation("org.wiremock:wiremock-standalone:3.12.1")
+  testImplementation("org.wiremock:wiremock-standalone:3.13.0")
 
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.4.0")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.4.3")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.mockito:mockito-inline:5.2.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.25")
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.26")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
-  testImplementation("org.testcontainers:localstack:1.20.6")
-  testImplementation("org.testcontainers:postgresql:1.20.6")
+  testImplementation("org.testcontainers:localstack:1.21.0")
+  testImplementation("org.testcontainers:postgresql:1.21.0")
+
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.11.4")
 }
 
 kotlin {
