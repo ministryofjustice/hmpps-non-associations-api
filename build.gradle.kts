@@ -5,7 +5,7 @@ import uk.gov.justice.digital.hmpps.gradle.PortForwardRedisTask
 import uk.gov.justice.digital.hmpps.gradle.RevealSecretsTask
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "7.1.4"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.1.0"
   kotlin("plugin.jpa") version "2.1.20"
   kotlin("plugin.spring") version "2.1.20"
   idea
@@ -50,6 +50,8 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("org.testcontainers:localstack:1.21.0")
   testImplementation("org.testcontainers:postgresql:1.21.0")
+
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.12.2")
 }
 
 kotlin {
