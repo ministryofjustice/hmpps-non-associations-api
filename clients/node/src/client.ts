@@ -1,4 +1,4 @@
-import { ApiConfig, asSystem, RestClient } from '@ministryofjustice/hmpps-rest-client'
+import { type ApiConfig, asSystem, RestClient } from '@ministryofjustice/hmpps-rest-client'
 
 import type { SortBy, SortDirection } from './constants'
 import type { Page, PageRequest } from './paginationTypes'
@@ -34,7 +34,8 @@ type SortedPageRequest = PageRequest<
 >
 
 /**
- * REST client to access HMPPS Non-associations API
+ * REST client to access HMPPS Non-associations API.
+ * An instance should be created for every user request, it’s not designed to be shared.
  */
 export class NonAssociationsApi extends RestClient {
   static readonly name = 'HMPPS Non-associations API'
@@ -43,7 +44,7 @@ export class NonAssociationsApi extends RestClient {
     /**
      * Provide a system token with necessary roles, not a user token
      * READ_NON_ASSOCIATIONS and optionally WRITE_NON_ASSOCIATIONS or DELETE_NON_ASSOCIATIONS
-     * This should be authenticated for the acting username
+     * This must already be authenticated for the acting username
      */
     systemToken: string,
 
@@ -59,6 +60,7 @@ export class NonAssociationsApi extends RestClient {
   ) {
     super(NonAssociationsApi.name, config, logger, {
       async getToken(): Promise<string> {
+        // NB: the same system token supplied when constructing the client is used for all requests
         return systemToken
       },
     })

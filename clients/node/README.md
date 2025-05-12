@@ -82,7 +82,8 @@ export class Client extends NonAssociationsApi {
     super(
       /**
        * Provide a system token with necessary roles, not a user token
-       * READ_NON_ASSOCIATIONS and optionally WRITE_NON_ASSOCIATIONS
+       * READ_NON_ASSOCIATIONS and optionally WRITE_NON_ASSOCIATIONS or DELETE_NON_ASSOCIATIONS
+       * This must already be authenticated for the acting username
        */
       systemToken,
 
@@ -95,11 +96,6 @@ export class Client extends NonAssociationsApi {
        * Logger such as standard library’s `console` or `bunyan` instance
        */
       logger,
-
-      /**
-       * Plugins for superagent requests, e.g. restClientMetricsMiddleware
-       */
-      [restClientMetricsMiddleware],
     )
   }
 }
@@ -110,7 +106,8 @@ export class Client extends NonAssociationsApi {
 ```typescript
 async (req, res) => {
   const { user } = res.locals
-  const systemToken = await hmppsAuthClient.getSystemClientToken(user.username)
+  const authClient = new AuthenticationClient( /* … */ ) // from @ministryofjustice/hmpps-auth-clients
+  const systemToken = authClient.getToken(user.username)
   const api = new Client(systemToken)
   const nonAssociation = await api.getNonAssociation(nonAssociationId)
 }
