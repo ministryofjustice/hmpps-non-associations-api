@@ -1,7 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import nock from 'nock'
-import type { Plugin } from 'superagent'
+import * as nock from 'nock'
 
 import {
   NonAssociationsApi,
@@ -23,7 +20,6 @@ const logger = {
   warn: jest.fn(),
   error: jest.fn(),
 } as unknown as jest.Mocked<Logger>
-const plugin = jest.fn() as unknown as jest.Mocked<Plugin>
 const client = new NonAssociationsApi(
   token,
   {
@@ -35,7 +31,6 @@ const client = new NonAssociationsApi(
     agent: { timeout: 1000 },
   },
   logger,
-  [plugin],
 )
 
 beforeEach(() => {
@@ -44,7 +39,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  expect(logger.warn).not.toHaveBeenCalled()
+  expect(logger.error).not.toHaveBeenCalled()
 })
 
 function mockResponse(): nock.Scope {
@@ -53,6 +48,10 @@ function mockResponse(): nock.Scope {
       authorization: `Bearer ${token}`,
     },
   })
+}
+
+function expectAllMocksTriggered(): void {
+  expect(nock.isDone()).toBe(true)
 }
 
 describe('REST Client', () => {
@@ -66,11 +65,10 @@ describe('REST Client', () => {
       mockResponse().get('/constants').reply(200, constants)
 
       expect(await client.constants()).toStrictEqual(constants)
-      expect(nock.isDone()).toEqual(true)
+      expectAllMocksTriggered()
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).not.toHaveBeenCalled()
-      expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'GET' }))
+      expect(logger.warn).not.toHaveBeenCalled()
     })
 
     it('when getting a non-association by id', async () => {
@@ -78,11 +76,10 @@ describe('REST Client', () => {
 
       const nonAssociation = await client.getNonAssociation(openNonAssociation.id)
       expect(nonAssociation).toStrictEqual(openNonAssociation)
-      expect(nock.isDone()).toEqual(true)
+      expectAllMocksTriggered()
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).not.toHaveBeenCalled()
-      expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'GET' }))
+      expect(logger.warn).not.toHaveBeenCalled()
     })
 
     it('when listing non-associations for a prisoner', async () => {
@@ -95,11 +92,10 @@ describe('REST Client', () => {
 
       const nonAssociations = await client.listNonAssociations(nonAssociationListOpen.prisonerNumber)
       expect(nonAssociations).toStrictEqual(nonAssociationListOpen)
-      expect(nock.isDone()).toEqual(true)
+      expectAllMocksTriggered()
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).not.toHaveBeenCalled()
-      expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'GET' }))
+      expect(logger.warn).not.toHaveBeenCalled()
     })
 
     it('when listing non-associations between 2 prisoners', async () => {
@@ -118,11 +114,10 @@ describe('REST Client', () => {
         { includeOpen: false, includeClosed: true },
       )
       expect(nonAssociationsList).toStrictEqual([closedNonAssociation])
-      expect(nock.isDone()).toEqual(true)
+      expectAllMocksTriggered()
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).not.toHaveBeenCalled()
-      expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'POST' }))
+      expect(logger.warn).not.toHaveBeenCalled()
     })
 
     it('when listing non-associations involving 2 prisoners', async () => {
@@ -141,11 +136,10 @@ describe('REST Client', () => {
         { includeOpen: false, includeClosed: true },
       )
       expect(nonAssociationsList).toStrictEqual([closedNonAssociation])
-      expect(nock.isDone()).toEqual(true)
+      expectAllMocksTriggered()
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).not.toHaveBeenCalled()
-      expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'POST' }))
+      expect(logger.warn).not.toHaveBeenCalled()
     })
 
     it('when listing all non-associations in pages', async () => {
@@ -165,11 +159,10 @@ describe('REST Client', () => {
         totalPages: 1,
         totalElements: 2,
       })
-      expect(nock.isDone()).toEqual(true)
+      expectAllMocksTriggered()
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).not.toHaveBeenCalled()
-      expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'GET' }))
+      expect(logger.warn).not.toHaveBeenCalled()
     })
 
     it('when creating a non-association', async () => {
@@ -189,11 +182,10 @@ describe('REST Client', () => {
         comment: 'See IR 12133100',
       })
       expect(nonAssociation).toEqual(openNonAssociation)
-      expect(nock.isDone()).toEqual(true)
+      expectAllMocksTriggered()
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).not.toHaveBeenCalled()
-      expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'POST' }))
+      expect(logger.warn).not.toHaveBeenCalled()
     })
 
     it('when updating a non-association', async () => {
@@ -211,11 +203,10 @@ describe('REST Client', () => {
         restrictionType: 'LANDING',
       })
       expect(nonAssociation.id).toEqual(openNonAssociation.id)
-      expect(nock.isDone()).toEqual(true)
+      expectAllMocksTriggered()
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).not.toHaveBeenCalled()
-      expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'PATCH' }))
+      expect(logger.warn).not.toHaveBeenCalled()
     })
 
     it('when closing a non-association', async () => {
@@ -229,11 +220,10 @@ describe('REST Client', () => {
         closedReason: 'Problem solved',
       })
       expect(nonAssociation).toEqual(closedNonAssociation)
-      expect(nock.isDone()).toEqual(true)
+      expectAllMocksTriggered()
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).not.toHaveBeenCalled()
-      expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'PUT' }))
+      expect(logger.warn).not.toHaveBeenCalled()
     })
 
     it('when deleting a non-association', async () => {
@@ -244,11 +234,10 @@ describe('REST Client', () => {
         staffUserNameRequestingDeletion: 'abc123',
       })
       expect(result).toBeNull()
-      expect(nock.isDone()).toEqual(true)
+      expectAllMocksTriggered()
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).not.toHaveBeenCalled()
-      expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'POST' }))
+      expect(logger.warn).not.toHaveBeenCalled()
     })
 
     it('when reopening a non-association', async () => {
@@ -258,11 +247,10 @@ describe('REST Client', () => {
         reopenReason: 'Closed in error',
       })
       expect(nonAssociation).toEqual(openNonAssociation)
-      expect(nock.isDone()).toEqual(true)
+      expectAllMocksTriggered()
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).not.toHaveBeenCalled()
-      expect(plugin).toHaveBeenCalledWith(expect.objectContaining({ method: 'PUT' }))
+      expect(logger.warn).not.toHaveBeenCalled()
     })
   })
 
@@ -276,10 +264,10 @@ describe('REST Client', () => {
       mockResponse().get('/constants').reply(503).get('/constants').reply(200, constants)
 
       expect(await client.constants()).toStrictEqual(constants)
-      expect(nock.isDone()).toEqual(true)
+      expectAllMocksTriggered()
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).not.toHaveBeenCalled()
+      expect(logger.warn).not.toHaveBeenCalled()
     })
 
     it('when getting a non-association by id', async () => {
@@ -291,10 +279,10 @@ describe('REST Client', () => {
 
       const nonAssociation = await client.getNonAssociation(openNonAssociation.id)
       expect(nonAssociation).toStrictEqual(openNonAssociation)
-      expect(nock.isDone()).toEqual(true)
+      expectAllMocksTriggered()
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).not.toHaveBeenCalled()
+      expect(logger.warn).not.toHaveBeenCalled()
     })
 
     it('when listing non-associations for a prisoner', async () => {
@@ -312,10 +300,10 @@ describe('REST Client', () => {
 
       const nonAssociations = await client.listNonAssociations(nonAssociationListOpen.prisonerNumber)
       expect(nonAssociations).toStrictEqual(nonAssociationListOpen)
-      expect(nock.isDone()).toEqual(true)
+      expectAllMocksTriggered()
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).not.toHaveBeenCalled()
+      expect(logger.warn).not.toHaveBeenCalled()
     })
 
     it('when listing all non-associations in pages', async () => {
@@ -332,10 +320,10 @@ describe('REST Client', () => {
 
       const nonAssociations = await client.pagedNonAssociations()
       expect(nonAssociations.content[0]).toStrictEqual(openNonAssociation)
-      expect(nock.isDone()).toEqual(true)
+      expectAllMocksTriggered()
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).not.toHaveBeenCalled()
+      expect(logger.warn).not.toHaveBeenCalled()
     })
   })
 
@@ -345,13 +333,13 @@ describe('REST Client', () => {
 
       await expect(client.constants()).rejects.toEqual(
         expect.objectContaining({
-          status: 503,
+          responseStatus: 503,
           message: 'Service Unavailable',
         }),
       )
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.warn).toHaveBeenCalledTimes(1)
     })
 
     it('when getting a non-association by id', async () => {
@@ -365,13 +353,13 @@ describe('REST Client', () => {
 
       await expect(client.getNonAssociation(openNonAssociation.id)).rejects.toEqual(
         expect.objectContaining({
-          status: 503,
+          responseStatus: 503,
           message: 'Service Unavailable',
         }),
       )
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.warn).toHaveBeenCalledTimes(1)
     })
 
     it('when listing non-associations for a prisoner', async () => {
@@ -394,13 +382,13 @@ describe('REST Client', () => {
 
       await expect(client.listNonAssociations(nonAssociationListOpen.prisonerNumber)).rejects.toEqual(
         expect.objectContaining({
-          status: 503,
+          responseStatus: 503,
           message: 'Service Unavailable',
         }),
       )
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.warn).toHaveBeenCalledTimes(1)
     })
 
     it('when listing all non-associations in pages', async () => {
@@ -414,13 +402,13 @@ describe('REST Client', () => {
 
       await expect(client.pagedNonAssociations()).rejects.toEqual(
         expect.objectContaining({
-          status: 503,
+          responseStatus: 503,
           message: 'Service Unavailable',
         }),
       )
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.warn).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -435,13 +423,13 @@ describe('REST Client', () => {
         ]),
       ).rejects.toEqual(
         expect.objectContaining({
-          status: 503,
+          responseStatus: 503,
           message: 'Service Unavailable',
         }),
       )
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.warn).toHaveBeenCalledTimes(1)
     })
 
     it('when listing non-associations involving 2 prisoners', async () => {
@@ -454,13 +442,13 @@ describe('REST Client', () => {
         ]),
       ).rejects.toEqual(
         expect.objectContaining({
-          status: 503,
+          responseStatus: 503,
           message: 'Service Unavailable',
         }),
       )
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.warn).toHaveBeenCalledTimes(1)
     })
 
     it('when creating a non-association', async () => {
@@ -478,13 +466,13 @@ describe('REST Client', () => {
         }),
       ).rejects.toEqual(
         expect.objectContaining({
-          status: 503,
+          responseStatus: 503,
           message: 'Service Unavailable',
         }),
       )
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.warn).toHaveBeenCalledTimes(1)
     })
 
     it('when updating a non-association', async () => {
@@ -496,13 +484,13 @@ describe('REST Client', () => {
         }),
       ).rejects.toEqual(
         expect.objectContaining({
-          status: 503,
+          responseStatus: 503,
           message: 'Service Unavailable',
         }),
       )
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.warn).toHaveBeenCalledTimes(1)
     })
 
     it('when closing a non-association', async () => {
@@ -514,13 +502,13 @@ describe('REST Client', () => {
         }),
       ).rejects.toEqual(
         expect.objectContaining({
-          status: 503,
+          responseStatus: 503,
           message: 'Service Unavailable',
         }),
       )
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.warn).toHaveBeenCalledTimes(1)
     })
 
     it('when deleting a non-association', async () => {
@@ -533,13 +521,13 @@ describe('REST Client', () => {
         }),
       ).rejects.toEqual(
         expect.objectContaining({
-          status: 403,
+          responseStatus: 403,
           message: 'Forbidden',
         }),
       )
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.warn).toHaveBeenCalledTimes(1)
     })
 
     it('when reopening a non-association', async () => {
@@ -552,13 +540,13 @@ describe('REST Client', () => {
         }),
       ).rejects.toEqual(
         expect.objectContaining({
-          status: 403,
+          responseStatus: 403,
           message: 'Forbidden',
         }),
       )
 
       expect(logger.info).toHaveBeenCalledTimes(1)
-      expect(logger.error).toHaveBeenCalledTimes(1)
+      expect(logger.warn).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -703,7 +691,7 @@ describe('REST Client', () => {
         client.pagedNonAssociations({ sort: 'id', page: 345 }),
         client.pagedNonAssociations({ sort: 'whenCreated,DESC', size: 1 }),
       ])
-      expect(nock.isDone()).toEqual(true)
+      expectAllMocksTriggered()
     })
   })
 })

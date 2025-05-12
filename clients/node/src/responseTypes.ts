@@ -5,8 +5,12 @@ interface EnumerationItem {
   code: string
   description: string
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface Constants extends Record<'roles' | 'reasons' | 'restrictionTypes', EnumerationItem[]> {}
+
+export interface Constants {
+  roles: EnumerationItem[]
+  reasons: EnumerationItem[]
+  restrictionTypes: EnumerationItem[]
+}
 
 interface BaseNonAssociationsListItem extends ObjectWithDates {
   id: number
@@ -47,15 +51,15 @@ export interface ClosedNonAssociationsListItem extends BaseNonAssociationsListIt
   closedAt: Date
 }
 
+export type NonAssociationsListItem = OpenNonAssociationsListItem | ClosedNonAssociationsListItem
+
 /**
  * List of non-associations for a particular prisoner
  *
  * Defined in uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.PrisonerNonAssociations class
  * see https://github.com/ministryofjustice/hmpps-non-associations-api
  */
-export interface NonAssociationsList<
-  Item extends BaseNonAssociationsListItem = OpenNonAssociationsListItem | ClosedNonAssociationsListItem,
-> {
+export interface NonAssociationsList<Item extends BaseNonAssociationsListItem = NonAssociationsListItem> {
   prisonerNumber: string
   firstName: string
   lastName: string
