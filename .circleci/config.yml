@@ -71,7 +71,7 @@ jobs:
           name: Install dependencies
           command: |
             cd clients/node
-            npm clean-install --no-audit
+            npm install --no-audit
       - save_cache:
           key: dependency-cache-node<< parameters.node-version >>-{{ checksum "clients/node/package-lock.json" }}
           paths:

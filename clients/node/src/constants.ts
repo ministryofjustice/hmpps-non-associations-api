@@ -43,7 +43,7 @@ export type SortDirection = (typeof sortDirectionOptions)[number]
 /**
  * Known system usernames that might appear in authorisedBy, updatedBy and closedBy fields
  */
-export const systemUsers: ReadonlyArray<string> = [
+export const systemUsers: readonly string[] = [
   // https://github.com/ministryofjustice/hmpps-non-associations-api/blob/04bf15fd1a7d659abe785749fbedda9f13627fba/src/main/kotlin/uk/gov/justice/digital/hmpps/hmppsnonassociationsapi/HmppsNonAssociationsApi.kt#L9
   'NON_ASSOCIATIONS_API',
   'PRISONER_MANAGER_API',
