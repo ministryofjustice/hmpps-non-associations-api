@@ -8,6 +8,8 @@
     "strict": true,
     "noImplicitAny": true,
     "experimentalDecorators": true,
+    "esModuleInterop": false,
+    "isolatedModules": true,
   },
   "exclude": [
     "dist",

@@ -1,8 +1,6 @@
-import Agent, { HttpsAgent, type HttpsOptions } from 'agentkeepalive'
-import superagent, { type Plugin, type SuperAgentRequest } from 'superagent'
+import { type ApiConfig, asSystem, RestClient } from '@ministryofjustice/hmpps-rest-client'
 
 import type { SortBy, SortDirection } from './constants'
-import type { ErrorResponse } from './errorTypes'
 import type { Page, PageRequest } from './paginationTypes'
 import type {
   CreateNonAssociationRequest,
@@ -21,19 +19,6 @@ import type {
   ClosedNonAssociation,
 } from './responseTypes'
 import { parseDates } from './parseDates'
-import { sanitiseError } from './sanitiseError'
-
-/**
- * API configuration standard in DPS typescript express apps
- */
-export interface ApiConfig {
-  url: string
-  timeout: {
-    response: number
-    deadline: number
-  }
-  agent: HttpsOptions
-}
 
 /**
  * Logger interface compatible with standard library `console` and with `bunyan`
@@ -49,85 +34,36 @@ type SortedPageRequest = PageRequest<
 >
 
 /**
- * REST client to access HMPPS Non-associations API
+ * REST client to access HMPPS Non-associations API.
+ * An instance should be created for every user request, it’s not designed to be shared.
  */
-export class NonAssociationsApi {
-  readonly name = 'HMPPS Non-associations API'
-
-  readonly agent: Agent
+export class NonAssociationsApi extends RestClient {
+  static readonly name = 'HMPPS Non-associations API'
 
   constructor(
     /**
      * Provide a system token with necessary roles, not a user token
      * READ_NON_ASSOCIATIONS and optionally WRITE_NON_ASSOCIATIONS or DELETE_NON_ASSOCIATIONS
+     * This must already be authenticated for the acting username
      */
-    readonly systemToken: string,
+    systemToken: string,
 
     /**
      * API configuration standard in DPS front-end apps
      */
-    readonly config: ApiConfig,
+    config: ApiConfig,
 
     /**
      * Logger such as standard library’s `console` or `bunyan` instance
      */
-    readonly logger: Logger,
-
-    /**
-     * Plugins for superagent requests, e.g. restClientMetricsMiddleware
-     */
-    readonly plugins: Plugin[] = [],
+    logger: Logger,
   ) {
-    this.agent = config.url.startsWith('https') ? new HttpsAgent(config.agent) : new Agent(config.agent)
-  }
-
-  /**
-   * Builds requests
-   * - uses bearer token authentication
-   * - uses keep-alive agent
-   * - installs plugins
-   * - adds optional retry handler
-   * - times-out if necessary
-   * - logs messages
-   */
-  protected sendRequest<Request extends SuperAgentRequest>(
-    request: Request,
-    retry = false,
-    retryAttempts = 2,
-  ): Promise<superagent.Response> {
-    const req = request
-      .agent(this.agent)
-      .auth(this.systemToken, { type: 'bearer' })
-      .retry(retryAttempts, (err, res): boolean | undefined => {
-        if (!retry) {
-          return false
-        }
-        if (err) {
-          this.logger.info(
-            `${this.name} retrying ${request.method.toUpperCase()} ${request.url} due to error with ${err.code} ${
-              err.message
-            }`,
-          )
-        }
-        // retry handler only for logging retries, not to influence retry logic
-        return undefined
-      })
-      .timeout(this.config.timeout)
-    for (const plugin of this.plugins) {
-      req.use(plugin)
-    }
-    this.logger.info(`${this.name} ${request.method.toUpperCase()}: ${request.url}`)
-    return req.then(undefined, error => {
-      const sanitisedError = sanitiseError<ErrorResponse>(error)
-      this.logger.error(
-        `${this.name} error ${request.method.toUpperCase()} ${request.url}: ${JSON.stringify(sanitisedError)}`,
-      )
-      throw sanitisedError
+    super(NonAssociationsApi.name, config, logger, {
+      async getToken(): Promise<string> {
+        // NB: the same system token supplied when constructing the client is used for all requests
+        return systemToken
+      },
     })
-  }
-
-  protected buildUrl(path: string): string {
-    return `${this.config.url}${path}`
   }
 
   /**
@@ -136,9 +72,12 @@ export class NonAssociationsApi {
    * @throws SanitisedError<ErrorResponse>
    */
   constants(): Promise<Constants> {
-    const request = superagent.get(this.buildUrl('/constants'))
-
-    return this.sendRequest(request, true).then(response => response.body)
+    return this.get<Constants>(
+      {
+        path: '/constants',
+      },
+      asSystem(),
+    )
   }
 
   /**
@@ -192,7 +131,7 @@ export class NonAssociationsApi {
     },
   ): Promise<NonAssociationsList>
 
-  listNonAssociations(
+  async listNonAssociations(
     prisonerNumber: string,
     {
       includeOpen = true,
@@ -208,21 +147,21 @@ export class NonAssociationsApi {
       sortDirection?: SortDirection
     } = {},
   ): Promise<NonAssociationsList> {
-    const request = superagent
-      .get(this.buildUrl(`/prisoner/${encodeURIComponent(prisonerNumber)}/non-associations`))
-      .query({
-        includeOpen: includeOpen.toString(),
-        includeClosed: includeClosed.toString(),
-        includeOtherPrisons: includeOtherPrisons.toString(),
-        sortBy,
-        sortDirection,
-      })
-
-    return this.sendRequest(request, true).then(response => {
-      const nonAssociationList: NonAssociationsList = response.body
-      nonAssociationList.nonAssociations.forEach(nonAssociation => parseDates(nonAssociation))
-      return nonAssociationList
-    })
+    const nonAssociationList = await this.get<NonAssociationsList>(
+      {
+        path: `/prisoner/${encodeURIComponent(prisonerNumber)}/non-associations`,
+        query: {
+          includeOpen: includeOpen.toString(),
+          includeClosed: includeClosed.toString(),
+          includeOtherPrisons: includeOtherPrisons.toString(),
+          sortBy,
+          sortDirection,
+        },
+      },
+      asSystem(),
+    )
+    nonAssociationList.nonAssociations.forEach(nonAssociation => parseDates(nonAssociation))
+    return nonAssociationList
   }
 
   /**
@@ -265,7 +204,7 @@ export class NonAssociationsApi {
     },
   ): Promise<NonAssociation[]>
 
-  listNonAssociationsBetween(
+  async listNonAssociationsBetween(
     prisonerNumbers: string[],
     {
       includeOpen = true,
@@ -275,18 +214,18 @@ export class NonAssociationsApi {
       includeClosed?: boolean
     } = {},
   ): Promise<NonAssociation[]> {
-    const request = superagent
-      .post(this.buildUrl('/non-associations/between'))
-      .query({
-        includeOpen: includeOpen.toString(),
-        includeClosed: includeClosed.toString(),
-      })
-      .send(prisonerNumbers)
-
-    return this.sendRequest(request).then(response => {
-      const nonAssociations: NonAssociation[] = response.body
-      return nonAssociations.map(nonAssociation => parseDates(nonAssociation))
-    })
+    const nonAssociations = await this.post<NonAssociation[]>(
+      {
+        path: '/non-associations/between',
+        query: {
+          includeOpen: includeOpen.toString(),
+          includeClosed: includeClosed.toString(),
+        },
+        data: prisonerNumbers,
+      },
+      asSystem(),
+    )
+    return nonAssociations.map(nonAssociation => parseDates(nonAssociation))
   }
 
   /**
@@ -329,7 +268,7 @@ export class NonAssociationsApi {
     },
   ): Promise<NonAssociation[]>
 
-  listNonAssociationsInvolving(
+  async listNonAssociationsInvolving(
     prisonerNumbers: string[],
     {
       includeOpen = true,
@@ -339,18 +278,18 @@ export class NonAssociationsApi {
       includeClosed?: boolean
     } = {},
   ): Promise<NonAssociation[]> {
-    const request = superagent
-      .post(this.buildUrl('/non-associations/involving'))
-      .query({
-        includeOpen: includeOpen.toString(),
-        includeClosed: includeClosed.toString(),
-      })
-      .send(prisonerNumbers)
-
-    return this.sendRequest(request).then(response => {
-      const nonAssociations: NonAssociation[] = response.body
-      return nonAssociations.map(nonAssociation => parseDates(nonAssociation))
-    })
+    const nonAssociations = await this.post<NonAssociation[]>(
+      {
+        path: '/non-associations/involving',
+        query: {
+          includeOpen: includeOpen.toString(),
+          includeClosed: includeClosed.toString(),
+        },
+        data: prisonerNumbers,
+      },
+      asSystem(),
+    )
+    return nonAssociations.map(nonAssociation => parseDates(nonAssociation))
   }
 
   /**
@@ -389,7 +328,7 @@ export class NonAssociationsApi {
     } & SortedPageRequest,
   ): Promise<Page<NonAssociation>>
 
-  pagedNonAssociations({
+  async pagedNonAssociations({
     includeOpen = true,
     includeClosed = false,
     page,
@@ -412,13 +351,15 @@ export class NonAssociationsApi {
     if (typeof sort !== 'undefined') {
       query.sort = sort
     }
-    const request = superagent.get(this.buildUrl('/non-associations')).query(query)
-
-    return this.sendRequest(request, true).then(response => {
-      const nonAssociations: Page<NonAssociation> = response.body
-      nonAssociations.content.forEach(nonAssociation => parseDates(nonAssociation))
-      return nonAssociations
-    })
+    const nonAssociations = await this.get<Page<NonAssociation>>(
+      {
+        path: '/non-associations',
+        query,
+      },
+      asSystem(),
+    )
+    nonAssociations.content.forEach(nonAssociation => parseDates(nonAssociation))
+    return nonAssociations
   }
 
   /**
@@ -428,13 +369,14 @@ export class NonAssociationsApi {
    *
    * @throws SanitisedError<ErrorResponse>
    */
-  getNonAssociation(id: number): Promise<NonAssociation> {
-    const request = superagent.get(this.buildUrl(`/non-associations/${encodeURIComponent(id)}`))
-
-    return this.sendRequest(request, true).then(response => {
-      const nonAssociation = response.body
-      return parseDates(nonAssociation)
-    })
+  async getNonAssociation(id: number): Promise<NonAssociation> {
+    const nonAssociation = await this.get<NonAssociation>(
+      {
+        path: `/non-associations/${encodeURIComponent(id)}`,
+      },
+      asSystem(),
+    )
+    return parseDates(nonAssociation)
   }
 
   /**
@@ -444,13 +386,15 @@ export class NonAssociationsApi {
    *
    * @throws SanitisedError<ErrorResponse>
    */
-  createNonAssociation(payload: CreateNonAssociationRequest): Promise<OpenNonAssociation> {
-    const request = superagent.post(this.buildUrl('/non-associations')).send(payload)
-
-    return this.sendRequest(request).then(response => {
-      const nonAssociation: OpenNonAssociation = response.body
-      return parseDates(nonAssociation)
-    })
+  async createNonAssociation(payload: CreateNonAssociationRequest): Promise<OpenNonAssociation> {
+    const nonAssociation = await this.post<OpenNonAssociation>(
+      {
+        path: '/non-associations',
+        data: payload as unknown as Record<string, undefined>,
+      },
+      asSystem(),
+    )
+    return parseDates(nonAssociation)
   }
 
   /**
@@ -460,13 +404,15 @@ export class NonAssociationsApi {
    *
    * @throws SanitisedError<ErrorResponse>
    */
-  updateNonAssociation(id: number, payload: UpdateNonAssociationRequest): Promise<NonAssociation> {
-    const request = superagent.patch(this.buildUrl(`/non-associations/${encodeURIComponent(id)}`)).send(payload)
-
-    return this.sendRequest(request).then(response => {
-      const nonAssociation: NonAssociation = response.body
-      return parseDates(nonAssociation)
-    })
+  async updateNonAssociation(id: number, payload: UpdateNonAssociationRequest): Promise<NonAssociation> {
+    const nonAssociation = await this.patch<NonAssociation>(
+      {
+        path: `/non-associations/${encodeURIComponent(id)}`,
+        data: payload as unknown as Record<string, undefined>,
+      },
+      asSystem(),
+    )
+    return parseDates(nonAssociation)
   }
 
   /**
@@ -476,13 +422,15 @@ export class NonAssociationsApi {
    *
    * @throws SanitisedError<ErrorResponse>
    */
-  closeNonAssociation(id: number, payload: CloseNonAssociationRequest): Promise<ClosedNonAssociation> {
-    const request = superagent.put(this.buildUrl(`/non-associations/${encodeURIComponent(id)}/close`)).send(payload)
-
-    return this.sendRequest(request).then(response => {
-      const nonAssociation: ClosedNonAssociation = response.body
-      return parseDates(nonAssociation)
-    })
+  async closeNonAssociation(id: number, payload: CloseNonAssociationRequest): Promise<ClosedNonAssociation> {
+    const nonAssociation = await this.put<ClosedNonAssociation>(
+      {
+        path: `/non-associations/${encodeURIComponent(id)}/close`,
+        data: payload as unknown as Record<string, undefined>,
+      },
+      asSystem(),
+    )
+    return parseDates(nonAssociation)
   }
 
   /**
@@ -495,10 +443,15 @@ export class NonAssociationsApi {
    *
    * @throws SanitisedError<ErrorResponse>
    */
-  deleteNonAssociation(id: number, payload: DeleteNonAssociationRequest): Promise<null> {
-    const request = superagent.post(this.buildUrl(`/non-associations/${encodeURIComponent(id)}/delete`)).send(payload)
-
-    return this.sendRequest(request).then(() => null)
+  async deleteNonAssociation(id: number, payload: DeleteNonAssociationRequest): Promise<null> {
+    await this.post(
+      {
+        path: `/non-associations/${encodeURIComponent(id)}/delete`,
+        data: payload as unknown as Record<string, undefined>,
+      },
+      asSystem(),
+    )
+    return null
   }
 
   /**
@@ -511,12 +464,14 @@ export class NonAssociationsApi {
    *
    * @throws SanitisedError<ErrorResponse>
    */
-  reopenNonAssociation(id: number, payload: ReopenNonAssociationRequest): Promise<OpenNonAssociation> {
-    const request = superagent.put(this.buildUrl(`/non-associations/${encodeURIComponent(id)}/reopen`)).send(payload)
-
-    return this.sendRequest(request).then(response => {
-      const nonAssociation: OpenNonAssociation = response.body
-      return parseDates(nonAssociation)
-    })
+  async reopenNonAssociation(id: number, payload: ReopenNonAssociationRequest): Promise<OpenNonAssociation> {
+    const nonAssociation = await this.put<OpenNonAssociation>(
+      {
+        path: `/non-associations/${encodeURIComponent(id)}/reopen`,
+        data: payload as unknown as Record<string, undefined>,
+      },
+      asSystem(),
+    )
+    return parseDates(nonAssociation)
   }
 }
