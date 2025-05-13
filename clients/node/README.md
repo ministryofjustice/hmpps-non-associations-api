@@ -19,7 +19,7 @@ npm install --save @ministryofjustice/hmpps-non-associations-api
 ```
 
 Pros:
-- uses the most standard, public registry
+- uses the standard, public registry
 - dependency upgrade tools will process new releases
 
 Cons:
@@ -41,36 +41,6 @@ Pros:
 
 Cons:
 - dependency upgrade tools are unlikely to notice new releases
-
-### Install from GitHub Packages – npm registry
-
-Unfortunately, GitHub Packages requires authentication to pull from public npm registries,
-so the setup here is more complex.
-
-In the application repository, create `.npmrc` with:
-
-```text
-registry=https://registry.npmjs.org/
-@ministryofjustice:registry=https://npm.pkg.github.com
-```
-
-Create a classic GitHub personal access token with at least `read:packages` scope, adding it to `~/.npmrc`:
-
-```text
-//npm.pkg.github.com/:_authToken=[token]
-```
-
-Install library by adding the
-[latest release version](https://github.com/ministryofjustice/hmpps-non-associations-api/releases)
-to `package.json`:
-
-```text
-"@ministryofjustice/hmpps-non-associations-api": "[latest version number]"
-```
-
-Cons:
-- requires authentication when using locally and in CI other than GitHub Actions
-- it’s unclear whether dependency upgrade tools can process new releases
 
 ### Usage
 

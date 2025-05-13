@@ -12,6 +12,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Set version from release tag
         run: |
           cd clients/node
@@ -25,22 +26,24 @@ jobs:
           echo "Will publish version $version"
           sed -i 's/"version": "0.0.0"/"version": "'$version'"/' package.json
           echo "version=$version" >> "$GITHUB_ENV"
+
       - name: Setup node with private registry
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: clients/node/package-lock.json
-          registry-url: 'https://npm.pkg.github.com'
+          registry-url: 'https://registry.npmjs.org'
           scope: '@ministryofjustice'
+
       - name: Install dependencies
         run: |
           cd clients/node
-          npm clean-install --no-audit
+          npm install --no-audit
+
       - name: Run tests
         run: |
           cd clients/node
           npm test
+
       - name: Build library
         run: |
           cp LICENSE clients/node
@@ -49,26 +52,14 @@ jobs:
           npm run build
           npm pack
           mv ministryofjustice-hmpps-non-associations-api-$version.tgz node-client.tgz
+
       - name: Upload package to GitHub Release
         run: |
           cd clients/node
           gh release upload ${{ github.event.release.tag_name }} node-client.tgz
         env:
           GH_TOKEN: ${{ github.token }}
-      - name: Publish package to GitHub Packages
-        run: |
-          cd clients/node
-          npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Setup node with public registry
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: clients/node/package-lock.json
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@ministryofjustice'
+
       - name: Publish package to npmjs.com
         run: |
           cd clients/node
