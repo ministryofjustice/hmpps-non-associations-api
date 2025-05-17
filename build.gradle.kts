@@ -6,8 +6,8 @@ import uk.gov.justice.digital.hmpps.gradle.RevealSecretsTask
 
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.1.0"
-  kotlin("plugin.jpa") version "2.1.20"
-  kotlin("plugin.spring") version "2.1.20"
+  kotlin("plugin.jpa") version "2.1.21"
+  kotlin("plugin.spring") version "2.1.21"
   idea
   id("org.springdoc.openapi-gradle-plugin") version "1.9.0"
 }
@@ -26,10 +26,10 @@ dependencies {
   implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:8.1.0")
 
   implementation("io.opentelemetry:opentelemetry-api:1.50.0")
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.15.0")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.16.0")
 
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
-  implementation("org.hibernate.orm:hibernate-community-dialects:6.6.14.Final")
+  implementation("org.hibernate.orm:hibernate-community-dialects:6.6.15.Final")
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
 
@@ -45,13 +45,13 @@ dependencies {
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.4.3")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
   testImplementation("org.mockito:mockito-inline:5.2.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.27")
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.28")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("org.testcontainers:localstack:1.21.0")
   testImplementation("org.testcontainers:postgresql:1.21.0")
 
-  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.11.4")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.12.2")
 }
 
 kotlin {
