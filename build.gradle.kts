@@ -6,8 +6,8 @@ import uk.gov.justice.digital.hmpps.gradle.RevealSecretsTask
 
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.1.0"
-  kotlin("plugin.jpa") version "2.1.20"
-  kotlin("plugin.spring") version "2.1.20"
+  kotlin("plugin.jpa") version "2.1.21"
+  kotlin("plugin.spring") version "2.1.21"
   idea
   id("org.springdoc.openapi-gradle-plugin") version "1.9.0"
 }
@@ -26,10 +26,10 @@ dependencies {
   implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:8.1.0")
 
   implementation("io.opentelemetry:opentelemetry-api:1.50.0")
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.15.0")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.16.0")
 
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
-  implementation("org.hibernate.orm:hibernate-community-dialects:6.6.14.Final")
+  implementation("org.hibernate.orm:hibernate-community-dialects:7.0.0.Final")
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
 
