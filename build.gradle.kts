@@ -29,7 +29,7 @@ dependencies {
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.15.0")
 
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
-  implementation("org.hibernate.orm:hibernate-community-dialects:6.6.14.Final")
+  implementation("org.hibernate.orm:hibernate-community-dialects:7.0.0.Final")
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
 
