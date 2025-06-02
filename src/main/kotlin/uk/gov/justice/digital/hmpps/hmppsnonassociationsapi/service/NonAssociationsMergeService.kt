@@ -1,10 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
-import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
@@ -26,7 +26,7 @@ class NonAssociationsMergeService(
 
   /**
    * Replaces an old prisoner number for a new one in all non-associations,
-   * closing newly-duplicate records and deleting non-associations with the same prisoner number on both sides.
+   * closing newly duplicate records and deleting non-associations with the same prisoner number on both sides.
    */
   fun replacePrisonerNumber(
     oldPrisonerNumber: String,
@@ -36,7 +36,7 @@ class NonAssociationsMergeService(
 
   /**
    * Replaces an old prisoner number for a new one in non-associations created within given date range (inclusive),
-   * closing newly-duplicate records and deleting non-associations with the same prisoner number on both sides.
+   * closing newly duplicate records and deleting non-associations with the same prisoner number on both sides.
    */
   fun replacePrisonerNumberInDateRange(
     oldPrisonerNumber: String,

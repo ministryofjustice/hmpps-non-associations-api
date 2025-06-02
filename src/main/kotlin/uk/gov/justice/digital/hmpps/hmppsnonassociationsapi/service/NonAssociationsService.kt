@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
-import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -9,6 +8,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationAlreadyClosedException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationAlreadyOpenException
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.NonAssociationNotFoundException
@@ -40,7 +40,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation a
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
 @Service
-@Transactional
 class NonAssociationsService(
   private val nonAssociationsRepository: NonAssociationsRepository,
   private val offenderSearch: OffenderSearchService,
@@ -53,6 +52,7 @@ class NonAssociationsService(
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
+  @Transactional
   fun createNonAssociation(createNonAssociationRequest: CreateNonAssociationRequest): NonAssociationDTO {
     val createdBy = authenticationHolder.authenticationOrNull?.userName
       ?: throw UserInContextMissingException()
@@ -112,7 +112,7 @@ class NonAssociationsService(
   /**
    * Returns all non-associations that exist amongst provided group of prisoners
    *
-   * Optionally a prisonId can be provided to only return non-associations
+   * Optionally, a prisonId can be provided to only return non-associations
    * where both prisoners are at this given prison
    */
   fun getAnyBetween(
@@ -151,6 +151,7 @@ class NonAssociationsService(
     return nonAssociations.map(NonAssociationJPA::toDto)
   }
 
+  @Transactional
   fun updateNonAssociation(id: Long, update: PatchNonAssociationRequest): NonAssociationDTO {
     val updatedBy = authenticationHolder.authenticationOrNull?.userName
       ?: throw UserInContextMissingException()
@@ -163,6 +164,7 @@ class NonAssociationsService(
     return nonAssociation.toDto()
   }
 
+  @Transactional
   fun closeNonAssociation(id: Long, closeRequest: CloseNonAssociationRequest): NonAssociationDTO {
     val closedBy = closeRequest.closedBy
       ?: authenticationHolder.authenticationOrNull?.userName
@@ -184,6 +186,7 @@ class NonAssociationsService(
     return nonAssociation.toDto()
   }
 
+  @Transactional
   fun reopenNonAssociation(id: Long, reopenNonAssociationRequest: ReopenNonAssociationRequest): NonAssociationDTO {
     val reopenedBy = reopenNonAssociationRequest.reopenedBy
       ?: authenticationHolder.authenticationOrNull?.userName
@@ -211,6 +214,7 @@ class NonAssociationsService(
     return nonAssociation.toDto()
   }
 
+  @Transactional
   fun deleteNonAssociation(id: Long, deleteRequest: DeleteNonAssociationRequest): NonAssociationDTO {
     val nonAssociation = nonAssociationsRepository.findById(id).getOrNull() ?: throw NonAssociationNotFoundException(id)
 
@@ -220,6 +224,7 @@ class NonAssociationsService(
     return nonAssociation.toDto()
   }
 
+  @Transactional(readOnly = true)
   fun getPrisonerNonAssociations(prisonerNumber: String, options: NonAssociationListOptions): PrisonerNonAssociations {
     var nonAssociations = nonAssociationsRepository.findAllByPrisonerNumber(prisonerNumber)
 
