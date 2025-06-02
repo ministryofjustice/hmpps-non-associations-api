@@ -224,7 +224,6 @@ class NonAssociationsService(
     return nonAssociation.toDto()
   }
 
-  @Transactional(readOnly = true)
   fun getPrisonerNonAssociations(prisonerNumber: String, options: NonAssociationListOptions): PrisonerNonAssociations {
     var nonAssociations = nonAssociationsRepository.findAllByPrisonerNumber(prisonerNumber)
 
