@@ -51,7 +51,7 @@ dependencies {
   testImplementation("org.testcontainers:localstack:1.21.1")
   testImplementation("org.testcontainers:postgresql:1.21.1")
 
-  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.13.1")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.12.2")
 }
 
 kotlin {
