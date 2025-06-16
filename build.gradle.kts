@@ -23,15 +23,15 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-validation")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.4.5")
-  implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:8.3.4")
+  implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:8.4.0")
 
   implementation("io.opentelemetry:opentelemetry-api:1.51.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.16.0")
 
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
-  implementation("org.hibernate.orm:hibernate-community-dialects:7.0.0.Final")
+  implementation("org.hibernate.orm:hibernate-community-dialects:7.0.2.Final")
 
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 
   implementation("com.zaxxer:HikariCP:6.3.0")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
@@ -40,7 +40,7 @@ dependencies {
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-  testImplementation("org.wiremock:wiremock-standalone:3.13.0")
+  testImplementation("org.wiremock:wiremock-standalone:3.13.1")
 
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.4.6")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
@@ -50,8 +50,6 @@ dependencies {
   testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
   testImplementation("org.testcontainers:localstack:1.21.1")
   testImplementation("org.testcontainers:postgresql:1.21.1")
-
-  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.12.2")
 }
 
 kotlin {
