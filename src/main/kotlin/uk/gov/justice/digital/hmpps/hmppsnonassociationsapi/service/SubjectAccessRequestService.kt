@@ -24,7 +24,7 @@ class SubjectAccessRequestService(
 
     val nonAssociations = try {
       nonAssociationsService.getPrisonerNonAssociations(prn, options)
-    } catch (e: MissingPrisonersInSearchException) {
+    } catch (@Suppress("unused") e: MissingPrisonersInSearchException) {
       throw SubjectAccessRequestSubjectNotRecognisedException()
     }
 

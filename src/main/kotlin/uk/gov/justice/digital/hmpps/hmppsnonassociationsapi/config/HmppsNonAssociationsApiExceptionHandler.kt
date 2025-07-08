@@ -29,6 +29,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException
 class HmppsNonAssociationsApiExceptionHandler {
   @ExceptionHandler(ValidationException::class)
   fun handleValidationException(e: ValidationException): ResponseEntity<ErrorResponse> {
+    @Suppress("LoggingSimilarMessage")
     log.info("Validation exception: {}", e.message)
     return ResponseEntity
       .status(BAD_REQUEST)
@@ -43,6 +44,7 @@ class HmppsNonAssociationsApiExceptionHandler {
 
   @ExceptionHandler(HttpMediaTypeNotSupportedException::class)
   fun handleInvalidRequestFormatException(e: HttpMediaTypeNotSupportedException): ResponseEntity<ErrorResponse> {
+    @Suppress("LoggingSimilarMessage")
     log.info("Validation exception: Request format not supported: {}", e.message)
     return ResponseEntity
       .status(UNSUPPORTED_MEDIA_TYPE)
@@ -57,6 +59,7 @@ class HmppsNonAssociationsApiExceptionHandler {
 
   @ExceptionHandler(HttpMessageNotReadableException::class)
   fun handleNoBodyValidationException(e: HttpMessageNotReadableException): ResponseEntity<ErrorResponse> {
+    @Suppress("LoggingSimilarMessage")
     log.info("Validation exception: Couldn't read request body: {}", e.message)
     return ResponseEntity
       .status(BAD_REQUEST)

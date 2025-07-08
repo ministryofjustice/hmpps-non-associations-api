@@ -111,6 +111,7 @@ data class NonAssociation(
   )
   val closedAt: LocalDateTime? = null,
 ) {
+  @Suppress("unused")
   val isOpen: Boolean
     get() = !isClosed
 }

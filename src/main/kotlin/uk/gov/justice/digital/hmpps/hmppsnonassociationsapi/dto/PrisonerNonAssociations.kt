@@ -145,6 +145,7 @@ data class PrisonerNonAssociation(
   @param:Schema(description = "Details about the other person in the non-association.", required = true)
   val otherPrisonerDetails: OtherPrisonerDetails,
 ) {
+  @Suppress("unused")
   val isOpen: Boolean
     get() = !isClosed
 }

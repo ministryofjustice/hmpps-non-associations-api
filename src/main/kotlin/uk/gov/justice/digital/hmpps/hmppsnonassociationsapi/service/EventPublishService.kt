@@ -43,5 +43,7 @@ class EventPublishService(
 
 enum class InformationSource {
   DPS,
+
+  @Suppress("unused")
   NOMIS,
 }

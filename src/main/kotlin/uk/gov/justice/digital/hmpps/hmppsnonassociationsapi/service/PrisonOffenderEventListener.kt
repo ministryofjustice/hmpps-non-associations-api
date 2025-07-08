@@ -92,13 +92,17 @@ data class AdditionalInformationBookingMoved(
 )
 
 data class HMPPSEventType(
+  @Suppress("PropertyName")
   val Value: String,
+  @Suppress("PropertyName")
   val Type: String,
 )
 data class HMPPSMessageAttributes(
   val eventType: HMPPSEventType,
 )
 data class HMPPSMessage(
+  @Suppress("PropertyName")
   val Message: String,
+  @Suppress("PropertyName")
   val MessageAttributes: HMPPSMessageAttributes,
 )
