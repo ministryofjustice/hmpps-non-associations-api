@@ -7,7 +7,7 @@ import java.time.ZoneId
 
 @Configuration
 class TimeZoneIdConfiguration(
-  @Value("\${spring.jackson.time-zone}") private val timeZone: String,
+  @param:Value($$"${spring.jackson.time-zone}") private val timeZone: String,
 ) {
   @Bean
   fun timeZoneId(): ZoneId = ZoneId.of(timeZone)

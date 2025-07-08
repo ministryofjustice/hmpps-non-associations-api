@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter
 @Configuration
 class CustomisedJacksonObjectMapper(
   private val zoneId: ZoneId,
-  @Value("\${spring.jackson.date-format}") private val zonedDateTimeFormat: String,
+  @param:Value($$"${spring.jackson.date-format}") private val zonedDateTimeFormat: String,
 ) {
   @Bean
   fun serialiser() = Jackson2ObjectMapperBuilderCustomizer {
