@@ -1,0 +1,65 @@
+name: Test REST client
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: Node version
+        required: true
+        type: number
+jobs:
+  test:
+    name: Test REST client on node ${{ inputs.node-version }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Setup node ${{ inputs.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Install npm dependencies
+        shell: bash
+        run: |
+          cd clients/node
+          npm install --no-audit
+
+      - name: Build library
+        shell: bash
+        run: |
+          cd clients/node
+          npm run build
+
+      - name: Run linter
+        shell: bash
+        run: |
+          cd clients/node
+          npm run lint
+
+      - name: Run tests
+        shell: bash
+        run: |
+          cd clients/node
+          npm test
+
+      - name: Upload test results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-test-results-${{ inputs.node-version }}
+          path: |
+            ./clients/node/test_results
+
+      - name: Publish test report
+        if: ${{ !cancelled() }}
+        uses: dorny/test-reporter@v2
+        with:
+          name: Test report for node ${{ inputs.node-version }}
+          artifact: npm-test-results-${{ inputs.node-version }}
+          path: junit.xml
+          reporter: jest-junit
+          fail-on-empty: false
+          fail-on-error: false

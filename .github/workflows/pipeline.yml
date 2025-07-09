@@ -43,6 +43,14 @@ jobs:
     name: Validate the kotlin
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/gradle_verify.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
+  node_client_test:
+    name: Test REST client
+    strategy:
+      matrix:
+        node-version: [20, 22, 24]
+    uses: ./.github/workflows/test-node-client.yml
+    with:
+      node-version: ${{ matrix.node-version }}
   build:
     name: Build docker image from hmpps-github-actions
     if: github.ref == 'refs/heads/main'
