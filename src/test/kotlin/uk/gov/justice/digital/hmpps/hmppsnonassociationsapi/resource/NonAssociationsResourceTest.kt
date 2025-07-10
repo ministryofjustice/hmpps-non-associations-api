@@ -2346,7 +2346,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         .bodyValue(listOf(prisonerJohnNumber, prisonerMerlinNumber))
         .exchange()
         .expectStatus().isOk
-        .expectBody().json("[]", true)
+        .expectBody().json("[]", JsonCompareMode.STRICT)
     }
 
     @Test

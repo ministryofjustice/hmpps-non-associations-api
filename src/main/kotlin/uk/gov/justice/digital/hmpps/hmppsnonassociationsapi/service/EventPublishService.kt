@@ -2,9 +2,9 @@ package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.NonAssociation
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.AdditionalInformation
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociationDomainEventType
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.SnsService
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.AdditionalInformation
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationDomainEventType
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.SnsService
 import java.time.Clock
 import java.time.LocalDateTime
 
@@ -43,5 +43,7 @@ class EventPublishService(
 
 enum class InformationSource {
   DPS,
+
+  @Suppress("unused")
   NOMIS,
 }
