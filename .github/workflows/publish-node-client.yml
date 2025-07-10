@@ -10,7 +10,7 @@ jobs:
       packages: write
       id-token: write
     steps:
-      - name: Checkout repository
+      - name: Checkout sources
         uses: actions/checkout@v4
 
       - name: Set version from release tag
@@ -27,10 +27,10 @@ jobs:
           sed -i 's/"version": "0.0.0"/"version": "'$version'"/' package.json
           echo "version=$version" >> "$GITHUB_ENV"
 
-      - name: Setup node with private registry
+      - name: Setup node with public registry
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version-file: ./clients/node/.nvmrc
           registry-url: 'https://registry.npmjs.org'
           scope: '@ministryofjustice'
 

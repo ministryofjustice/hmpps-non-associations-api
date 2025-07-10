@@ -42,8 +42,8 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.ReopenNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationDomainEventType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service.NonAssociationsService
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.services.NonAssociationDomainEventType
 
 @RestController
 @Validated

@@ -215,7 +215,11 @@ class NonAssociationsService(
   }
 
   @Transactional
-  fun deleteNonAssociation(id: Long, deleteRequest: DeleteNonAssociationRequest): NonAssociationDTO {
+  fun deleteNonAssociation(
+    id: Long,
+    @Suppress("unused")
+    deleteRequest: DeleteNonAssociationRequest,
+  ): NonAssociationDTO {
     val nonAssociation = nonAssociationsRepository.findById(id).getOrNull() ?: throw NonAssociationNotFoundException(id)
 
     nonAssociationsRepository.delete(nonAssociation)
