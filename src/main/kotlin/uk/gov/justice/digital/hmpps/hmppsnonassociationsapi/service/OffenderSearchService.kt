@@ -28,7 +28,9 @@ class OffenderSearchService(
         val requestBody = mapOf("prisonerNumbers" to pageOfPrisonerNumbers)
         offenderSearchWebClient
           .post()
-          .uri("/prisoner-search/prisoner-numbers")
+          .uri(
+            "/prisoner-search/prisoner-numbers?responseFields=prisonerNumber,firstName,lastName,prisonId,prisonName,cellLocation",
+          )
           .header("Content-Type", "application/json")
           .bodyValue(requestBody)
           .retrieve()
