@@ -33,7 +33,9 @@ class OffenderSearchMockServer : WireMockServer(WIREMOCK_PORT) {
     val requestBody = mapper.writeValueAsString(mapOf("prisonerNumbers" to prisonerNumbers.toSet()))
 
     stubFor(
-      post("/prisoner-search/prisoner-numbers")
+      post(
+        "/prisoner-search/prisoner-numbers?responseFields=prisonerNumber,firstName,lastName,prisonId,prisonName,cellLocation",
+      )
         .withRequestBody(
           WireMock.equalToJson(requestBody, true, false),
         )
@@ -47,7 +49,9 @@ class OffenderSearchMockServer : WireMockServer(WIREMOCK_PORT) {
 
   fun stubSearchFails() {
     stubFor(
-      post("/prisoner-search/prisoner-numbers")
+      post(
+        "/prisoner-search/prisoner-numbers?responseFields=prisonerNumber,firstName,lastName,prisonId,prisonName,cellLocation",
+      )
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
