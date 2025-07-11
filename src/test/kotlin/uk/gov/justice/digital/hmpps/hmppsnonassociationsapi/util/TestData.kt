@@ -5,7 +5,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.CreateNonAssocia
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonersearch.Prisoner
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
 import java.time.Clock
@@ -82,8 +82,8 @@ fun createNonAssociationRequest(
   )
 }
 
-val offenderSearchPrisoners = mapOf(
-  "A1234BC" to OffenderSearchPrisoner(
+val prisonerSearchPrisoners = mapOf(
+  "A1234BC" to Prisoner(
     prisonerNumber = "A1234BC",
     firstName = "John",
     lastName = "Doe",
@@ -91,7 +91,7 @@ val offenderSearchPrisoners = mapOf(
     prisonName = "Moorland",
     cellLocation = "MDI-A-1",
   ),
-  "D5678EF" to OffenderSearchPrisoner(
+  "D5678EF" to Prisoner(
     prisonerNumber = "D5678EF",
     firstName = "Merlin",
     lastName = "Somerplumbs",
@@ -99,7 +99,7 @@ val offenderSearchPrisoners = mapOf(
     prisonName = "Moorland",
     cellLocation = "MDI-A-2",
   ),
-  "G9012HI" to OffenderSearchPrisoner(
+  "G9012HI" to Prisoner(
     prisonerNumber = "G9012HI",
     firstName = "Josh",
     lastName = "Plimburkson",
@@ -108,7 +108,7 @@ val offenderSearchPrisoners = mapOf(
     cellLocation = "MDI-A-3",
   ),
   // Different prison
-  "L3456MN" to OffenderSearchPrisoner(
+  "L3456MN" to Prisoner(
     prisonerNumber = "L3456MN",
     firstName = "Edward",
     lastName = "Lillibluprs",
@@ -117,7 +117,7 @@ val offenderSearchPrisoners = mapOf(
     cellLocation = "FBI-C-2",
   ),
   // In transfer
-  "C1234CC" to OffenderSearchPrisoner(
+  "C1234CC" to Prisoner(
     prisonerNumber = "C1234CC",
     firstName = "MAX",
     lastName = "CLARKE",
@@ -126,7 +126,7 @@ val offenderSearchPrisoners = mapOf(
     cellLocation = null,
   ),
   // Outside any establishment
-  "B1234BB" to OffenderSearchPrisoner(
+  "B1234BB" to Prisoner(
     prisonerNumber = "B1234BB",
     firstName = "JOE",
     lastName = "PETERS",
@@ -135,7 +135,7 @@ val offenderSearchPrisoners = mapOf(
     cellLocation = null,
   ),
   // Null location, allegedly indicates no booking
-  "D1234DD" to OffenderSearchPrisoner(
+  "D1234DD" to Prisoner(
     prisonerNumber = "D1234DD",
     firstName = "NATHAN",
     lastName = "LOST",

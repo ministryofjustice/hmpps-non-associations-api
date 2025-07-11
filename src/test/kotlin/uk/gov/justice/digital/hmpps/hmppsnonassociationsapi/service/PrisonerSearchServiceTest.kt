@@ -10,14 +10,14 @@ import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.MissingPrisonersInSearchException
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchPrisoners
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonersearch.Prisoner
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.prisonerSearchPrisoners
 
-@DisplayName("Offender search service")
-class OffenderSearchServiceTest {
+@DisplayName("Prisoner search service")
+class PrisonerSearchServiceTest {
   private val mapper = ObjectMapper().findAndRegisterModules()
 
-  private fun createWebClientMockResponses(vararg responses: List<OffenderSearchPrisoner>): WebClient {
+  private fun createWebClientMockResponses(vararg responses: List<Prisoner>): WebClient {
     val responseIterator = responses.iterator()
     return WebClient.builder()
       .exchangeFunction {
@@ -37,24 +37,24 @@ class OffenderSearchServiceTest {
   @Test
   fun `returns an empty map when passed no prisoner numbers`() {
     val webClient = createWebClientMockResponses()
-    val offenderSearchService = OffenderSearchService(webClient)
-    val prisoners = offenderSearchService.searchByPrisonerNumbers(emptyList())
+    val prisonerSearchService = PrisonerSearchService(webClient, mapper)
+    val prisoners = prisonerSearchService.searchByPrisonerNumbers(emptyList())
     assertThat(prisoners).isEmpty()
   }
 
   @Test
-  fun `calls offender search once if passed few prisoner numbers`() {
-    val webClient = createWebClientMockResponses(offenderSearchPrisoners.values.toList())
-    val offenderSearchService = OffenderSearchService(webClient)
-    val prisoners = offenderSearchService.searchByPrisonerNumbers(offenderSearchPrisoners.keys.toList())
-    assertThat(prisoners).hasSize(offenderSearchPrisoners.size)
+  fun `calls prisoner search once if passed few prisoner numbers`() {
+    val webClient = createWebClientMockResponses(prisonerSearchPrisoners.values.toList())
+    val prisonerSearchService = PrisonerSearchService(webClient, mapper)
+    val prisoners = prisonerSearchService.searchByPrisonerNumbers(prisonerSearchPrisoners.keys.toList())
+    assertThat(prisoners).hasSize(prisonerSearchPrisoners.size)
   }
 
   @Test
-  fun `calls offender search repeatedly in pages of 900`() {
+  fun `calls prisoner search repeatedly in pages of 900`() {
     // generate 900 prisoners for page 1
     val response1 = (1..900).map {
-      OffenderSearchPrisoner(
+      Prisoner(
         String.format("A%04dAA", it),
         "First name",
         "Surname",
@@ -65,7 +65,7 @@ class OffenderSearchServiceTest {
     }
     // generate 900 prisoners for page 2
     val response2 = (900..<1800).map {
-      OffenderSearchPrisoner(
+      Prisoner(
         String.format("A%04dAA", it),
         "First name",
         "Surname",
@@ -76,7 +76,7 @@ class OffenderSearchServiceTest {
     }
     // generate 200 prisoners for page 3
     val response3 = (1800..2000).map {
-      OffenderSearchPrisoner(
+      Prisoner(
         String.format("A%04dAA", it),
         "First name",
         "Surname",
@@ -87,17 +87,17 @@ class OffenderSearchServiceTest {
     }
 
     val webClient = createWebClientMockResponses(response1, response2, response3)
-    val offenderSearchService = OffenderSearchService(webClient)
-    val prisoners = offenderSearchService.searchByPrisonerNumbers((1..2000).map { String.format("A%04dAA", it) })
+    val prisonerSearchService = PrisonerSearchService(webClient, mapper)
+    val prisoners = prisonerSearchService.searchByPrisonerNumbers((1..2000).map { String.format("A%04dAA", it) })
     assertThat(prisoners).hasSize(2000)
   }
 
   @Test
   fun `throws an error if any prisoners are not found`() {
     val webClient = createWebClientMockResponses(emptyList())
-    val offenderSearchService = OffenderSearchService(webClient)
+    val prisonerSearchService = PrisonerSearchService(webClient, mapper)
     assertThatThrownBy {
-      offenderSearchService.searchByPrisonerNumbers(listOf("A1234AA"))
+      prisonerSearchService.searchByPrisonerNumbers(listOf("A1234AA"))
     }.isInstanceOf(MissingPrisonersInSearchException::class.java).hasMessageContaining("A1234AA")
   }
 }

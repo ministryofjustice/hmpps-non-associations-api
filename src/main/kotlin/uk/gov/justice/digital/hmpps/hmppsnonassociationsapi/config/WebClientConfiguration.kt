@@ -13,7 +13,7 @@ import java.time.Duration
 @Configuration
 class WebClientConfiguration(
   @param:Value($$"${api.base.url.oauth}") private val authBaseUri: String,
-  @param:Value($$"${api.base.url.offender-search}") private val offenderSearchUri: String,
+  @param:Value($$"${api.base.url.prisoner-search}") private val prisonerSearchUri: String,
   @param:Value($$"${api.timeout:20s}") val healthTimeout: Duration,
 ) {
 
@@ -21,17 +21,17 @@ class WebClientConfiguration(
   fun authHealthWebClient(builder: WebClient.Builder): WebClient = builder.healthWebClient(authBaseUri, healthTimeout)
 
   @Bean
-  fun offenderSearchHealthWebClient(builder: WebClient.Builder): WebClient =
-    builder.healthWebClient(offenderSearchUri, healthTimeout)
+  fun prisonerSearchHealthWebClient(builder: WebClient.Builder): WebClient =
+    builder.healthWebClient(prisonerSearchUri, healthTimeout)
 
   @Bean
-  fun offenderSearchWebClient(
+  fun prisonerSearchWebClient(
     authorizedClientManager: OAuth2AuthorizedClientManager,
     builder: WebClient.Builder,
   ): WebClient = builder.authorisedWebClient(
     authorizedClientManager,
     registrationId = SYSTEM_USERNAME,
-    url = offenderSearchUri,
+    url = prisonerSearchUri,
     healthTimeout,
   )
 }

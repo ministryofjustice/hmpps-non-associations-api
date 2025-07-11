@@ -42,7 +42,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation a
 @Service
 class NonAssociationsService(
   private val nonAssociationsRepository: NonAssociationsRepository,
-  private val offenderSearch: OffenderSearchService,
+  private val prisonerSearch: PrisonerSearchService,
   private val authenticationHolder: HmppsAuthenticationHolder,
   private val telemetryClient: TelemetryClient,
   private val clock: Clock,
@@ -67,7 +67,7 @@ class NonAssociationsService(
     }
 
     // ensure that prisoner numbers exist and their locations are not null
-    val prisonersWithNullLocations = offenderSearch.searchByPrisonerNumbers(prisonersToKeepApart)
+    val prisonersWithNullLocations = prisonerSearch.searchByPrisonerNumbers(prisonersToKeepApart)
       .values
       .filter { it.prisonId == null }
       .map { it.prisonerNumber }
@@ -237,7 +237,7 @@ class NonAssociationsService(
     val prisonerNumbers = nonAssociations.flatMapTo(mutableSetOf(prisonerNumber)) {
       listOf(it.firstPrisonerNumber, it.secondPrisonerNumber)
     }
-    val prisoners = offenderSearch.searchByPrisonerNumbers(prisonerNumbers)
+    val prisoners = prisonerSearch.searchByPrisonerNumbers(prisonerNumbers)
 
     // filter out non-associations in other prisons
     // this should be done first because open/closed non-associations will need to be counted
@@ -279,7 +279,7 @@ class NonAssociationsService(
     val prisonerNumbers = nonAssociations.flatMap { nonna ->
       listOf(nonna.firstPrisonerNumber, nonna.secondPrisonerNumber)
     }
-    val prisoners = offenderSearch.searchByPrisonerNumbers(prisonerNumbers)
+    val prisoners = prisonerSearch.searchByPrisonerNumbers(prisonerNumbers)
 
     return nonAssociations.filter { nonna ->
       prisoners[nonna.firstPrisonerNumber]!!.prisonId == prisonId &&

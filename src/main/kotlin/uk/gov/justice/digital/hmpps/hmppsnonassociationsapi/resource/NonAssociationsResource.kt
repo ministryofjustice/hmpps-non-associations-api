@@ -87,7 +87,7 @@ class NonAssociationsResource(
   )
   @Suppress("ktlint:standard:function-signature")
   fun getPrisonerNonAssociations(
-    @Schema(description = "The offender prisoner number", example = "A1234BC", required = true)
+    @Schema(description = "The prisoner number", example = "A1234BC", required = true)
     @PathVariable
     @Pattern(regexp = "[a-zA-Z][0-9]{4}[a-zA-Z]{2}", message = "Prisoner number must be in the correct format")
     prisonerNumber: String,
