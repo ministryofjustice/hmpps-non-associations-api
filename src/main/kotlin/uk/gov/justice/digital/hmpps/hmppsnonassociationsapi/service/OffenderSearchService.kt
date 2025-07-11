@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
@@ -10,7 +11,14 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.O
 @Service
 class OffenderSearchService(
   private val offenderSearchWebClient: WebClient,
+  objectMapper: ObjectMapper,
 ) {
+  private val responseFields by lazy {
+    objectMapper.serializerProviderInstance.findValueSerializer(OffenderSearchPrisoner::class.java).properties()
+      .asSequence()
+      .joinToString(",") { it.name }
+  }
+
   /**
    * Search prisoners by their prisoner number
    *
@@ -29,7 +37,8 @@ class OffenderSearchService(
         offenderSearchWebClient
           .post()
           .uri(
-            "/prisoner-search/prisoner-numbers?responseFields=prisonerNumber,firstName,lastName,prisonId,prisonName,cellLocation",
+            "/prisoner-search/prisoner-numbers?responseFields={responseFields}",
+            mapOf("responseFields" to responseFields),
           )
           .header("Content-Type", "application/json")
           .bodyValue(requestBody)
