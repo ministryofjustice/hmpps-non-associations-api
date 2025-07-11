@@ -14,7 +14,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.HmppsAuthMockServer
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.OffenderSearchMockServer
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
 import java.time.format.DateTimeFormatter
@@ -41,7 +41,7 @@ abstract class IntegrationTestBase : TestBase() {
   companion object {
 
     @JvmField
-    val offenderSearchMockServer = OffenderSearchMockServer()
+    val prisonerSearchMockServer = PrisonerSearchMockServer()
 
     @JvmField
     val hmppsAuthMockServer = HmppsAuthMockServer()
@@ -52,7 +52,7 @@ abstract class IntegrationTestBase : TestBase() {
       hmppsAuthMockServer.start()
       hmppsAuthMockServer.stubGrantToken()
 
-      offenderSearchMockServer.start()
+      prisonerSearchMockServer.start()
     }
 
     @AfterAll
@@ -66,7 +66,7 @@ abstract class IntegrationTestBase : TestBase() {
 
   @BeforeEach
   fun setUp() {
-    offenderSearchMockServer.resetAll()
+    prisonerSearchMockServer.resetAll()
     repository.deleteAll()
   }
 

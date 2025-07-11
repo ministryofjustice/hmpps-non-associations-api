@@ -21,7 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.helper.TestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchPrisoners
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.prisonerSearchPrisoners
 import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 import uk.gov.justice.hmpps.test.kotlin.auth.WithMockUserSecurityContextFactory
@@ -36,13 +36,13 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation a
 @DisplayName("Non-associations service")
 class NonAssociationsServiceTest {
   private val nonAssociationsRepository: NonAssociationsRepository = mock()
-  private val offenderSearchService: OffenderSearchService = mock()
+  private val prisonerSearchService: PrisonerSearchService = mock()
   private val authenticationHolder = HmppsAuthenticationHolder()
   private val telemetryClient: TelemetryClient = mock()
 
   private val service = NonAssociationsService(
     nonAssociationsRepository,
-    offenderSearchService,
+    prisonerSearchService,
     authenticationHolder,
     telemetryClient,
     TestBase.clock,
@@ -112,7 +112,7 @@ class NonAssociationsServiceTest {
   @Nested
   inner class Sorting {
     private val keyPrisoner = "A1234BC"
-    private val otherPrisoners = offenderSearchPrisoners.keys.filter { it != keyPrisoner }
+    private val otherPrisoners = prisonerSearchPrisoners.keys.filter { it != keyPrisoner }
 
     @BeforeEach
     fun setUp() {
@@ -127,7 +127,7 @@ class NonAssociationsServiceTest {
         )
       }
 
-      whenever(offenderSearchService.searchByPrisonerNumbers(any())).thenReturn(offenderSearchPrisoners)
+      whenever(prisonerSearchService.searchByPrisonerNumbers(any())).thenReturn(prisonerSearchPrisoners)
       whenever(
         nonAssociationsRepository.findAllByFirstPrisonerNumberOrSecondPrisonerNumber(eq(keyPrisoner), eq(keyPrisoner)),
       )

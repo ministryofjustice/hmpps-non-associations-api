@@ -1,6 +1,6 @@
-package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch
+package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonersearch
 
-data class OffenderSearchPrisoner(
+data class Prisoner(
   val prisonerNumber: String,
   val firstName: String,
   val lastName: String,

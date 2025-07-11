@@ -9,9 +9,9 @@ import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.github.tomakehurst.wiremock.http.HttpHeader
 import com.github.tomakehurst.wiremock.http.HttpHeaders
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonersearch.Prisoner
 
-class OffenderSearchMockServer : WireMockServer(WIREMOCK_PORT) {
+class PrisonerSearchMockServer : WireMockServer(WIREMOCK_PORT) {
   companion object {
     private const val WIREMOCK_PORT = 8094
   }
@@ -30,7 +30,7 @@ class OffenderSearchMockServer : WireMockServer(WIREMOCK_PORT) {
     )
   }
 
-  fun stubSearchByPrisonerNumbers(prisonerNumbers: List<String>, prisoners: List<OffenderSearchPrisoner>) {
+  fun stubSearchByPrisonerNumbers(prisonerNumbers: List<String>, prisoners: List<Prisoner>) {
     val requestBody = mapper.writeValueAsString(mapOf("prisonerNumbers" to prisonerNumbers.toSet()))
 
     stubFor(

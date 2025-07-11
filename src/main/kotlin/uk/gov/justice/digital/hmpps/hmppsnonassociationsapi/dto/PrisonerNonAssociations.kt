@@ -1,7 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonersearch.Prisoner
 import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation as NonAssociationJPA
 
@@ -190,14 +190,14 @@ data class OtherPrisonerDetails(
  *
  * @param prisonerNumber prisoner number of the "main" prisoner
  * @param prisoners is a dictionary with the information about the prisoners
- *                  from Offender Search API (e.g first name, etc...)
+ *                  from Prisoner Search API (e.g first name, etc...)
  * @param options sorting options
  *
  * @return an instance of `PrisonerNonAssociations`
  */
 fun List<NonAssociationJPA>.toPrisonerNonAssociations(
   prisonerNumber: String,
-  prisoners: Map<String, OffenderSearchPrisoner>,
+  prisoners: Map<String, Prisoner>,
   options: NonAssociationListOptions,
   openCount: Int,
   closedCount: Int,
@@ -220,11 +220,11 @@ fun List<NonAssociationJPA>.toPrisonerNonAssociations(
 
 private fun List<NonAssociationJPA>.mapPrisonerNonAssociationItems(
   prisonerNumber: String,
-  prisoners: Map<String, OffenderSearchPrisoner>,
+  prisoners: Map<String, Prisoner>,
 ): List<PrisonerNonAssociation> {
   data class PrisonersInfo(
-    val prisoner: OffenderSearchPrisoner,
-    val otherPrisoner: OffenderSearchPrisoner,
+    val prisoner: Prisoner,
+    val otherPrisoner: Prisoner,
     val role: Role,
     val otherRole: Role,
   )

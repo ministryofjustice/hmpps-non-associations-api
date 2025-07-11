@@ -184,7 +184,7 @@ class HmppsNonAssociationsApiExceptionHandler {
 
   @ExceptionHandler(MissingPrisonersInSearchException::class)
   fun handleMissingPrisonersInSearchException(e: MissingPrisonersInSearchException): ResponseEntity<ErrorResponse?>? {
-    log.debug("Missing prisoners in Offender Search API: {}", e.message)
+    log.debug("Missing prisoners in Prisoner Search API: {}", e.message)
     return ResponseEntity
       .status(NOT_FOUND)
       .body(

@@ -25,11 +25,11 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Reason
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.ReopenNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.offendersearch.OffenderSearchPrisoner
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.prisonersearch.Prisoner
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.createNonAssociationRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.offenderSearchPrisoners
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.prisonerSearchPrisoners
 import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
 import java.lang.String.format
 import java.time.Clock
@@ -191,14 +191,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `when any of the prisoners can't be found in OffenderSearch responds 404 Not Found`() {
-      val foundPrisoner = offenderSearchPrisoners["A1234BC"]!!
+    fun `when any of the prisoners can't be found in prisoner search responds 404 Not Found`() {
+      val foundPrisoner = prisonerSearchPrisoners["A1234BC"]!!
       val notFoundPrisonerNumber = "X1111TT" // NOT FOUND
       val prisonerNumbers = listOf(
         foundPrisoner.prisonerNumber,
         notFoundPrisonerNumber,
       )
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
         prisonerNumbers,
         listOf(foundPrisoner),
       )
@@ -233,14 +233,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `for a valid request creates the non-association`() {
-      val firstPrisoner = offenderSearchPrisoners["A1234BC"]!!
-      val secondPrisoner = offenderSearchPrisoners["D5678EF"]!!
+      val firstPrisoner = prisonerSearchPrisoners["A1234BC"]!!
+      val secondPrisoner = prisonerSearchPrisoners["D5678EF"]!!
       val prisonerNumbers = listOf(
         firstPrisoner.prisonerNumber,
         secondPrisoner.prisonerNumber,
       )
       val prisoners = listOf(firstPrisoner, secondPrisoner)
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
         prisonerNumbers,
         prisoners,
       )
@@ -322,8 +322,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `cannot create NA for already open NA between same prisoners`() {
-      val firstPrisoner = offenderSearchPrisoners["A1234BC"]!!
-      val secondPrisoner = offenderSearchPrisoners["D5678EF"]!!
+      val firstPrisoner = prisonerSearchPrisoners["A1234BC"]!!
+      val secondPrisoner = prisonerSearchPrisoners["D5678EF"]!!
 
       repository.save(
         genNonAssociation(
@@ -360,10 +360,10 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `cannot create NA if some prisoner has a null location`() {
-      val firstPrisoner = offenderSearchPrisoners["A1234BC"]!!
-      val secondPrisoner = offenderSearchPrisoners["D1234DD"]!!
+      val firstPrisoner = prisonerSearchPrisoners["A1234BC"]!!
+      val secondPrisoner = prisonerSearchPrisoners["D1234DD"]!!
 
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
         listOf("A1234BC", "D1234DD"),
         listOf(firstPrisoner, secondPrisoner),
       )
@@ -395,14 +395,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `can create NA for already closed NA between same prisoners`() {
-      val firstPrisoner = offenderSearchPrisoners["A1234BC"]!!
-      val secondPrisoner = offenderSearchPrisoners["D5678EF"]!!
+      val firstPrisoner = prisonerSearchPrisoners["A1234BC"]!!
+      val secondPrisoner = prisonerSearchPrisoners["D5678EF"]!!
       val prisonerNumbers = listOf(
         firstPrisoner.prisonerNumber,
         secondPrisoner.prisonerNumber,
       )
       val prisoners = listOf(firstPrisoner, secondPrisoner)
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
         prisonerNumbers,
         prisoners,
       )
@@ -709,10 +709,10 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   @DisplayName("Get legacy non-associations list")
   @Nested
   inner class GetLegacyList {
-    private lateinit var prisonerJohn: OffenderSearchPrisoner
-    private lateinit var prisonerMerlin: OffenderSearchPrisoner
-    private lateinit var prisonerJosh: OffenderSearchPrisoner
-    private lateinit var prisonerEdward: OffenderSearchPrisoner
+    private lateinit var prisonerJohn: Prisoner
+    private lateinit var prisonerMerlin: Prisoner
+    private lateinit var prisonerJosh: Prisoner
+    private lateinit var prisonerEdward: Prisoner
     private lateinit var openNonAssociation: NonAssociationJPA
     private lateinit var closedNa: NonAssociationJPA
     private lateinit var otherPrisonNa: NonAssociationJPA
@@ -723,11 +723,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @BeforeEach
     fun setup() {
       // prisoners in MDI
-      prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
-      prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
-      prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
+      prisonerJohn = prisonerSearchPrisoners["A1234BC"]!!
+      prisonerMerlin = prisonerSearchPrisoners["D5678EF"]!!
+      prisonerJosh = prisonerSearchPrisoners["G9012HI"]!!
       // prisoner in another prison
-      prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
+      prisonerEdward = prisonerSearchPrisoners["L3456MN"]!!
 
       // open non-association, same prison
       openNonAssociation = createNonAssociation(
@@ -758,8 +758,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       otherPrisonNaLegacyReasons = LegacyReason.BUL to LegacyReason.BUL
 
       val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
-        prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers = prisoners.map(Prisoner::prisonerNumber),
         prisoners,
       )
     }
@@ -1735,9 +1735,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `when any of the prisoners can't be found in OffenderSearch responds 404 Not Found`() {
+    fun `when any of the prisoners can't be found in prisoner search responds 404 Not Found`() {
       val nonAssociation = createNonAssociation()
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
         listOf(nonAssociation.firstPrisonerNumber, nonAssociation.secondPrisonerNumber),
         emptyList(),
       )
@@ -1756,8 +1756,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
 
     @Test
     fun `when there a no non-associations for the given prison, returns the prisoner details`() {
-      val prisoner = offenderSearchPrisoners[prisonerNumber]!!
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+      val prisoner = prisonerSearchPrisoners[prisonerNumber]!!
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
         listOf(prisonerNumber),
         listOf(prisoner),
       )
@@ -1797,11 +1797,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `by default returns only open non-associations in same prison the given prisoner is in`() {
       // prisoners in MDI
-      val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
-      val prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
-      val prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
+      val prisonerJohn = prisonerSearchPrisoners["A1234BC"]!!
+      val prisonerMerlin = prisonerSearchPrisoners["D5678EF"]!!
+      val prisonerJosh = prisonerSearchPrisoners["G9012HI"]!!
       // prisoner in another prison
-      val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
+      val prisonerEdward = prisonerSearchPrisoners["L3456MN"]!!
 
       // open non-association, same prison
       val openNonAssociation = createNonAssociation(
@@ -1824,8 +1824,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       )
 
       val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
-        prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers = prisoners.map(Prisoner::prisonerNumber),
         prisoners,
       )
 
@@ -1884,11 +1884,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `optionally returns closed non-associations`() {
       // prisoners in MDI
-      val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
-      val prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
-      val prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
+      val prisonerJohn = prisonerSearchPrisoners["A1234BC"]!!
+      val prisonerMerlin = prisonerSearchPrisoners["D5678EF"]!!
+      val prisonerJosh = prisonerSearchPrisoners["G9012HI"]!!
       // prisoner in another prison
-      val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
+      val prisonerEdward = prisonerSearchPrisoners["L3456MN"]!!
 
       // open non-association, same prison, returned
       val openNonAssociation = createNonAssociation(
@@ -1911,8 +1911,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       )
 
       val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
-        prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers = prisoners.map(Prisoner::prisonerNumber),
         prisoners,
       )
 
@@ -1995,11 +1995,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `optionally returns only closed non-associations`() {
       // prisoners in MDI
-      val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
-      val prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
-      val prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
+      val prisonerJohn = prisonerSearchPrisoners["A1234BC"]!!
+      val prisonerMerlin = prisonerSearchPrisoners["D5678EF"]!!
+      val prisonerJosh = prisonerSearchPrisoners["G9012HI"]!!
       // prisoner in another prison
-      val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
+      val prisonerEdward = prisonerSearchPrisoners["L3456MN"]!!
 
       // open non-association, same prison, not returned
       createNonAssociation(
@@ -2022,8 +2022,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       )
 
       val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
-        prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers = prisoners.map(Prisoner::prisonerNumber),
         prisoners,
       )
 
@@ -2081,11 +2081,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `optionally returns non-associations in other prisons`() {
       // prisoners in MDI
-      val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
-      val prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
-      val prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
+      val prisonerJohn = prisonerSearchPrisoners["A1234BC"]!!
+      val prisonerMerlin = prisonerSearchPrisoners["D5678EF"]!!
+      val prisonerJosh = prisonerSearchPrisoners["G9012HI"]!!
       // prisoner in another prison
-      val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
+      val prisonerEdward = prisonerSearchPrisoners["L3456MN"]!!
 
       // open non-association, same prison
       val openNonAssociation = createNonAssociation(
@@ -2108,8 +2108,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       )
 
       val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
-        prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers = prisoners.map(Prisoner::prisonerNumber),
         prisoners,
       )
 
@@ -2203,11 +2203,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `non-associations can be sorted`() {
       // prisoners in MDI
-      val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
-      val prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
-      val prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
+      val prisonerJohn = prisonerSearchPrisoners["A1234BC"]!!
+      val prisonerMerlin = prisonerSearchPrisoners["D5678EF"]!!
+      val prisonerJosh = prisonerSearchPrisoners["G9012HI"]!!
       // prisoner in another prison
-      val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
+      val prisonerEdward = prisonerSearchPrisoners["L3456MN"]!!
 
       // open non-association, same prison
       createNonAssociation(
@@ -2230,8 +2230,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       )
 
       val prisoners = listOf(prisonerJohn, prisonerMerlin, prisonerJosh, prisonerEdward)
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
-        prisonerNumbers = prisoners.map(OffenderSearchPrisoner::prisonerNumber),
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
+        prisonerNumbers = prisoners.map(Prisoner::prisonerNumber),
         prisoners,
       )
 
@@ -2352,8 +2352,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `when prisonId is provided and there are no non-associations between the prisoners`() {
       createNonAssociation("A0011AA", prisonerJohnNumber)
-      // offender search fails when given an empty list of prisoner numbers
-      offenderSearchMockServer.stubSearchFails()
+      // prisoner search fails when given an empty list of prisoner numbers
+      prisonerSearchMockServer.stubSearchFails()
 
       webTestClient.post()
         .uri {
@@ -2598,18 +2598,18 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `when prisonId is provided`() {
       // prisoners in MDI
-      val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
-      val prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
-      val prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
+      val prisonerJohn = prisonerSearchPrisoners["A1234BC"]!!
+      val prisonerMerlin = prisonerSearchPrisoners["D5678EF"]!!
+      val prisonerJosh = prisonerSearchPrisoners["G9012HI"]!!
       // prisoner in another prison
-      val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
+      val prisonerEdward = prisonerSearchPrisoners["L3456MN"]!!
 
       // only non-associations between provided prisoners are returned
       createNonAssociation(prisonerMerlin.prisonerNumber, prisonerJosh.prisonerNumber) // returned
       createNonAssociation(prisonerJosh.prisonerNumber, prisonerJohn.prisonerNumber) // not returned (other prisoner)
       createNonAssociation(prisonerEdward.prisonerNumber, prisonerJosh.prisonerNumber) // not returned (other prison)
 
-      // Stub Offender Search API request
+      // Stub Prisoner Search API request
       val prisonerNumbers = listOf(
         prisonerMerlin.prisonerNumber,
         prisonerJosh.prisonerNumber,
@@ -2620,7 +2620,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         prisonerJosh,
         prisonerEdward,
       )
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
         prisonerNumbers,
         prisoners,
       )
@@ -2728,8 +2728,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `when prisonId is provided and there are no non-associations involving the prisoners`() {
       createNonAssociation("A0011AA", "D4444DD")
-      // offender search fails when given an empty list of prisoner numbers
-      offenderSearchMockServer.stubSearchFails()
+      // prisoner search fails when given an empty list of prisoner numbers
+      prisonerSearchMockServer.stubSearchFails()
 
       webTestClient.post()
         .uri {
@@ -2994,11 +2994,11 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @Test
     fun `when prisonId is provided`() {
       // prisoners in MDI
-      val prisonerJohn = offenderSearchPrisoners["A1234BC"]!!
-      val prisonerMerlin = offenderSearchPrisoners["D5678EF"]!!
-      val prisonerJosh = offenderSearchPrisoners["G9012HI"]!!
+      val prisonerJohn = prisonerSearchPrisoners["A1234BC"]!!
+      val prisonerMerlin = prisonerSearchPrisoners["D5678EF"]!!
+      val prisonerJosh = prisonerSearchPrisoners["G9012HI"]!!
       // prisoner in another prison
-      val prisonerEdward = offenderSearchPrisoners["L3456MN"]!!
+      val prisonerEdward = prisonerSearchPrisoners["L3456MN"]!!
 
       // only non-associations involving any of the provided prisoners are returned
       createNonAssociation(prisonerMerlin.prisonerNumber, prisonerJosh.prisonerNumber) // returned
@@ -3006,7 +3006,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       createNonAssociation(prisonerJosh.prisonerNumber, prisonerJohn.prisonerNumber) // not returned (other prisoners)
       createNonAssociation(prisonerEdward.prisonerNumber, prisonerJosh.prisonerNumber) // not returned (other prison)
 
-      // Stub Offender Search API request
+      // Stub Prisoner Search API request
       val prisonerNumbers = listOf(
         prisonerMerlin.prisonerNumber,
         prisonerJosh.prisonerNumber,
@@ -3017,7 +3017,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
         prisonerJosh,
         prisonerEdward,
       )
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
         prisonerNumbers,
         prisoners,
       )
@@ -3055,14 +3055,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     fun `when an SAR is made non-associations are returned`() {
       val nonAssociation = createNonAssociation()
 
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
         listOf(
           nonAssociation.firstPrisonerNumber,
           nonAssociation.secondPrisonerNumber,
         ),
         listOf(
-          offenderSearchPrisoners[nonAssociation.firstPrisonerNumber]!!,
-          offenderSearchPrisoners[nonAssociation.secondPrisonerNumber]!!,
+          prisonerSearchPrisoners[nonAssociation.firstPrisonerNumber]!!,
+          prisonerSearchPrisoners[nonAssociation.secondPrisonerNumber]!!,
         ),
       )
 
@@ -3122,9 +3122,9 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       // Someone with no non-associations
       val prisonerNumber = "G9012HI"
 
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
         listOf(prisonerNumber),
-        listOf(offenderSearchPrisoners[prisonerNumber]!!),
+        listOf(prisonerSearchPrisoners[prisonerNumber]!!),
       )
 
       webTestClient.get()
@@ -3141,14 +3141,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       // Choose a toDate that would filter the non-association out
       val toDate = nonAssociation.whenCreated.minusDays(42).toLocalDate()
 
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
         listOf(
           nonAssociation.firstPrisonerNumber,
           nonAssociation.secondPrisonerNumber,
         ),
         listOf(
-          offenderSearchPrisoners[nonAssociation.firstPrisonerNumber]!!,
-          offenderSearchPrisoners[nonAssociation.secondPrisonerNumber]!!,
+          prisonerSearchPrisoners[nonAssociation.firstPrisonerNumber]!!,
+          prisonerSearchPrisoners[nonAssociation.secondPrisonerNumber]!!,
         ),
       )
 
@@ -3183,14 +3183,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       val nonAssociation = createNonAssociation()
       // Choose a toDate that would filter the non-association out
 
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
         listOf(
           nonAssociation.firstPrisonerNumber,
           nonAssociation.secondPrisonerNumber,
         ),
         listOf(
-          offenderSearchPrisoners[nonAssociation.firstPrisonerNumber]!!,
-          offenderSearchPrisoners[nonAssociation.secondPrisonerNumber]!!,
+          prisonerSearchPrisoners[nonAssociation.firstPrisonerNumber]!!,
+          prisonerSearchPrisoners[nonAssociation.secondPrisonerNumber]!!,
         ),
       )
 
@@ -3219,12 +3219,12 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `SAR about prisoner with non-associations not found in Offender Search responds 209`() {
-      // A prisoner number not found in Offender Search API is different than "no non-associations found for this prisoner"
+    fun `SAR about prisoner with non-associations not found in Prisoner Search responds 209`() {
+      // A prisoner number not found in Prisoner Search API is different from "no non-associations found for this prisoner"
       // and that's why it's not a 204 No Content: Responds 209 Subject Identifier is not recognised by this service.
       val nonAssociation = createNonAssociation()
 
-      offenderSearchMockServer.stubSearchByPrisonerNumbers(
+      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
         listOf(
           nonAssociation.firstPrisonerNumber,
           nonAssociation.secondPrisonerNumber,
