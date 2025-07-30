@@ -38,13 +38,12 @@ generic-service:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
     HMPPS_SQS_USE_WEB_TOKEN: "true"
 
-  envFrom:
-    - secretRef:
-        name: hmpps-non-associations-api
-    - secretRef:
-        name: hmpps-non-associations-api-application-insights
-
   namespace_secrets:
+    hmpps-non-associations-api-application-insights:
+      APPLICATIONINSIGHTS_CONNECTION_STRING: "APPLICATIONINSIGHTS_CONNECTION_STRING"
+    hmpps-non-associations-api-client-creds:
+      NON_ASSOCIATIONS_API_CLIENT_ID: "API_CLIENT_ID"
+      NON_ASSOCIATIONS_API_CLIENT_SECRET: "API_CLIENT_SECRET"
     dps-rds-instance-output:
       DATABASE_ENDPOINT: "rds_instance_endpoint"
       DATABASE_NAME: "database_name"
