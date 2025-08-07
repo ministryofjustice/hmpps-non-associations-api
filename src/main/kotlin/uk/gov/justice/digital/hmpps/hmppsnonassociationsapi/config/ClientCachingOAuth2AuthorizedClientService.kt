@@ -10,7 +10,9 @@ import java.util.concurrent.ConcurrentHashMap
 // Ignore the passed in principal and use the same value each time
 private const val SINGLE_PRINCIPAL = "principalName"
 
-class ClientCachingOAuth2AuthorizedClientService(private val clientRegistrationRepository: ClientRegistrationRepository) : OAuth2AuthorizedClientService {
+class ClientCachingOAuth2AuthorizedClientService(
+  private val clientRegistrationRepository: ClientRegistrationRepository,
+) : OAuth2AuthorizedClientService {
   private val authorizedClients: MutableMap<OAuth2AuthorizedClientId, OAuth2AuthorizedClient> = ConcurrentHashMap()
 
   override fun <T : OAuth2AuthorizedClient?> loadAuthorizedClient(
