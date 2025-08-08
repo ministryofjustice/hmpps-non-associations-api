@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientPropertiesMapper
 import org.springframework.context.annotation.Bean
@@ -13,6 +14,7 @@ import org.springframework.security.oauth2.client.registration.InMemoryClientReg
 import java.util.Optional
 
 @Configuration
+@ConditionalOnBean(ClientRegistrationRepository::class)
 class OAuth2ClientConfiguration {
 
   /**
