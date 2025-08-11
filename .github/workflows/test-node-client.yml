@@ -14,7 +14,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup node ${{ inputs.node-version }}
         uses: actions/setup-node@v4
