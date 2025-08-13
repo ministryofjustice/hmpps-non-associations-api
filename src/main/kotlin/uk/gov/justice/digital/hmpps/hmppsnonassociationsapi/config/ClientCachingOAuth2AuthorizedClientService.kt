@@ -5,10 +5,8 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientId
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
+import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.SYSTEM_USERNAME
 import java.util.concurrent.ConcurrentHashMap
-
-// Ignore the passed in principal and use the same value each time
-private const val SINGLE_PRINCIPAL = "principalName"
 
 class ClientCachingOAuth2AuthorizedClientService(
   private val clientRegistrationRepository: ClientRegistrationRepository,
@@ -20,18 +18,18 @@ class ClientCachingOAuth2AuthorizedClientService(
     principalName: String,
   ): T? = clientRegistrationRepository.findByRegistrationId(clientRegistrationId)?.let {
     @Suppress("UNCHECKED_CAST")
-    authorizedClients[OAuth2AuthorizedClientId(clientRegistrationId, SINGLE_PRINCIPAL)] as T
+    authorizedClients[OAuth2AuthorizedClientId(clientRegistrationId, SYSTEM_USERNAME)] as T
   }
 
   override fun saveAuthorizedClient(authorizedClient: OAuth2AuthorizedClient, principal: Authentication) {
     authorizedClients[
-      OAuth2AuthorizedClientId(authorizedClient.clientRegistration.registrationId, SINGLE_PRINCIPAL),
+      OAuth2AuthorizedClientId(authorizedClient.clientRegistration.registrationId, SYSTEM_USERNAME),
     ] = authorizedClient
   }
 
   override fun removeAuthorizedClient(clientRegistrationId: String, principalName: String) {
     clientRegistrationRepository.findByRegistrationId(clientRegistrationId)?.apply {
-      authorizedClients.remove(OAuth2AuthorizedClientId(clientRegistrationId, SINGLE_PRINCIPAL))
+      authorizedClients.remove(OAuth2AuthorizedClientId(clientRegistrationId, SYSTEM_USERNAME))
     }
   }
 }
