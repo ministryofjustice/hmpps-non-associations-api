@@ -5,9 +5,9 @@ import uk.gov.justice.digital.hmpps.gradle.PortForwardRedisTask
 import uk.gov.justice.digital.hmpps.gradle.RevealSecretsTask
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.4"
-  kotlin("plugin.jpa") version "2.2.0"
-  kotlin("plugin.spring") version "2.2.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "8.3.7"
+  kotlin("plugin.jpa") version "2.2.10"
+  kotlin("plugin.spring") version "2.2.10"
   idea
   id("org.springdoc.openapi-gradle-plugin") version "1.9.0"
 }
@@ -26,14 +26,14 @@ dependencies {
   implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:9.3.3")
 
   implementation("io.opentelemetry:opentelemetry-api:1.53.0")
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.18.1")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.19.0")
 
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
   implementation("org.hibernate.orm:hibernate-community-dialects:7.1.0.Final")
 
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.11")
 
-  implementation("com.zaxxer:HikariCP:7.0.1")
+  implementation("com.zaxxer:HikariCP:7.0.2")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql")
   implementation("com.pauldijou:jwt-core_2.11:5.0.0")
