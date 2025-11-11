@@ -49,6 +49,7 @@ jobs:
       postgres-username: non_associations
       postgres-password: non_associations
       localstack-tag: '4'
+      java-version: '25'
   node_client_test:
     name: Test REST client
     strategy:
