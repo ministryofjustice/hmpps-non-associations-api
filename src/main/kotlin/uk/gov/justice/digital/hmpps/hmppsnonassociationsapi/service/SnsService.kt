@@ -7,6 +7,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
+import uk.gov.justice.hmpps.sqs.publish
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -46,7 +47,7 @@ class SnsService(
   private fun publishToDomainEventsTopic(payload: HMPPSDomainEvent) {
     log.debug("Event {} for id {}", payload.eventType, payload.additionalInformation)
     domaineventsTopic.publish(
-      eventType = payload.eventType,
+      eventType = payload.eventType.toString(),
       event = objectMapper.writeValueAsString(payload),
     ).also { log.info("Published event $payload to outbound topic") }
   }
