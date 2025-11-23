@@ -26,10 +26,10 @@ dependencies {
   implementation("uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib:9.7.8")
 
   implementation("io.opentelemetry:opentelemetry-api:1.56.0")
-  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.21.0")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.22.0")
 
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
-  implementation("org.hibernate.orm:hibernate-community-dialects:7.1.7.Final")
+  implementation("org.hibernate.orm:hibernate-community-dialects:7.1.10.Final")
 
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
 
@@ -40,7 +40,7 @@ dependencies {
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-  testImplementation("org.wiremock:wiremock-standalone:3.13.1")
+  testImplementation("org.wiremock:wiremock-standalone:3.13.2")
 
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.8.1")
   testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
