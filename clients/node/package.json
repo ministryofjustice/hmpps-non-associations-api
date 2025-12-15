@@ -30,7 +30,7 @@
     "node": "20 || 22 || 24"
   },
   "dependencies": {
-    "@ministryofjustice/hmpps-rest-client": "^0.0.1"
+    "@ministryofjustice/hmpps-rest-client": "^1.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
