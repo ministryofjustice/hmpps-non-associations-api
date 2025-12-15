@@ -266,7 +266,7 @@ describe('REST Client', () => {
       expect(await client.constants()).toStrictEqual(constants)
       expectAllMocksTriggered()
 
-      expect(logger.info).toHaveBeenCalledTimes(1)
+      expect(logger.info).toHaveBeenCalledTimes(2)
       expect(logger.warn).not.toHaveBeenCalled()
     })
 
@@ -281,7 +281,7 @@ describe('REST Client', () => {
       expect(nonAssociation).toStrictEqual(openNonAssociation)
       expectAllMocksTriggered()
 
-      expect(logger.info).toHaveBeenCalledTimes(1)
+      expect(logger.info).toHaveBeenCalledTimes(2)
       expect(logger.warn).not.toHaveBeenCalled()
     })
 
@@ -302,7 +302,7 @@ describe('REST Client', () => {
       expect(nonAssociations).toStrictEqual(nonAssociationListOpen)
       expectAllMocksTriggered()
 
-      expect(logger.info).toHaveBeenCalledTimes(1)
+      expect(logger.info).toHaveBeenCalledTimes(2)
       expect(logger.warn).not.toHaveBeenCalled()
     })
 
@@ -322,7 +322,7 @@ describe('REST Client', () => {
       expect(nonAssociations.content[0]).toStrictEqual(openNonAssociation)
       expectAllMocksTriggered()
 
-      expect(logger.info).toHaveBeenCalledTimes(1)
+      expect(logger.info).toHaveBeenCalledTimes(2)
       expect(logger.warn).not.toHaveBeenCalled()
     })
   })
@@ -338,7 +338,7 @@ describe('REST Client', () => {
         }),
       )
 
-      expect(logger.info).toHaveBeenCalledTimes(1)
+      expect(logger.info).toHaveBeenCalledTimes(3)
       expect(logger.warn).toHaveBeenCalledTimes(1)
     })
 
@@ -358,7 +358,7 @@ describe('REST Client', () => {
         }),
       )
 
-      expect(logger.info).toHaveBeenCalledTimes(1)
+      expect(logger.info).toHaveBeenCalledTimes(3)
       expect(logger.warn).toHaveBeenCalledTimes(1)
     })
 
@@ -387,7 +387,7 @@ describe('REST Client', () => {
         }),
       )
 
-      expect(logger.info).toHaveBeenCalledTimes(1)
+      expect(logger.info).toHaveBeenCalledTimes(3)
       expect(logger.warn).toHaveBeenCalledTimes(1)
     })
 
@@ -407,7 +407,7 @@ describe('REST Client', () => {
         }),
       )
 
-      expect(logger.info).toHaveBeenCalledTimes(1)
+      expect(logger.info).toHaveBeenCalledTimes(3)
       expect(logger.warn).toHaveBeenCalledTimes(1)
     })
   })

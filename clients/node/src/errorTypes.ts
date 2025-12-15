@@ -22,11 +22,11 @@ export interface ErrorResponse {
 export function isErrorResponse(obj: unknown): obj is ErrorResponse {
   return Boolean(
     obj &&
-      typeof obj === 'object' &&
-      'status' in obj &&
-      typeof obj.status === 'number' &&
-      'userMessage' in obj &&
-      'developerMessage' in obj,
+    typeof obj === 'object' &&
+    'status' in obj &&
+    typeof obj.status === 'number' &&
+    'userMessage' in obj &&
+    'developerMessage' in obj,
   )
 }
 
