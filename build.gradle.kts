@@ -5,7 +5,7 @@ import uk.gov.justice.digital.hmpps.gradle.PortForwardRedisTask
 import uk.gov.justice.digital.hmpps.gradle.RevealSecretsTask
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.2.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "9.3.0"
   kotlin("plugin.jpa") version "2.3.0"
   kotlin("plugin.spring") version "2.3.0"
   idea
@@ -31,7 +31,7 @@ dependencies {
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
   implementation("org.hibernate.orm:hibernate-community-dialects:7.2.0.Final")
 
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.15")
 
   implementation("com.zaxxer:HikariCP:7.0.2")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
