@@ -31,7 +31,7 @@ dependencies {
   implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
   implementation("org.hibernate.orm:hibernate-community-dialects:7.2.6.Final")
 
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.16")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2")
 
   implementation("com.zaxxer:HikariCP:7.0.2")
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
