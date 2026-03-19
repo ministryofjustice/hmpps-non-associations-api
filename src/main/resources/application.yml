@@ -100,8 +100,3 @@ management:
     info:
       cache:
         time-to-live: 2000ms
-
-dpr:
-  lib:
-    definition:
-      locations: "reports/definitions.json"
