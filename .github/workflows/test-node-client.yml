@@ -55,7 +55,7 @@ jobs:
 
       - name: Publish test report
         if: ${{ !cancelled() }}
-        uses: dorny/test-reporter@v2
+        uses: dorny/test-reporter@v3
         with:
           name: Test report for node ${{ inputs.node-version }}
           artifact: npm-test-results-${{ inputs.node-version }}
