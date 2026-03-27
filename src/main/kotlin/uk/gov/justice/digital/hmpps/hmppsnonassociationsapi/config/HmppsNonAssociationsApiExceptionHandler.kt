@@ -75,7 +75,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   @ExceptionHandler(MethodArgumentTypeMismatchException::class)
   fun handleMethodArgumentTypeMismatchException(e: MethodArgumentTypeMismatchException): ResponseEntity<ErrorResponse> {
     val type = e.requiredType
-    val message = if (type.isEnum) {
+    val message = if (type!!.isEnum) {
       "Parameter ${e.name} must be one of the following ${StringUtils.join(type.enumConstants, ", ")}"
     } else {
       "Parameter ${e.name} must be of type ${type.typeName}"
@@ -108,7 +108,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(NotFound::class)
-  fun handleSpringNotFound(e: NotFound): ResponseEntity<ErrorResponse?>? {
+  fun handleSpringNotFound(e: NotFound): ResponseEntity<ErrorResponse> {
     log.debug("Not found exception caught: {}", e.message)
     return ResponseEntity
       .status(NOT_FOUND)
@@ -124,7 +124,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   @ExceptionHandler(SubjectAccessRequestNoContentException::class)
   fun handleSubjectAccessRequestNoContentException(
     e: SubjectAccessRequestNoContentException,
-  ): ResponseEntity<ErrorResponse?>? {
+  ): ResponseEntity<ErrorResponse> {
     log.debug("SAR No Content exception caught: {}", e.message)
     return ResponseEntity
       .status(NO_CONTENT)
@@ -140,7 +140,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   @ExceptionHandler(SubjectAccessRequestSubjectNotRecognisedException::class)
   fun handleSubjectAccessRequestSubjectNotRecognisedException(
     e: SubjectAccessRequestSubjectNotRecognisedException,
-  ): ResponseEntity<ErrorResponse?>? {
+  ): ResponseEntity<ErrorResponse> {
     log.debug("SAR Subject not recognised exception caught: {}", e.message)
     return ResponseEntity
       .status(209)
@@ -154,7 +154,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(NoResourceFoundException::class)
-  fun handleNoResourceFoundException(e: NoResourceFoundException): ResponseEntity<ErrorResponse?>? {
+  fun handleNoResourceFoundException(e: NoResourceFoundException): ResponseEntity<ErrorResponse> {
     log.debug("No resource found exception caught: {}", e.message)
     return ResponseEntity
       .status(NOT_FOUND)
@@ -168,7 +168,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(NonAssociationNotFoundException::class)
-  fun handleNonAssociationNotFound(e: NonAssociationNotFoundException): ResponseEntity<ErrorResponse?>? {
+  fun handleNonAssociationNotFound(e: NonAssociationNotFoundException): ResponseEntity<ErrorResponse> {
     log.debug("Non-association not found exception caught: {}", e.message)
     return ResponseEntity
       .status(NOT_FOUND)
@@ -183,7 +183,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(MissingPrisonersInSearchException::class)
-  fun handleMissingPrisonersInSearchException(e: MissingPrisonersInSearchException): ResponseEntity<ErrorResponse?>? {
+  fun handleMissingPrisonersInSearchException(e: MissingPrisonersInSearchException): ResponseEntity<ErrorResponse> {
     log.debug("Missing prisoners in Prisoner Search API: {}", e.message)
     return ResponseEntity
       .status(NOT_FOUND)
@@ -197,7 +197,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(ResponseStatusException::class)
-  fun handleResponseStatusException(e: ResponseStatusException): ResponseEntity<ErrorResponse?>? {
+  fun handleResponseStatusException(e: ResponseStatusException): ResponseEntity<ErrorResponse> {
     log.debug("Response status exception caught: {}", e.message)
     val reason = e.reason ?: "Unknown error"
     return ResponseEntity
@@ -212,7 +212,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(java.lang.Exception::class)
-  fun handleException(e: java.lang.Exception): ResponseEntity<ErrorResponse?>? {
+  fun handleException(e: java.lang.Exception): ResponseEntity<ErrorResponse> {
     log.error("Unexpected exception", e)
     return ResponseEntity
       .status(INTERNAL_SERVER_ERROR)
@@ -228,7 +228,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   @ExceptionHandler(NonAssociationAlreadyClosedException::class)
   fun handleNonAssociationAlreadyClosedException(
     e: NonAssociationAlreadyClosedException,
-  ): ResponseEntity<ErrorResponse?>? {
+  ): ResponseEntity<ErrorResponse> {
     log.debug("Already Closed Non-Association caught: {}", e.message)
     return ResponseEntity
       .status(CONFLICT)
@@ -243,7 +243,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(NonAssociationAlreadyOpenException::class)
-  fun handleNonAssociationAlreadyOpenException(e: NonAssociationAlreadyOpenException): ResponseEntity<ErrorResponse?>? {
+  fun handleNonAssociationAlreadyOpenException(e: NonAssociationAlreadyOpenException): ResponseEntity<ErrorResponse> {
     log.debug("Already Open Non-Association caught: {}", e.message)
     return ResponseEntity
       .status(CONFLICT)
@@ -258,7 +258,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(UserInContextMissingException::class)
-  fun handleUserInContextMissingException(e: UserInContextMissingException): ResponseEntity<ErrorResponse?>? {
+  fun handleUserInContextMissingException(e: UserInContextMissingException): ResponseEntity<ErrorResponse> {
     log.debug("User in context missing: {}", e.message)
     return ResponseEntity
       .status(UNAUTHORIZED)
@@ -291,7 +291,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   @ExceptionHandler(OpenNonAssociationAlreadyExistsException::class)
   fun handleOpenNonAssociationAlreadyExistsException(
     e: OpenNonAssociationAlreadyExistsException,
-  ): ResponseEntity<ErrorResponse?>? {
+  ): ResponseEntity<ErrorResponse> {
     log.debug("Non-association already exists for these prisoners that is open: {}", e.message)
     return ResponseEntity
       .status(CONFLICT)
@@ -306,7 +306,7 @@ class HmppsNonAssociationsApiExceptionHandler {
   }
 
   @ExceptionHandler(NullPrisonerLocationsException::class)
-  fun handleNullPrisonerLocationsException(e: NullPrisonerLocationsException): ResponseEntity<ErrorResponse?>? {
+  fun handleNullPrisonerLocationsException(e: NullPrisonerLocationsException): ResponseEntity<ErrorResponse> {
     log.debug("Non-association cannot be created when prisoner locations are null: {}", e.message)
     return ResponseEntity
       .status(CONFLICT)

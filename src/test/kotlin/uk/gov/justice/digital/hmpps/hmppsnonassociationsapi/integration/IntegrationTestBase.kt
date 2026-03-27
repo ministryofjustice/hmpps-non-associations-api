@@ -17,6 +17,10 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.NonAssociationsRepository
 import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
+import java.time.Clock
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -39,6 +43,13 @@ abstract class IntegrationTestBase : TestBase() {
   protected lateinit var objectMapper: ObjectMapper
 
   companion object {
+    // All tests should use a frozen instant for “now”: 12:34:56 on 5 December 2023 in London
+    val zoneId: ZoneId = ZoneId.of("Europe/London")
+    val clock: Clock = Clock.fixed(
+      Instant.parse("2023-12-05T12:34:56.123456+00:00"),
+      zoneId,
+    )
+    val now: LocalDateTime = LocalDateTime.now(clock)
 
     @JvmField
     val prisonerSearchMockServer = PrisonerSearchMockServer()
