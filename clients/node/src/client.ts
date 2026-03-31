@@ -24,6 +24,7 @@ import { parseDates } from './parseDates'
  * Logger interface compatible with standard library `console` and with `bunyan`
  */
 export interface Logger {
+  debug(msg: string): void
   info(msg: string): void
   warn(msg: string): void
   error(msg: string): void
