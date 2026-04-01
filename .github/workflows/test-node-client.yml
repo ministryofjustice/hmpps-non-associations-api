@@ -2,6 +2,11 @@ name: Test REST client
 on:
   workflow_call:
     inputs:
+      enable_slsa_action:
+        description: Enable dev-sec-ops SLSA action
+        type: boolean
+        required: true
+        default: true
       node-version:
         description: Node version
         required: true
@@ -20,6 +25,10 @@ jobs:
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: ${{ inputs.node-version }}
+
+      - name: SLSA
+        if: ${{ inputs.enable_slsa_action }}
+        uses: ministryofjustice/devsecops-actions/sca/slsa@4cd163be7859cd130800d6719d925318826038ea # v1
 
       - name: Install npm dependencies
         shell: bash

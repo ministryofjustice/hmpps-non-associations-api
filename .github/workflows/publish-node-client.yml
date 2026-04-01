@@ -34,6 +34,9 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           scope: '@ministryofjustice'
 
+      - name: SLSA
+        uses: ministryofjustice/devsecops-actions/sca/slsa@4cd163be7859cd130800d6719d925318826038ea # v1
+
       - name: Install dependencies
         run: |
           cd clients/node
