@@ -58,6 +58,7 @@ jobs:
     uses: ./.github/workflows/test-node-client.yml
     with:
       node-version: ${{ matrix.node-version }}
+      enable_slsa_action: true
   build:
     name: Build docker image from hmpps-github-actions
     if: github.ref == 'refs/heads/main'
