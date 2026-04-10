@@ -681,7 +681,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
             "reasonDescription": "Anti Bullying Strategy",
             "typeCode": "CELL",
             "typeDescription": "Do Not Locate in Same Cell",
-            "expiryDate": "${nonAssociation.closedAt?.format(dtFormat)}",
+            "expiryDate": "${nonAssociation.closedAt}",
             "authorisedBy": "Mr Bobby",
             "comments": "They keep fighting",
             "offenderNonAssociation": {
@@ -3154,14 +3154,14 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     @CsvSource(
       value = [
         "           |            | true",
-        "2023-07-15 |            | true",
-        "2023-07-16 |            | false",
-        "           | 2023-07-15 | true",
-        "           | 2023-07-14 | false",
-        "2023-07-14 | 2023-07-14 | false",
-        "2023-07-16 | 2023-07-16 | false",
-        "2023-07-15 | 2023-07-15 | true",
-        "2023-07-14 | 2023-07-16 | true",
+        "2023-12-05 |            | true",
+        "2023-12-06 |            | false",
+        "           | 2023-12-05 | true",
+        "           | 2023-12-04 | false",
+        "2023-12-04 | 2023-12-04 | false",
+        "2023-12-06 | 2023-12-06 | false",
+        "2023-12-05 | 2023-12-05 | true",
+        "2023-12-04 | 2023-12-06 | true",
       ],
       delimiter = '|',
     )

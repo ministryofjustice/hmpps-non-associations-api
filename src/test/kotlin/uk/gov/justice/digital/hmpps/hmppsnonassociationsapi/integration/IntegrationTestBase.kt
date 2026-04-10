@@ -21,7 +21,6 @@ import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 abstract class IntegrationTestBase : TestBase() {
@@ -71,8 +70,6 @@ abstract class IntegrationTestBase : TestBase() {
     fun stopMocks() {
       hmppsAuthMockServer.stop()
     }
-
-    val dtFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
   }
 
   @BeforeEach

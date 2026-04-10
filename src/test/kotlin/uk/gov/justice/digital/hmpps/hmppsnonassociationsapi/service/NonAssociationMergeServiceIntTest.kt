@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -9,8 +8,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
@@ -26,7 +25,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.repository.findA
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.genNonAssociation
 import uk.gov.justice.hmpps.kotlin.auth.HmppsAuthenticationHolder
 import uk.gov.justice.hmpps.test.kotlin.auth.WithMockAuthUser
-import java.time.Clock
 import java.time.ZoneId
 
 @DisplayName("Non-associations merge service, integration tests")
@@ -47,7 +45,7 @@ class NonAssociationMergeServiceIntTest : TestBase() {
     fun timeZoneId(): ZoneId = zoneId
 
     @Bean
-    fun objectMapper(): ObjectMapper = jacksonObjectMapper()
+    fun objectMapper(): ObjectMapper = ObjectMapper().findAndRegisterModules()
   }
 
   @Autowired
