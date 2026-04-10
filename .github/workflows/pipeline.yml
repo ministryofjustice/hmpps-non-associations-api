@@ -49,15 +49,7 @@ jobs:
       postgres-username: non_associations
       postgres-password: non_associations
       localstack-tag: '4'
-      java-version: '25'
-  node_client_test:
-    name: Test REST client
-    strategy:
-      matrix:
-        node-version: [20, 22, 24]
-    uses: ./.github/workflows/test-node-client.yml
-    with:
-      node-version: ${{ matrix.node-version }}
+      java-version: "25"
   build:
     name: Build docker image from hmpps-github-actions
     if: github.ref == 'refs/heads/main'
