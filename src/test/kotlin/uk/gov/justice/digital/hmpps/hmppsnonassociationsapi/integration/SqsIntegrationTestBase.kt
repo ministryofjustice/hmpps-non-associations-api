@@ -1,11 +1,15 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration
 
 import org.junit.jupiter.api.BeforeEach
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.config.LocalStackTestcontainer
@@ -15,10 +19,21 @@ import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 import uk.gov.justice.hmpps.sqs.MissingTopicException
 import uk.gov.justice.hmpps.sqs.countMessagesOnQueue
+import java.time.Clock
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+@AutoConfigureWebTestClient
+@AutoConfigureJson
 class SqsIntegrationTestBase : IntegrationTestBase() {
+
+  @MockitoBean
+  private lateinit var clock: Clock
+
+  @BeforeEach
+  fun setupClock() {
+    whenever(clock.instant()).thenReturn(IntegrationTestBase.clock.instant())
+    whenever(clock.zone).thenReturn(IntegrationTestBase.clock.zone)
+  }
 
   companion object {
     private val localstackInstance = LocalStackTestcontainer.instance

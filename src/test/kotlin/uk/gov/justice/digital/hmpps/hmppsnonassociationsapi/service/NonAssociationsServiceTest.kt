@@ -99,7 +99,7 @@ class NonAssociationsServiceTest {
       whenUpdated = now,
     )
 
-    whenever(nonAssociationsRepository.save(any()))
+    whenever(nonAssociationsRepository.save(any<NonAssociationJPA>()))
       .thenReturn(createdNonAssociationJPA)
 
     val createdNonAssociationDTO: NonAssociationDTO = service.createNonAssociation(createNonAssociationRequest)

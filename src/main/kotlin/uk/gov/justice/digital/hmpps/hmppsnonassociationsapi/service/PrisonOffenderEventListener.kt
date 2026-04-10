@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.service
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.awspring.cloud.sqs.annotation.SqsListener
 import io.opentelemetry.api.trace.SpanKind
@@ -63,6 +64,7 @@ class PrisonOffenderEventListener(
   }
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class HMPPSMergeDomainEvent(
   val eventType: String? = null,
   val additionalInformation: AdditionalInformationMerge,
@@ -71,11 +73,13 @@ data class HMPPSMergeDomainEvent(
   val description: String,
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class AdditionalInformationMerge(
   val nomsNumber: String,
   val removedNomsNumber: String,
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class HMPPSMergeBookingMovedEvent(
   val eventType: String? = null,
   val additionalInformation: AdditionalInformationBookingMoved,
@@ -84,6 +88,7 @@ data class HMPPSMergeBookingMovedEvent(
   val description: String,
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class AdditionalInformationBookingMoved(
   val bookingId: Long,
   val movedFromNomsNumber: String,
@@ -91,15 +96,20 @@ data class AdditionalInformationBookingMoved(
   val bookingStartDateTime: LocalDateTime?,
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class HMPPSEventType(
   @Suppress("PropertyName")
   val Value: String,
   @Suppress("PropertyName")
   val Type: String,
 )
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class HMPPSMessageAttributes(
   val eventType: HMPPSEventType,
 )
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class HMPPSMessage(
   @Suppress("PropertyName")
   val Message: String,
