@@ -1,0 +1,65 @@
+name: Test REST client
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: Node version
+        required: true
+        type: number
+jobs:
+  test:
+    name: Test REST client on node ${{ inputs.node-version }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup node ${{ inputs.node-version }}
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Install npm dependencies
+        shell: bash
+        run: |
+          cd clients/node
+          npm install --no-audit
+
+      - name: Build library
+        shell: bash
+        run: |
+          cd clients/node
+          npm run build
+
+      - name: Run linter
+        shell: bash
+        run: |
+          cd clients/node
+          npm run lint
+
+      - name: Run tests
+        shell: bash
+        run: |
+          cd clients/node
+          npm test
+
+      - name: Upload test results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+        with:
+          name: npm-test-results-${{ inputs.node-version }}
+          path: |
+            ./clients/node/test_results
+
+      - name: Publish test report
+        if: ${{ !cancelled() }}
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3
+        with:
+          name: Test report for node ${{ inputs.node-version }}
+          artifact: npm-test-results-${{ inputs.node-version }}
+          path: junit.xml
+          reporter: jest-junit
+          fail-on-empty: false
+          fail-on-error: false
