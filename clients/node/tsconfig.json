@@ -4,16 +4,27 @@
   "compileOnSave": true,
   "compilerOptions": {
     "outDir": "./dist",
+    "rootDir": ".",
     "declaration": true,
     "strict": true,
     "noImplicitAny": true,
     "experimentalDecorators": true,
-    "esModuleInterop": false,
     "isolatedModules": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./node_modules",
+    ],
+    "types": [
+      "node",
+      "jest",
+    ]
   },
   "exclude": [
     "dist",
     "node_modules",
   ],
-  "include": ["src/**/*.ts"],
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts"
+  ],
 }
