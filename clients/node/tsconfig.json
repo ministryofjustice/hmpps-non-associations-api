@@ -7,7 +7,6 @@
     "rootDir": ".",
     "declaration": true,
     "strict": true,
-    "noImplicitAny": true,
     "experimentalDecorators": true,
     "isolatedModules": true,
     "typeRoots": [
