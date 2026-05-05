@@ -52,12 +52,24 @@ interface NonAssociationsRepository : JpaRepository<NonAssociation, Long> {
     @Param("isClosed") isClosed: Boolean,
   ): List<NonAssociation>
 
-  // TODO: Assumes that there can only be 1 non-association given a pair of prisoner numbers.
-  //       In future, this will only be true for open non-associations.
-  fun findByFirstPrisonerNumberAndSecondPrisonerNumber(
-    firstPrisonerNumber: String,
-    secondPrisonerNumber: String,
-  ): NonAssociation?
+  /**
+   * Finds all open non-associations between two prisoners, regardless of which is first or second.
+   * Used during merge to detect duplicates without being tripped up by closed historical records
+   * or direction-of-storage differences.
+   */
+  @Query(
+    """
+      SELECT n FROM NonAssociation n
+      WHERE n.isClosed = false AND (
+        (n.firstPrisonerNumber = :firstPrisonerNumber AND n.secondPrisonerNumber = :secondPrisonerNumber) OR
+        (n.firstPrisonerNumber = :secondPrisonerNumber AND n.secondPrisonerNumber = :firstPrisonerNumber)
+      )
+    """,
+  )
+  fun findOpenBetweenPrisoners(
+    @Param("firstPrisonerNumber") firstPrisonerNumber: String,
+    @Param("secondPrisonerNumber") secondPrisonerNumber: String,
+  ): List<NonAssociation>
 }
 
 /**

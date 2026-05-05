@@ -70,36 +70,34 @@ class NonAssociationsMergeService(
       .forEach { nonAssociation ->
         log.debug("Looking at record {}", nonAssociation)
         if (nonAssociation.firstPrisonerNumber == oldPrisonerNumber) {
-          nonAssociationsRepository.findByFirstPrisonerNumberAndSecondPrisonerNumber(
+          val duplicateRecord = nonAssociationsRepository.findOpenBetweenPrisoners(
             firstPrisonerNumber = newPrisonerNumber,
             secondPrisonerNumber = nonAssociation.secondPrisonerNumber,
-          ).let { duplicateRecord ->
-            merge(
-              nonAssociation,
-              duplicateRecord,
-              newPrisonerNumber,
-              nonAssociation.secondPrisonerNumber,
-              true,
-            ).let { updatedRecord ->
-              updatedRecords.add(updatedRecord)
-            }
+          ).firstOrNull()
+          merge(
+            nonAssociation,
+            duplicateRecord,
+            newPrisonerNumber,
+            nonAssociation.secondPrisonerNumber,
+            true,
+          ).let { updatedRecord ->
+            updatedRecords.add(updatedRecord)
           }
         }
 
         if (nonAssociation.secondPrisonerNumber == oldPrisonerNumber) {
-          nonAssociationsRepository.findByFirstPrisonerNumberAndSecondPrisonerNumber(
+          val duplicateRecord = nonAssociationsRepository.findOpenBetweenPrisoners(
             firstPrisonerNumber = nonAssociation.firstPrisonerNumber,
             secondPrisonerNumber = newPrisonerNumber,
-          ).let { duplicateRecord ->
-            merge(
-              nonAssociation,
-              duplicateRecord,
-              newPrisonerNumber,
-              nonAssociation.firstPrisonerNumber,
-              false,
-            ).let { updatedRecord ->
-              updatedRecords.add(updatedRecord)
-            }
+          ).firstOrNull()
+          merge(
+            nonAssociation,
+            duplicateRecord,
+            newPrisonerNumber,
+            nonAssociation.firstPrisonerNumber,
+            false,
+          ).let { updatedRecord ->
+            updatedRecords.add(updatedRecord)
           }
         }
       }
