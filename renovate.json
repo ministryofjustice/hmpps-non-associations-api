@@ -1,7 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>ministryofjustice/hmpps-renovate-config:jvm"],
-  "assigneesFromCodeOwners": true,
   "prBodyTemplate": "{{{table}}}{{{notes}}}{{{warnings}}}{{{controls}}}",
   "packageRules": [
     {
@@ -11,18 +10,11 @@
       "groupSlug": "all-gradle-minor-patch"
     },
     {
-      "matchManagers": ["gradle"],
-      "matchPackageNames": ["io.swagger.parser.v3:swagger-parser"],
+      "matchManagers": ["github-actions"],
+      "matchFileNames": ["**/.github/workflows/**/*.ya?ml"],
       "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "swagger-parser",
-      "groupSlug": "swagger-parser"
-    },
-    {
-      "matchManagers": ["gradle"],
-      "matchPackageNames": ["uk.gov.justice.service.hmpps:hmpps-digital-prison-reporting-lib"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "hmpps-digital-prison-reporting-lib",
-      "groupSlug": "hmpps-digital-prison-reporting-lib"
+      "enabled": false
     }
-  ]
+  ],
+  "platformCommit": "enabled"
 }
