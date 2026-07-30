@@ -11,6 +11,12 @@ plugins {
   id("org.springdoc.openapi-gradle-plugin") version "1.9.0"
 }
 
+extra["jackson-2-bom.version"] = "2.22.1"
+extra["jackson-bom.version"] = "3.1.5"
+extra["netty.version"] = "4.2.16.Final"
+extra["httpcore5.version"] = "5.4.3"
+extra["postgresql.version"] = "42.7.12"
+
 configurations {
   testImplementation { exclude(group = "org.junit.vintage") }
 }
