@@ -83,6 +83,16 @@ tasks {
   withType<KotlinCompile> {
     compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25
   }
+
+  // Schema documentation helper - see .github/workflows/schema-spy.yml. This builds the database the
+  // SchemaSpy report is generated from, and is not part of the normal suite.
+  test {
+    if (project.hasProperty("init-db")) {
+      include("**/InitialiseDatabase.class")
+    } else {
+      exclude("**/InitialiseDatabase.class")
+    }
+  }
 }
 
 openApi {
