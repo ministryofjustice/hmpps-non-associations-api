@@ -78,6 +78,37 @@ docker run --rm --network host -v /tmp/schemaspy:/output schemaspy/schemaspy:6.2
   -u non_associations -p non_associations -vizjs
 ```
 
+### Table and column descriptions
+
+Descriptions live in the database as `COMMENT ON` statements, applied by
+`db/migration/V1_3__schema_comments.sql`, so SchemaSpy and any Glue crawl read the same source of
+truth. Each column description ends with a sensitivity classification:
+
+| Tag | Meaning |
+| --- | --- |
+| `[Sensitivity: NONE]` | Not personal data in itself |
+| `[Sensitivity: PERSONAL]` | Personal data about a prisoner — identifies or locates them |
+| `[Sensitivity: STAFF]` | Personal data about a member of staff, typically the username that acted |
+| `[Sensitivity: SPECIAL-CATEGORY]` | UK GDPR Article 9 data, or offence data under Article 10 |
+| `[Sensitivity: OFFICIAL-SENSITIVE]` | Not personal data, but damaging if disclosed |
+
+`STAFF` is still personal data and still in scope for a staff member's own subject access request. It
+is separated from `PERSONAL` so an extract about prisoners can be reasoned about without staff columns
+inflating the count.
+
+Two caveats when reading the tags. They describe **the column's own content, not the row's** — every
+row here concerns two named prisoners, so the whole record is personal data about both whatever an
+individual column is marked. And note that one row has **two** data subjects: a subject access request
+for one prisoner covers rows where their number appears in *either* prisoner column, and the other
+prisoner's number in that row is third-party data.
+
+Most of this schema is special category data. A non-association exists because of bullying, violence,
+gang activity, organised crime or a police request, so the reason, the roles and the free text all
+describe alleged offending in custody — criminal offence data under Article 10.
+
+**Any new table or column needs a `COMMENT ON`** in a migration — `SchemaCommentsTest` fails the build
+otherwise. A later migration can add to or replace any comment at any time.
+
 Note that the compose database binds host port 5432 deliberately: `Testcontainer.isRunning()` defers to
 an already-running database, so `InitialiseDatabase` migrates that container and SchemaSpy can read the
 same schema afterwards. Left to Testcontainers the schema would die with the JVM.
