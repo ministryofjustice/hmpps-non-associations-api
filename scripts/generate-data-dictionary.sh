@@ -53,26 +53,32 @@ JOIN pg_class pc
   ON pc.relname = c.table_name
  AND pc.relnamespace = '${DB_SCHEMA}'::regnamespace
  AND pc.relkind = 'r'
+-- Constraints are read from pg_catalog rather than information_schema. Constraint names are unique
+-- per table in Postgres, not per schema, and information_schema.key_column_usage joins only on
+-- constraint_name and schema - so two tables with a same-named constraint fan out and duplicate every
+-- column of both. This schema has a single table so it cannot happen today, but it bit the incentives
+-- API (see IR-1879). pg_constraint carries the owning relation, so it cannot.
 LEFT JOIN (
-  SELECT kcu.table_name, kcu.column_name
-  FROM information_schema.table_constraints tc
-  JOIN information_schema.key_column_usage kcu
-    ON kcu.constraint_name = tc.constraint_name
-   AND kcu.table_schema = tc.table_schema
-  WHERE tc.constraint_type = 'PRIMARY KEY'
-    AND tc.table_schema = '${DB_SCHEMA}'
+  SELECT rel.relname AS table_name, att.attname AS column_name
+  FROM pg_constraint con
+  JOIN pg_class rel ON rel.oid = con.conrelid
+  JOIN unnest(con.conkey) AS k(attnum) ON TRUE
+  JOIN pg_attribute att ON att.attrelid = con.conrelid AND att.attnum = k.attnum
+  WHERE con.contype = 'p'
+    AND con.connamespace = '${DB_SCHEMA}'::regnamespace
+  GROUP BY rel.relname, att.attname
 ) pk ON pk.table_name = c.table_name AND pk.column_name = c.column_name
 LEFT JOIN (
-  SELECT kcu.table_name, kcu.column_name, ccu.table_name AS references_table
-  FROM information_schema.table_constraints tc
-  JOIN information_schema.key_column_usage kcu
-    ON kcu.constraint_name = tc.constraint_name
-   AND kcu.table_schema = tc.table_schema
-  JOIN information_schema.constraint_column_usage ccu
-    ON ccu.constraint_name = tc.constraint_name
-   AND ccu.table_schema = tc.table_schema
-  WHERE tc.constraint_type = 'FOREIGN KEY'
-    AND tc.table_schema = '${DB_SCHEMA}'
+  SELECT rel.relname AS table_name, att.attname AS column_name,
+         string_agg(DISTINCT ref.relname, '; ') AS references_table
+  FROM pg_constraint con
+  JOIN pg_class rel ON rel.oid = con.conrelid
+  JOIN pg_class ref ON ref.oid = con.confrelid
+  JOIN unnest(con.conkey) AS k(attnum) ON TRUE
+  JOIN pg_attribute att ON att.attrelid = con.conrelid AND att.attnum = k.attnum
+  WHERE con.contype = 'f'
+    AND con.connamespace = '${DB_SCHEMA}'::regnamespace
+  GROUP BY rel.relname, att.attname
 ) fk ON fk.table_name = c.table_name AND fk.column_name = c.column_name
 WHERE c.table_schema = '${DB_SCHEMA}'
   AND c.table_name <> 'flyway_schema_history'
