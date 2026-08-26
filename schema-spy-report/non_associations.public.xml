@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><database name="non_associations" schema="public" type="PostgreSQL - 16.15 (Debian 16.15-1.pgdg13+2)">
+   <sequences>
+      <sequence increment="1" name="non_association_id_seq" startValue="1"/>
+   </sequences>
+   <tables>
+      <table name="flyway_schema_history" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="installed_rank" nullable="false" remarks="" size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="version" nullable="true" remarks="" size="50" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="description" nullable="false" remarks="" size="200" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="type" nullable="false" remarks="" size="20" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="script" nullable="false" remarks="" size="1000" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="checksum" nullable="true" remarks="" size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="installed_by" nullable="false" remarks="" size="100" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="7" name="installed_on" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="execution_time" nullable="false" remarks="" size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="9" name="success" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
+         <primaryKey column="installed_rank" sequenceNumberInPK="1"/>
+         <index name="flyway_schema_history_pk" unique="true">
+            <column ascending="true" name="installed_rank"/>
+         </index>
+         <index name="flyway_schema_history_s_idx" unique="false">
+            <column ascending="true" name="success"/>
+         </index>
+      </table>
+      <table name="non_association" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('non_association_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="19" type="bigserial" typeCode="-5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="first_prisoner_number" nullable="false" remarks="" size="10" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="first_prisoner_role" nullable="false" remarks="" size="20" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="second_prisoner_number" nullable="false" remarks="" size="10" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="second_prisoner_role" nullable="false" remarks="" size="20" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="reason" nullable="false" remarks="" size="20" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="restriction_type" nullable="false" remarks="" size="20" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="comment" nullable="false" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="8" name="when_created" nullable="false" remarks="" size="35" type="timestamptz" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="9" name="when_updated" nullable="false" remarks="" size="35" type="timestamptz" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="10" name="authorised_by" nullable="true" remarks="" size="60" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="11" name="updated_by" nullable="false" remarks="" size="60" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="false" digits="0" id="12" name="is_closed" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="13" name="closed_by" nullable="true" remarks="" size="60" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="14" name="closed_reason" nullable="true" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="15" name="closed_at" nullable="true" remarks="" size="35" type="timestamptz" typeCode="93"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="non_association_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="non_association_idx_p1" unique="false">
+            <column ascending="true" name="first_prisoner_number"/>
+         </index>
+         <index name="non_association_idx_p1p2" unique="false">
+            <column ascending="true" name="first_prisoner_number"/>
+            <column ascending="true" name="second_prisoner_number"/>
+         </index>
+         <index name="non_association_idx_p2" unique="false">
+            <column ascending="true" name="second_prisoner_number"/>
+         </index>
+         <checkConstraint constraint="((((is_closed IS TRUE) AND (closed_by IS NOT NULL)) OR ((is_closed IS FALSE) AND (closed_by IS NULL))))" name="non_association_check"/>
+         <checkConstraint constraint="((((is_closed IS TRUE) AND (closed_reason IS NOT NULL)) OR ((is_closed IS FALSE) AND (closed_reason IS NULL))))" name="non_association_check1"/>
+         <checkConstraint constraint="((((is_closed IS TRUE) AND (closed_at IS NOT NULL)) OR ((is_closed IS FALSE) AND (closed_at IS NULL))))" name="non_association_check2"/>
+         <checkConstraint constraint="((length(comment) &gt; 0))" name="non_association_comment_check"/>
+         <checkConstraint constraint="((NOT ((second_prisoner_number)::text = (first_prisoner_number)::text)))" name="non_association_different_people"/>
+         <checkConstraint constraint="((length((first_prisoner_number)::text) &gt; 0))" name="non_association_first_prisoner_number_check"/>
+         <checkConstraint constraint="((length((first_prisoner_role)::text) &gt; 0))" name="non_association_first_prisoner_role_check"/>
+         <checkConstraint constraint="((length((reason)::text) &gt; 0))" name="non_association_reason_check"/>
+         <checkConstraint constraint="((length((restriction_type)::text) &gt; 0))" name="non_association_restriction_type_check"/>
+         <checkConstraint constraint="((length((second_prisoner_number)::text) &gt; 0))" name="non_association_second_prisoner_number_check"/>
+         <checkConstraint constraint="((length((second_prisoner_role)::text) &gt; 0))" name="non_association_second_prisoner_role_check"/>
+      </table>
+   </tables>
+</database>
