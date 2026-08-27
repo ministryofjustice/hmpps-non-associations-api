@@ -61,7 +61,13 @@ Both also accept the `--port` argument to choose a different local port, other t
 ## Database schema
 
 A browsable schema report is published from `main` to
-[ministryofjustice.github.io/hmpps-non-associations-api/schema-spy-report](https://ministryofjustice.github.io/hmpps-non-associations-api/schema-spy-report/).
+[ministryofjustice.github.io/hmpps-non-associations-api/schema-spy-report](https://ministryofjustice.github.io/hmpps-non-associations-api/schema-spy-report/),
+along with two CSV exports for the MOJ Data Catalogue:
+
+| File | Contents |
+|------|----------|
+| `data-dictionary.csv` | Every table and column, with its description, sensitivity classification, type, nullability, PK and FK |
+| `reference-data.csv` | The enum lookups. Every code in this schema resolves in Kotlin — there are no reference tables — so without this a consumer sees a `varchar(20)` with no idea which values are legal |
 
 The report shows every table and column, with types, nullability, primary and foreign keys, and ER
 diagrams. Share it rather than a hand-written description when explaining the schema — to the Data Hub
@@ -72,10 +78,11 @@ it locally:
 
 ```shell
 docker compose -f docker-compose-schema-spy.yml up -d --wait
-./gradlew -Pinit-db=true test --tests '*InitialiseDatabase'
+./gradlew -Pinit-db=true test --tests '*InitialiseDatabase' --tests '*ExportReferenceData'
 docker run --rm --network host -v /tmp/schemaspy:/output schemaspy/schemaspy:6.2.4 \
   -t pgsql -host localhost -port 5432 -db non_associations -s public \
   -u non_associations -p non_associations -vizjs
+scripts/generate-data-dictionary.sh
 ```
 
 ### Table and column descriptions
@@ -106,8 +113,12 @@ Most of this schema is special category data. A non-association exists because o
 gang activity, organised crime or a police request, so the reason, the roles and the free text all
 describe alleged offending in custody — criminal offence data under Article 10.
 
+The tag is split into its own `sensitivity` column in `data-dictionary.csv`, and stripped from the
+description there so the text reads cleanly.
+
 **Any new table or column needs a `COMMENT ON`** in a migration — `SchemaCommentsTest` fails the build
-otherwise. A later migration can add to or replace any comment at any time.
+otherwise. A later migration can add to or replace any comment at any time. Likewise a new enum value
+needs a description in `ExportReferenceData`, which fails rather than exporting a blank row.
 
 Note that the compose database binds host port 5432 deliberately: `Testcontainer.isRunning()` defers to
 an already-running database, so `InitialiseDatabase` migrates that container and SchemaSpy can read the

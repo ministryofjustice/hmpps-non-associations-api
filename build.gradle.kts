@@ -84,13 +84,14 @@ tasks {
     compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25
   }
 
-  // Schema documentation helper - see .github/workflows/schema-spy.yml. This builds the database the
-  // SchemaSpy report is generated from, and is not part of the normal suite.
+  // Schema documentation helpers - see .github/workflows/schema-spy.yml. These build the database and
+  // export the reference data for the data dictionary, and are not part of the normal suite.
   test {
     if (project.hasProperty("init-db")) {
-      include("**/InitialiseDatabase.class")
+      include("**/InitialiseDatabase.class", "**/ExportReferenceData.class")
+      systemProperty("referenceDataOutput", project.findProperty("referenceDataOutput") ?: "reference-data.csv")
     } else {
-      exclude("**/InitialiseDatabase.class")
+      exclude("**/InitialiseDatabase.class", "**/ExportReferenceData.class")
     }
   }
 }
