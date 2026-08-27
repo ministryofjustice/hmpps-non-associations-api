@@ -74,6 +74,19 @@
                 <!-- Content Header (Page header) -->
                 <section class="content-header">
                     <h1>non_association</h1><p><span id="recordNumber">-1</span> rows</p><br />
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <i class="fa fa-file-text-o"></i>
+                            <h3 id="Description" class="box-title">Description</h3>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                            </div>
+                        </div><!-- /.box-header -->
+                        <div class="box-body clearfix">
+                            <p>One recorded requirement to keep two prisoners apart, and how far apart. The record concerns both prisoners equally - first and second carry no precedence, and the pair is not stored in a canonical order, so a query about one prisoner must check both columns. Rows are closed rather than deleted when the requirement ends, and can be reopened, so this table is also the history. Non-associations originate either in DPS or from NOMIS, which is why authorised_by is nullable and was free text there.</p>
+                        </div><!-- /.box-body -->
+                    </div>
                 </section>
                 <!-- Main content -->
                 <section class="content">
@@ -123,7 +136,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>Primary key. Surrogate sequence value; carries no meaning and is not the NOMIS identifier. <a href="./../null">Sensitivity: NONE</a></p></td>
                                 </tr>
                                 <tr>
                                     <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i><span id="first_prisoner_number">first_prisoner_number</span></td>
@@ -140,7 +153,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>NOMIS offender number (noms id) of one of the two prisoners. First rather than second is an accident of how the record was created and implies nothing - neither prisoner is the subject of the record more than the other. Updated in place when NOMIS merges two offender records. <a href="./../null">Sensitivity: PERSONAL</a></p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="first_prisoner_role">first_prisoner_role</span></td>
@@ -157,7 +170,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>How the first prisoner is involved: VICTIM, PERPETRATOR, NOT_RELEVANT or UNKNOWN. PERPETRATOR records an allegation of offending in custody against a named person, and VICTIM records that they were the subject of it, so this is criminal offence data whichever value it holds. <a href="./../null">Sensitivity: SPECIAL-CATEGORY</a></p></td>
                                 </tr>
                                 <tr>
                                     <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i><span id="second_prisoner_number">second_prisoner_number</span></td>
@@ -174,7 +187,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>NOMIS offender number (noms id) of the other prisoner. Constrained to differ from first_prisoner_number. In a subject access request for the first prisoner this column is third-party data about someone else. <a href="./../null">Sensitivity: PERSONAL</a></p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="second_prisoner_role">second_prisoner_role</span></td>
@@ -191,7 +204,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>How the second prisoner is involved: VICTIM, PERPETRATOR, NOT_RELEVANT or UNKNOWN. Criminal offence data about that prisoner whichever value it holds - see first_prisoner_role. <a href="./../null">Sensitivity: SPECIAL-CATEGORY</a></p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="reason">reason</span></td>
@@ -208,7 +221,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>Why the two prisoners must be kept apart: BULLYING, GANG_RELATED, ORGANISED_CRIME, LEGAL_REQUEST (police or legal request), THREAT, VIOLENCE or OTHER. Every value except OTHER names alleged offending or a police interest in the prisoners, so the code alone is criminal offence data about both of them. <a href="./../null">Sensitivity: SPECIAL-CATEGORY</a></p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="restriction_type">restriction_type</span></td>
@@ -225,7 +238,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>How far apart the two must be kept: CELL (cell only), LANDING (cell and landing) or WING (cell, landing and wing). This is the security measure imposed in response to alleged offending, which Article 10 covers alongside the offence data itself, and its severity is a proxy for how serious the risk was judged to be. <a href="./../null">Sensitivity: SPECIAL-CATEGORY</a></p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="comment">comment</span></td>
@@ -242,7 +255,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>Free-text explanation of why the two prisoners must be kept apart, written by the member of staff recording or updating it. Unstructured and unbounded - in practice describes violence, threats, gang affiliation, health and third parties, so treat as special category regardless of what any individual comment happens to say. Overwritten with the reopening reason when a closed non-association is reopened, so it holds the current explanation rather than the original one. <a href="./../null">Sensitivity: SPECIAL-CATEGORY</a></p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="when_created">when_created</span></td>
@@ -259,7 +272,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>When the non-association was first recorded in this service. For records migrated from NOMIS this is the migration, not the original prison event. <a href="./../null">Sensitivity: NONE</a></p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="when_updated">when_updated</span></td>
@@ -276,7 +289,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>When the non-association was last changed, including being closed or reopened. Equal to when_created until the first change. <a href="./../null">Sensitivity: NONE</a></p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="authorised_by">authorised_by</span></td>
@@ -293,7 +306,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>Who created or authorised the non-association. Nullable and not reliably a username: it was a free-text field in NOMIS and was not set at all by this service&rsquo;s early write paths, so it holds hand-typed names as well as DPS usernames. Identifies a member of staff either way. <a href="./../null">Sensitivity: STAFF</a></p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="updated_by">updated_by</span></td>
@@ -310,7 +323,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>DPS username of the member of staff who last changed the record, or the system user for changes made by the NOMIS merge listener. Identifies a member of staff. <a href="./../null">Sensitivity: STAFF</a></p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="is_closed">is_closed</span></td>
@@ -327,7 +340,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>Whether the requirement to keep the two prisoners apart has ended. Closed rows are retained rather than deleted, and can be reopened, so this is a state flag rather than a soft delete. The three closed_* columns are constrained to be all-set when true and all-null when false. <a href="./../null">Sensitivity: NONE</a></p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="closed_by">closed_by</span></td>
@@ -344,7 +357,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>DPS username of the member of staff who closed the non-association. Null while it is open. Identifies a member of staff. <a href="./../null">Sensitivity: STAFF</a></p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="closed_reason">closed_reason</span></td>
@@ -361,7 +374,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>Free-text explanation of why the non-association was closed, for example that one prisoner has been released or transferred, or that the risk was reassessed. Null while it is open. Unstructured and written by hand, so assume it describes offending, health and third parties like comment does. <a href="./../null">Sensitivity: SPECIAL-CATEGORY</a></p></td>
                                 </tr>
                                 <tr>
                                     <td><span id="closed_at">closed_at</span></td>
@@ -378,7 +391,7 @@
                                         <table border='0' cellspacing='0' cellpadding='0'>
                                         </table>
                                     </td>
-                                    <td></td>
+                                    <td><p>When the non-association was closed. Null while it is open. <a href="./../null">Sensitivity: NONE</a></p></td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -463,8 +476,16 @@
                                 </thead>
                                 <tbody>
                                 <tr>
-                                    <td>non_association_first_prisoner_number_check</td>
-                                    <td>((length((first_prisoner_number)::text) &gt; 0))</td>
+                                    <td>non_association_different_people</td>
+                                    <td>((NOT ((second_prisoner_number)::text &#61; (first_prisoner_number)::text)))</td>
+                                </tr>
+                                <tr>
+                                    <td>non_association_check</td>
+                                    <td>((((is_closed IS TRUE) AND (closed_by IS NOT NULL)) OR ((is_closed IS FALSE) AND (closed_by IS NULL))))</td>
+                                </tr>
+                                <tr>
+                                    <td>non_association_second_prisoner_role_check</td>
+                                    <td>((length((second_prisoner_role)::text) &gt; 0))</td>
                                 </tr>
                                 <tr>
                                     <td>non_association_first_prisoner_role_check</td>
@@ -475,32 +496,24 @@
                                     <td>((((is_closed IS TRUE) AND (closed_at IS NOT NULL)) OR ((is_closed IS FALSE) AND (closed_at IS NULL))))</td>
                                 </tr>
                                 <tr>
-                                    <td>non_association_comment_check</td>
-                                    <td>((length(comment) &gt; 0))</td>
-                                </tr>
-                                <tr>
-                                    <td>non_association_check1</td>
-                                    <td>((((is_closed IS TRUE) AND (closed_reason IS NOT NULL)) OR ((is_closed IS FALSE) AND (closed_reason IS NULL))))</td>
-                                </tr>
-                                <tr>
-                                    <td>non_association_second_prisoner_role_check</td>
-                                    <td>((length((second_prisoner_role)::text) &gt; 0))</td>
-                                </tr>
-                                <tr>
-                                    <td>non_association_different_people</td>
-                                    <td>((NOT ((second_prisoner_number)::text &#61; (first_prisoner_number)::text)))</td>
+                                    <td>non_association_second_prisoner_number_check</td>
+                                    <td>((length((second_prisoner_number)::text) &gt; 0))</td>
                                 </tr>
                                 <tr>
                                     <td>non_association_reason_check</td>
                                     <td>((length((reason)::text) &gt; 0))</td>
                                 </tr>
                                 <tr>
-                                    <td>non_association_second_prisoner_number_check</td>
-                                    <td>((length((second_prisoner_number)::text) &gt; 0))</td>
+                                    <td>non_association_check1</td>
+                                    <td>((((is_closed IS TRUE) AND (closed_reason IS NOT NULL)) OR ((is_closed IS FALSE) AND (closed_reason IS NULL))))</td>
                                 </tr>
                                 <tr>
-                                    <td>non_association_check</td>
-                                    <td>((((is_closed IS TRUE) AND (closed_by IS NOT NULL)) OR ((is_closed IS FALSE) AND (closed_by IS NULL))))</td>
+                                    <td>non_association_first_prisoner_number_check</td>
+                                    <td>((length((first_prisoner_number)::text) &gt; 0))</td>
+                                </tr>
+                                <tr>
+                                    <td>non_association_comment_check</td>
+                                    <td>((length(comment) &gt; 0))</td>
                                 </tr>
                                 <tr>
                                     <td>non_association_restriction_type_check</td>
