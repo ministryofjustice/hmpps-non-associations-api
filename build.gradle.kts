@@ -4,7 +4,7 @@ import uk.gov.justice.digital.hmpps.gradle.PortForwardRedisTask
 import uk.gov.justice.digital.hmpps.gradle.RevealSecretsTask
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.5.7"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.6"
   kotlin("plugin.jpa") version "2.4.10"
   kotlin("plugin.spring") version "2.4.10"
   idea
@@ -13,7 +13,6 @@ plugins {
 
 extra["jackson-2-bom.version"] = "2.22.1"
 extra["jackson-bom.version"] = "3.1.5"
-extra["netty.version"] = "4.2.16.Final"
 extra["httpcore5.version"] = "5.4.3"
 extra["postgresql.version"] = "42.7.12"
 
