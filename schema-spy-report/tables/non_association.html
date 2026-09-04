@@ -476,44 +476,44 @@
                                 </thead>
                                 <tbody>
                                 <tr>
-                                    <td>non_association_check1</td>
-                                    <td>((((is_closed IS TRUE) AND (closed_reason IS NOT NULL)) OR ((is_closed IS FALSE) AND (closed_reason IS NULL))))</td>
-                                </tr>
-                                <tr>
-                                    <td>non_association_reason_check</td>
-                                    <td>((length((reason)::text) &gt; 0))</td>
-                                </tr>
-                                <tr>
-                                    <td>non_association_comment_check</td>
-                                    <td>((length(comment) &gt; 0))</td>
-                                </tr>
-                                <tr>
-                                    <td>non_association_check</td>
-                                    <td>((((is_closed IS TRUE) AND (closed_by IS NOT NULL)) OR ((is_closed IS FALSE) AND (closed_by IS NULL))))</td>
-                                </tr>
-                                <tr>
-                                    <td>non_association_second_prisoner_number_check</td>
-                                    <td>((length((second_prisoner_number)::text) &gt; 0))</td>
-                                </tr>
-                                <tr>
-                                    <td>non_association_first_prisoner_number_check</td>
-                                    <td>((length((first_prisoner_number)::text) &gt; 0))</td>
-                                </tr>
-                                <tr>
                                     <td>non_association_check2</td>
                                     <td>((((is_closed IS TRUE) AND (closed_at IS NOT NULL)) OR ((is_closed IS FALSE) AND (closed_at IS NULL))))</td>
                                 </tr>
                                 <tr>
-                                    <td>non_association_second_prisoner_role_check</td>
-                                    <td>((length((second_prisoner_role)::text) &gt; 0))</td>
+                                    <td>non_association_restriction_type_check</td>
+                                    <td>((length((restriction_type)::text) &gt; 0))</td>
                                 </tr>
                                 <tr>
                                     <td>non_association_different_people</td>
                                     <td>((NOT ((second_prisoner_number)::text &#61; (first_prisoner_number)::text)))</td>
                                 </tr>
                                 <tr>
-                                    <td>non_association_restriction_type_check</td>
-                                    <td>((length((restriction_type)::text) &gt; 0))</td>
+                                    <td>non_association_second_prisoner_number_check</td>
+                                    <td>((length((second_prisoner_number)::text) &gt; 0))</td>
+                                </tr>
+                                <tr>
+                                    <td>non_association_second_prisoner_role_check</td>
+                                    <td>((length((second_prisoner_role)::text) &gt; 0))</td>
+                                </tr>
+                                <tr>
+                                    <td>non_association_check</td>
+                                    <td>((((is_closed IS TRUE) AND (closed_by IS NOT NULL)) OR ((is_closed IS FALSE) AND (closed_by IS NULL))))</td>
+                                </tr>
+                                <tr>
+                                    <td>non_association_reason_check</td>
+                                    <td>((length((reason)::text) &gt; 0))</td>
+                                </tr>
+                                <tr>
+                                    <td>non_association_first_prisoner_number_check</td>
+                                    <td>((length((first_prisoner_number)::text) &gt; 0))</td>
+                                </tr>
+                                <tr>
+                                    <td>non_association_comment_check</td>
+                                    <td>((length(comment) &gt; 0))</td>
+                                </tr>
+                                <tr>
+                                    <td>non_association_check1</td>
+                                    <td>((((is_closed IS TRUE) AND (closed_reason IS NOT NULL)) OR ((is_closed IS FALSE) AND (closed_reason IS NULL))))</td>
                                 </tr>
                                 <tr>
                                     <td>non_association_first_prisoner_role_check</td>
