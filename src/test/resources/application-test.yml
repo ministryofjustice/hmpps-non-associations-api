@@ -33,3 +33,16 @@ spring:
 #  level:
 #    org.hibernate.SQL: DEBUG
 #    org.hibernate.orm.jdbc.bind: TRACE
+
+# The SAR test library's approval files. See SubjectAccessRequestLibraryTest for what each check guards.
+hmpps.sar:
+  tests:
+    attachments-expected: false
+    # Bump only after checking the new migration against the SAR response and the data requirements extract.
+    expected-flyway-schema-version: "1.3"
+    expected-api-response:
+      path: /sar/expected-api-response.json
+    expected-jpa-entity-schema:
+      path: /sar/expected-jpa-entity-schema.json
+    expected-render-result:
+      path: /sar/expected-render-result.html

@@ -13,6 +13,7 @@ generic-service:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     API_BASE_URL_OAUTH: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
     API_BASE_URL_PRISONER_SEARCH: https://prisoner-search-dev.prison.service.justice.gov.uk
+    HMPPS_SAR_TEMPLATE_PATH: "/sar/templates/V1__sar_template.mustache"
 
 generic-prometheus-alerts:
   alertSeverity: hmpps-non-associations-dev
