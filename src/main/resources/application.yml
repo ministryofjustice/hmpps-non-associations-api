@@ -78,6 +78,20 @@ hmpps:
   sqs:
     queueAdminRole: ROLE_NON_ASSOCIATIONS_API_QUEUE_ADMIN
 
+# The subject access request report template. Enabled here rather than only in helm so that every profile,
+# including the one the tests run under, validates the path on startup - the library resolves it as a
+# classpath resource in a @PostConstruct and fails to start if it is wrong, and that is far better found in
+# CI than in a deploy. The path is overridden per environment in helm so a new template version can be rolled
+# out one environment at a time, which is the granularity the SAR tool's register-before-deploy rule needs.
+#
+# V1 is the template the HAA team held centrally in hmpps-subject-access-request-html-renderer, copied byte for
+# byte (IR-2038). The SAR tool recognises a template by its hash, so it must not be edited in place: a change is
+# a new version, registered with the SAR tool in each environment before the code that serves it deploys there.
+hmpps.sar:
+  template:
+    enabled: true
+    path: ${HMPPS_SAR_TEMPLATE_PATH:/sar/templates/V1__sar_template.mustache}
+
 management:
   endpoints:
     web:
