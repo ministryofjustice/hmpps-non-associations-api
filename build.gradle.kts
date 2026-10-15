@@ -5,8 +5,8 @@ import uk.gov.justice.digital.hmpps.gradle.RevealSecretsTask
 
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.11"
-  kotlin("plugin.jpa") version "2.4.20"
-  kotlin("plugin.spring") version "2.4.20"
+  kotlin("plugin.jpa") version "2.4.21"
+  kotlin("plugin.spring") version "2.4.21"
   idea
   id("org.springdoc.openapi-gradle-plugin") version "1.9.0"
 }
