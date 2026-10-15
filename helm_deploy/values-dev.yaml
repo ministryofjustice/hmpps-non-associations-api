@@ -16,7 +16,6 @@ generic-service:
     HMPPS_SAR_TEMPLATE_PATH: "/sar/templates/V1__sar_template.mustache"
 
 generic-prometheus-alerts:
-  alertSeverity: hmpps-non-associations-dev
   businessHoursOnly: true
   rdsAlertsDatabases:
     cloud-platform-7534158a562cce9e: non-associations-api
