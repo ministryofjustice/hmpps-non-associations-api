@@ -27,7 +27,7 @@
     "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest"
   },
   "engines": {
-    "node": "22 || 24 || >=26"
+    "node": "24 || >=26"
   },
   "dependencies": {
     "@ministryofjustice/hmpps-rest-client": "^2.2.0"
