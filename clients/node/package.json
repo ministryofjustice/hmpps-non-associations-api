@@ -24,7 +24,7 @@
     "clean": "rm -rf ./dist/ ./test_results/",
     "format": "prettier --write src test",
     "lint": "eslint . --cache --max-warnings 0",
-    "test": "jest"
+    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest"
   },
   "engines": {
     "node": "20 || 22 || 24"
