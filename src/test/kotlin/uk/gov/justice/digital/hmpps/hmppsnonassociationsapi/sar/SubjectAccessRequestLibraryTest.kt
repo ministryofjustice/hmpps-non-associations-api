@@ -11,7 +11,6 @@ import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.RestrictionType
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.dto.Role
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.integration.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.jpa.NonAssociation
-import uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.util.prisonerSearchPrisoners
 import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarApiDataTest
 import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarFlywaySchemaTest
 import uk.gov.justice.digital.hmpps.subjectaccessrequest.SarIntegrationTestHelper
@@ -36,8 +35,9 @@ import javax.sql.DataSource
  *    migration is added. Both force whoever makes the change to decide whether it belongs in a prisoner's
  *    report, rather than the field quietly never appearing.
  *
- * The approved report was first generated from V1 of the template, copied unchanged from the HAA team's central
- * repository (IR-2038), so it is the report the SAR tool was already producing for this data.
+ * The approved report is rendered from V2 of the template: the fully sanitised report the Offender SAR team asked
+ * for on 12 November 2026 (IR-2043), with every detail of each non-association shown as XXXXXX. The fixtures still
+ * fill every column so that any real value reaching the approved files would show up in review.
  *
  * Regenerate the files by running with `SAR_GENERATE_ACTUAL=true`, which writes `*.log` files under
  * `src/test/resources/`, then read them before copying them over the approved ones.
@@ -83,9 +83,7 @@ class SubjectAccessRequestLibraryTest :
    * Two non-associations for the same prisoner, which between them exercise every field the template reads:
    * one open, with the prisoner recorded first and an authoriser; one closed, with the prisoner recorded second.
    *
-   * The report prints each non-association's database id, so the sequence is restarted to keep the approved
-   * files stable whatever ran before. Dates are fixed for the same reason. The service looks the prisoners up in
-   * prisoner-search, so that is stubbed too.
+   * Dates and ids are fixed so the approved files stay stable whatever ran before.
    *
    * Idempotent, because the library calls this itself and the rows must not stack up.
    */
@@ -125,12 +123,6 @@ class SubjectAccessRequestLibraryTest :
         closedReason = "Other prisoner released",
         closedAt = LocalDateTime.parse("2023-03-20T14:45:00"),
       ),
-    )
-
-    val prisonerNumbers = listOf(PRISONER, OPEN_OTHER, CLOSED_OTHER)
-    prisonerSearchMockServer.stubSearchByPrisonerNumbers(
-      prisonerNumbers,
-      prisonerNumbers.map { prisonerSearchPrisoners[it]!! },
     )
   }
 

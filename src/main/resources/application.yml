@@ -87,10 +87,14 @@ hmpps:
 # V1 is the template the HAA team held centrally in hmpps-subject-access-request-html-renderer, copied byte for
 # byte (IR-2038). The SAR tool recognises a template by its hash, so it must not be edited in place: a change is
 # a new version, registered with the SAR tool in each environment before the code that serves it deploys there.
+#
+# V2 is the fully sanitised report the Offender SAR team asked for on 12 November 2026 (IR-2043): one entry per
+# non-association, every detail shown as XXXXXX. It is the default so the tests render it; helm keeps an
+# environment on V1 until V2 is registered there.
 hmpps.sar:
   template:
     enabled: true
-    path: ${HMPPS_SAR_TEMPLATE_PATH:/sar/templates/V1__sar_template.mustache}
+    path: ${HMPPS_SAR_TEMPLATE_PATH:/sar/templates/V2__sar_template.mustache}
 
 management:
   endpoints:

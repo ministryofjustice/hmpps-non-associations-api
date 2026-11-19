@@ -47,6 +47,6 @@ class SubjectAccessRequestTemplateTest : SqsIntegrationTestBase() {
 
   private companion object {
     const val TEMPLATE_URL = "/subject-access-request/template"
-    const val TEMPLATE_FILE = "/sar/templates/V1__sar_template.mustache"
+    const val TEMPLATE_FILE = "/sar/templates/V2__sar_template.mustache"
   }
 }

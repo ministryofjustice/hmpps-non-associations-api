@@ -1,0 +1,72 @@
+<h1 class="title">Non-associations</h1>
+<br>
+{{#nonAssociations}}
+    <h3>Non-association {{this.number}}</h3>
+    <br>
+    <table class="data-table">
+        <tr>
+            <td class="data-column-25">Role</td>
+            <td class="data-column-25">Reason</td>
+            <td class="data-column-25">Restriction type</td>
+        </tr>
+        <tr>
+            <td>{{this.role}}</td>
+            <td>{{this.reason}}</td>
+            <td>{{this.restrictionType}}</td>
+        </tr>
+    </table>
+    <table class="data-table">
+        <tr><td>Comment</td></tr>
+        <tr><td>{{this.comment}}</td></tr>
+    </table>
+    <br>
+    <h4>Creation details</h4>
+    <br>
+    <table class="data-table">
+        <tr>
+            <td class="data-column-25">Authorised by</td>
+            <td class="data-column-25">Date created</td>
+            <td class="data-column-25">Updated by</td>
+            <td class="data-column-25">Date updated</td>
+        </tr>
+        <tr>
+            <td>{{this.authorisedBy}}</td>
+            <td>{{this.whenCreated}}</td>
+            <td>{{this.updatedBy}}</td>
+            <td>{{this.whenUpdated}}</td>
+        </tr>
+    </table>
+    <table class="data-table">
+        <tr>
+            <td class="data-column-25">Closed</td>
+            <td class="data-column-25">Closed by</td>
+            <td class="data-column-25">Reason closed</td>
+            <td class="data-column-25">Closed at</td>
+        </tr>
+        <tr>
+            <td>{{this.isClosed}}</td>
+            <td>{{this.closedBy}}</td>
+            <td>{{this.closedReason}}</td>
+            <td>{{this.closedAt}}</td>
+        </tr>
+    </table>
+    <br>
+    <h4>Other prisoner details</h4>
+    <br>
+    <table class="data-table">
+        <tr>
+            <td class="data-column-25">Prisoner number</td>
+            <td class="data-column-25">Name</td>
+            <td class="data-column-25">Role</td>
+        </tr>
+        <tr>
+            <td>{{this.otherPrisonerNumber}}</td>
+            <td>{{this.otherPrisonerName}}</td>
+            <td>{{this.otherPrisonerRole}}</td>
+        </tr>
+    </table>
+    <br>
+{{/nonAssociations}}
+{{^nonAssociations}}
+    <p>No Data Held</p>
+{{/nonAssociations}}
