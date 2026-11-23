@@ -54,12 +54,11 @@ jobs:
             ./clients/node/test_results
 
       - name: Publish test report
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && hashFiles('clients/node/test_results/junit.xml') != '' }}
         uses: dorny/test-reporter@d1b5dff021aa968b288b02285a8bf47471c5928a # v3
         with:
           name: Test report for node ${{ inputs.node-version }}
-          artifact: npm-test-results-${{ inputs.node-version }}
-          path: junit.xml
+          path: clients/node/test_results/junit.xml
           reporter: jest-junit
           fail-on-empty: false
           fail-on-error: false
