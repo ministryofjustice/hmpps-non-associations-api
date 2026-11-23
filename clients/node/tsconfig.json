@@ -1,17 +1,13 @@
  {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "@tsconfig/node24/tsconfig.json",
+  "extends": "@tsconfig/node26/tsconfig.json",
   "compileOnSave": true,
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": ".",
+    "rootDir": "./src",
     "declaration": true,
     "strict": true,
     "isolatedModules": true,
-    "typeRoots": [
-      "./node_modules/@types",
-      "./node_modules",
-    ],
     "types": [
       "node",
       "jest",
@@ -21,8 +17,5 @@
     "dist",
     "node_modules",
   ],
-  "include": [
-    "src/**/*.ts",
-    "test/**/*.ts"
-  ],
+  "include": ["src/**/*.ts"],
 }

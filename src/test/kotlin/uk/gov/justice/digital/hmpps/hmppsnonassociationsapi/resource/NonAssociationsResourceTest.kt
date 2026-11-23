@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsnonassociationsapi.resource
 
 import com.fasterxml.jackson.core.type.TypeReference
+import com.github.tomakehurst.wiremock.client.WireMock.anyRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.anyUrl
 import io.swagger.v3.oas.annotations.media.Schema
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -882,7 +884,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           "updatedBy": "$EXPECTED_USERNAME",
           "isClosed": true,
           "closedReason": "$closedReason",
-          "closedBy": $EXPECTED_USERNAME,
+          "closedBy": "$EXPECTED_USERNAME",
           "closedAt": "$now"
         }
         """
@@ -3042,19 +3044,8 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
   @Nested
   inner class SAR {
     @Test
-    fun `when an SAR is made non-associations are returned`() {
+    fun `when an SAR is made each non-association is returned fully redacted`() {
       val nonAssociation = createNonAssociation()
-
-      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
-        listOf(
-          nonAssociation.firstPrisonerNumber,
-          nonAssociation.secondPrisonerNumber,
-        ),
-        listOf(
-          prisonerSearchPrisoners[nonAssociation.firstPrisonerNumber]!!,
-          prisonerSearchPrisoners[nonAssociation.secondPrisonerNumber]!!,
-        ),
-      )
 
       webTestClient.get()
         .uri("/subject-access-request?prn=${nonAssociation.firstPrisonerNumber}")
@@ -3067,37 +3058,24 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           """
             {
               "content": {
-                "prisonerNumber": "A1234BC",
-                "firstName": "John",
-                "lastName": "Doe",
-                "prisonId": "MDI",
-                "prisonName": "Moorland",
-                "cellLocation": "MDI-A-1",
-                "openCount": 1,
-                "closedCount": 0,
                 "nonAssociations": [
                   {
-                    "role": "VICTIM",
-                    "roleDescription": "Victim",
-                    "reason": "BULLYING",
-                    "reasonDescription": "Bullying",
-                    "restrictionType": "CELL",
-                    "restrictionTypeDescription": "Cell only",
-                    "comment": "They keep fighting",
-                    "authorisedBy": "Mr Bobby",
-                    "updatedBy": "A_DPS_USER",
-                    "isClosed": false,
-                    "otherPrisonerDetails": {
-                      "prisonerNumber": "D5678EF",
-                      "role": "PERPETRATOR",
-                      "roleDescription": "Perpetrator",
-                      "firstName": "Merlin",
-                      "lastName": "Somerplumbs",
-                      "prisonId": "MDI",
-                      "prisonName": "Moorland",
-                      "cellLocation": "MDI-A-2"
-                    },
-                    "isOpen": true
+                    "number": 1,
+                    "role": "XXXXXX",
+                    "reason": "XXXXXX",
+                    "restrictionType": "XXXXXX",
+                    "comment": "XXXXXX",
+                    "authorisedBy": "XXXXXX",
+                    "whenCreated": "XXXXXX",
+                    "updatedBy": "XXXXXX",
+                    "whenUpdated": "XXXXXX",
+                    "isClosed": "XXXXXX",
+                    "closedBy": "XXXXXX",
+                    "closedReason": "XXXXXX",
+                    "closedAt": "XXXXXX",
+                    "otherPrisonerNumber": "XXXXXX",
+                    "otherPrisonerName": "XXXXXX",
+                    "otherPrisonerRole": "XXXXXX"
                   }
                 ]
               }
@@ -3108,14 +3086,33 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
+    fun `SAR response contains none of the recorded values`() {
+      val nonAssociation = createNonAssociation()
+
+      val body = webTestClient.get()
+        .uri("/subject-access-request?prn=${nonAssociation.firstPrisonerNumber}")
+        .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS")))
+        .exchange()
+        .expectStatus().isOk
+        .expectBody(String::class.java)
+        .returnResult().responseBody!!
+
+      listOfNotNull(
+        nonAssociation.secondPrisonerNumber,
+        nonAssociation.comment,
+        nonAssociation.authorisedBy,
+        nonAssociation.updatedBy,
+        nonAssociation.reason.name,
+        nonAssociation.restrictionType.name,
+        nonAssociation.firstPrisonerRole.name,
+        nonAssociation.secondPrisonerRole.name,
+      ).forEach { assertThat(body).doesNotContain(it) }
+    }
+
+    @Test
     fun `SAR about prisoner with no non-associations responds with 204 No Content`() {
       // Someone with no non-associations
       val prisonerNumber = "G9012HI"
-
-      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
-        listOf(prisonerNumber),
-        listOf(prisonerSearchPrisoners[prisonerNumber]!!),
-      )
 
       webTestClient.get()
         .uri("/subject-access-request?prn=$prisonerNumber")
@@ -3130,17 +3127,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       val nonAssociation = createNonAssociation()
       // Choose a toDate that would filter the non-association out
       val toDate = nonAssociation.whenCreated.minusDays(42).toLocalDate()
-
-      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
-        listOf(
-          nonAssociation.firstPrisonerNumber,
-          nonAssociation.secondPrisonerNumber,
-        ),
-        listOf(
-          prisonerSearchPrisoners[nonAssociation.firstPrisonerNumber]!!,
-          prisonerSearchPrisoners[nonAssociation.secondPrisonerNumber]!!,
-        ),
-      )
 
       webTestClient.get()
         .uri("/subject-access-request?prn=${nonAssociation.firstPrisonerNumber}&toDate=$toDate")
@@ -3173,17 +3159,6 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
       val nonAssociation = createNonAssociation()
       // Choose a toDate that would filter the non-association out
 
-      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
-        listOf(
-          nonAssociation.firstPrisonerNumber,
-          nonAssociation.secondPrisonerNumber,
-        ),
-        listOf(
-          prisonerSearchPrisoners[nonAssociation.firstPrisonerNumber]!!,
-          prisonerSearchPrisoners[nonAssociation.secondPrisonerNumber]!!,
-        ),
-      )
-
       val url = buildString {
         append("/subject-access-request?prn=${nonAssociation.firstPrisonerNumber}")
         if (fromDate != null) {
@@ -3209,25 +3184,18 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `SAR about prisoner with non-associations not found in Prisoner Search responds 209`() {
-      // A prisoner number not found in Prisoner Search API is different from "no non-associations found for this prisoner"
-      // and that's why it's not a 204 No Content: Responds 209 Subject Identifier is not recognised by this service.
+    fun `SAR does not depend on prisoner search`() {
+      // The redacted response reads only this service's table, so a prisoner unknown to prisoner-search (for
+      // example after a merge) no longer fails the request
       val nonAssociation = createNonAssociation()
-
-      prisonerSearchMockServer.stubSearchByPrisonerNumbers(
-        listOf(
-          nonAssociation.firstPrisonerNumber,
-          nonAssociation.secondPrisonerNumber,
-        ),
-        emptyList(),
-      )
 
       webTestClient.get()
         .uri("/subject-access-request?prn=${nonAssociation.firstPrisonerNumber}")
         .headers(setAuthorisation(roles = listOf("ROLE_SAR_DATA_ACCESS")))
-        .header("Content-Type", "application/json")
         .exchange()
-        .expectStatus().isEqualTo(209)
+        .expectStatus().isOk
+
+      prisonerSearchMockServer.verify(0, anyRequestedFor(anyUrl()))
     }
   }
 

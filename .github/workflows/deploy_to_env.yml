@@ -24,7 +24,7 @@ permissions:
 jobs:
   helm_lint:
     name: helm lint
-    uses: ministryofjustice/hmpps-github-actions/.github/workflows/test_helm_lint.yml@v2 # WORKFLOW_VERSION
+    uses: ministryofjustice/hmpps-github-actions/.github/workflows/test_helm_lint.yml@v2.23.7 # WORKFLOW_VERSION
     secrets: inherit
     with:
       environment: ${{ inputs.environment }}
@@ -32,8 +32,9 @@ jobs:
     name: Deploy to environment
     needs:
       - helm_lint
-    uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2.19.0 # WORKFLOW_VERSION
+    uses: ministryofjustice/hmpps-github-actions/.github/workflows/deploy_env.yml@v2.23.7 # WORKFLOW_VERSION
     secrets: inherit
     with:
       environment: ${{ inputs.environment }}
       app_version: ${{ inputs.version }}
+      slack_notification: 'true' # posts to the channel in the (NON)PROD_RELEASES_SLACK_CHANNEL variable, if set
