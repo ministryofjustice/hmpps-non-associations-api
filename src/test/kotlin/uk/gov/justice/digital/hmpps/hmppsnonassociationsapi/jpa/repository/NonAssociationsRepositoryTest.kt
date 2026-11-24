@@ -165,18 +165,12 @@ class NonAssociationsRepositoryTest : TestBase() {
 
       val prisonerNumbers = listOf("A0000AA", "A1111AA", "A2222AA")
       val nonAssociations = repository.findAnyBetweenPrisonerNumbers(prisonerNumbers, NonAssociationListInclusion.ALL)
-      assertThat(nonAssociations).hasSize(4)
-      assertThat(nonAssociations).allMatch {
-        prisonerNumbers.contains(it.firstPrisonerNumber) && prisonerNumbers.contains(it.secondPrisonerNumber)
-      }
       val nonAssociationPairs = nonAssociations.map { listOf(it.firstPrisonerNumber, it.secondPrisonerNumber) }
-      assertThat(nonAssociationPairs).isEqualTo(
-        listOf(
-          listOf("A0000AA", "A1111AA"),
-          listOf("A0000AA", "A2222AA"),
-          listOf("A1111AA", "A2222AA"),
-          listOf("A0000AA", "A1111AA"),
-        ),
+      assertThat(nonAssociationPairs).containsExactlyInAnyOrder(
+        listOf("A0000AA", "A1111AA"),
+        listOf("A0000AA", "A2222AA"),
+        listOf("A1111AA", "A2222AA"),
+        listOf("A0000AA", "A1111AA"),
       )
     }
   }
