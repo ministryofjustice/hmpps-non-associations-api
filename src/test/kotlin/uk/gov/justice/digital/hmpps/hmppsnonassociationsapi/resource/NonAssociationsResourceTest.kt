@@ -884,7 +884,7 @@ class NonAssociationsResourceTest : SqsIntegrationTestBase() {
           "updatedBy": "$EXPECTED_USERNAME",
           "isClosed": true,
           "closedReason": "$closedReason",
-          "closedBy": $EXPECTED_USERNAME,
+          "closedBy": "$EXPECTED_USERNAME",
           "closedAt": "$now"
         }
         """
